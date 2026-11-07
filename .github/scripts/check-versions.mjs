@@ -47,6 +47,11 @@ for (const path of ["crates/core/Cargo.toml", "crates/cli/Cargo.toml", "app/src-
   if (text !== null && !/^version\.workspace\s*=\s*true/m.test(text)) {
     problems.push(`${path}: should use version.workspace = true`);
   }
+  // Internal crates are path dependencies; a version requirement on one breaks every release bump.
+  const pinned = text?.match(/^(offloader-[\w-]+)\s*=\s*\{[^}\n]*\bversion\s*=/m);
+  if (pinned) {
+    problems.push(`${path}: depend on ${pinned[1]} by path only (no version), or release bumps can't resolve it`);
+  }
 }
 
 json(".release-please-manifest.json", (d) => [['"."', d["."]]]);
