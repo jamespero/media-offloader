@@ -22,6 +22,7 @@ pub mod event;
 pub mod format;
 pub mod hash;
 pub mod job;
+pub mod journal;
 pub mod log;
 pub mod mhl;
 pub mod plan;
@@ -36,7 +37,9 @@ mod transfer;
 pub use error::{FileFailure, PrepareError};
 pub use event::{Event, FileStatus, Outcome, Pass, Stage};
 pub use hash::{HashConfig, Hashes};
-pub use job::{CopyMode, DestRole, Destination, Faults, FileReport, Job, JobReport, JobSpec, Sidecars};
+pub use job::{
+    CopyMode, DestRole, Destination, Faults, FileReport, Job, JobReport, JobSpec, Resume, Sidecars, VerifiedFile,
+};
 pub use plan::{Plan, PlannedFile};
 pub use scan::{SourceInfo, SourceKind};
 
