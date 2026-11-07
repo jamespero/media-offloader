@@ -54,6 +54,17 @@ for (const path of ["crates/core/Cargo.toml", "crates/cli/Cargo.toml", "app/src-
   }
 }
 
+// Cargo.lock: the workspace crates' own entries.
+const lock = read("Cargo.lock");
+if (lock !== null) {
+  const crates = ["offloader-core", "offloader-cli", "media-offloader-app"];
+  for (const block of lock.split("[[package]]")) {
+    const name = block.match(/^name = "([^"]*)"/m)?.[1];
+    const version = block.match(/^version = "([^"]*)"/m)?.[1];
+    if (crates.includes(name) && version !== undefined) found.push([`Cargo.lock ${name}`, version]);
+  }
+}
+
 json(".release-please-manifest.json", (d) => [['"."', d["."]]]);
 json("app/package.json", (d) => [["version", d.version]]);
 json("app/package-lock.json", (d) => [

@@ -100,7 +100,7 @@ A breaking change gets a `!` after the type or scope (`feat(cli)!: rename --dest
 
 ## Versioning and releases
 
-Media Offloader uses [Semantic Versioning](https://semver.org). The version lives in the Cargo workspace (`Cargo.toml`), `app/package.json` and `app/src-tauri/tauri.conf.json`; CI checks that they always match.
+Media Offloader uses [Semantic Versioning](https://semver.org). The version lives in the Cargo workspace (`Cargo.toml`), `app/package.json` and `app/src-tauri/tauri.conf.json`, and is repeated in `Cargo.lock` and `app/package-lock.json`; CI checks that they always match.
 
 - **Don't bump versions in your pull request.** Maintainers decide when to release and what the version is.
 - Releases are prepared automatically from the commit history: a release pull request collects the changes since the last release, bumps every version and updates `CHANGELOG.md`. Merging it tags the release.
