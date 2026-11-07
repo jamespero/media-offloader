@@ -9,7 +9,9 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use clap::{Args, Parser, Subcommand};
-use offloader_core::{CopyMode, Event, FileStatus, HashConfig, Job, JobSpec, Outcome, Pass, Stage, format, hash, log};
+use offloader_core::{
+    CopyMode, Event, FileStatus, HashConfig, Job, JobSpec, Outcome, Pass, Sidecars, Stage, format, hash, log, reverify,
+};
 
 #[derive(Parser)]
 #[command(name = "offload", version, about = "Copy a camera card with checksum verification (Media Offloader engine)")]
@@ -26,6 +28,13 @@ enum Cmd {
     Plan(CopyArgs),
     /// Make a card or drive safe to remove (dismount and eject).
     Eject { volume: PathBuf },
+    /// Re-check a folder against its ASC MHL history (or .md5 list), reading every file from disk.
+    Verify {
+        folder: PathBuf,
+        /// Where to write the re-verify log [default: the app's log folder].
+        #[arg(long)]
+        log_dir: Option<PathBuf>,
+    },
     /// Print checksums, reading from disk with the OS cache bypassed.
     Hash {
         #[arg(required = true)]
@@ -63,6 +72,12 @@ struct CopyArgs {
     /// Don't write a transfer log.
     #[arg(long, conflicts_with = "log_dir")]
     no_log: bool,
+    /// Don't write an ASC MHL manifest next to the footage.
+    #[arg(long)]
+    no_mhl: bool,
+    /// Also write checksums.md5 next to the footage (needs --md5).
+    #[arg(long, requires = "md5")]
+    md5_list: bool,
     /// Print events as JSON lines on stdout instead of a progress line.
     #[arg(long)]
     json: bool,
@@ -78,6 +93,7 @@ impl CopyArgs {
             hash: HashConfig { md5: self.md5 },
             include_system_files: self.include_system_files,
             log_dir: if self.no_log { None } else { self.log_dir.clone().or_else(log::default_log_dir) },
+            sidecars: Sidecars { mhl: !self.no_mhl, md5_list: self.md5_list },
             keep_awake: true,
             faults: None,
         }
@@ -105,6 +121,7 @@ fn main() -> ExitCode {
             }
             Err(e) => fail(&format!("couldn't eject {}: {e}", volume.display())),
         },
+        Cmd::Verify { folder, log_dir } => verify(&folder, log_dir.or_else(log::default_log_dir)),
     }
 }
 
@@ -350,5 +367,73 @@ impl Progress {
         }
         eprint!("\r{pct:5.1}%  {stage}  {name:<45} {rate:>10}  {eta:<12}");
         let _ = io::stderr().flush();
+    }
+}
+
+fn verify(folder: &std::path::Path, log_dir: Option<PathBuf>) -> ExitCode {
+    use reverify::{CheckStatus, ManifestSource, ReverifyEvent, ReverifyOutcome};
+    let cancel = Arc::new(AtomicBool::new(false));
+    {
+        let cancel = cancel.clone();
+        let _ = ctrlc::set_handler(move || cancel.store(true, Ordering::SeqCst));
+    }
+    let tty = io::stderr().is_terminal();
+    let last = Mutex::new(Instant::now());
+    let result = reverify::reverify(folder, log_dir.as_deref(), &cancel, &|e| match e {
+        ReverifyEvent::Started { source, files, bytes } => {
+            let by = match source {
+                ManifestSource::Mhl { generations } => format!("ASC MHL history ({generations} generation(s))"),
+                ManifestSource::Md5List { file } => file.clone(),
+            };
+            eprintln!("Checking {files} files ({}) against {by}", format::size(*bytes));
+        }
+        ReverifyEvent::Progress { done, total, .. } if tty => {
+            let mut l = last.lock().unwrap();
+            if l.elapsed() >= Duration::from_millis(150) {
+                *l = Instant::now();
+                eprint!("\r{:5.1}%", *done as f64 * 100.0 / (*total).max(1) as f64);
+            }
+        }
+        _ => {}
+    });
+    if tty {
+        eprint!("\r      \r");
+    }
+    let report = match result {
+        Ok(r) => r,
+        Err(e) => return fail(&e),
+    };
+    for p in &report.manifest_problems {
+        eprintln!("manifest: {p}");
+    }
+    for f in report.files.iter().filter(|f| !f.status.is_ok()) {
+        let why = match &f.status {
+            CheckStatus::Missing => "missing".to_string(),
+            CheckStatus::SizeDiffers { expected, actual } => format!("size {actual}, expected {expected}"),
+            CheckStatus::Mismatch { format, expected, actual } => {
+                format!("{} {actual}, expected {expected}", format.name())
+            }
+            CheckStatus::ReadError { message } => format!("can't read: {message}"),
+            CheckStatus::Pending => "not checked".to_string(),
+            CheckStatus::Verified => unreachable!(),
+        };
+        eprintln!("FAIL  {}  {why}", f.path);
+    }
+    for p in &report.not_listed {
+        eprintln!("new   {p}  (not in any manifest)");
+    }
+    if let Some(p) = &report.log_path {
+        eprintln!("log: {}", p.display());
+    }
+    match report.outcome {
+        ReverifyOutcome::Verified => {
+            eprintln!("✓ All {} files match their recorded checksums.", report.files.len());
+            ExitCode::SUCCESS
+        }
+        ReverifyOutcome::Failed { files } => {
+            eprintln!("✗ {files} file(s) do NOT match.");
+            ExitCode::from(1)
+        }
+        ReverifyOutcome::Cancelled => ExitCode::from(130),
     }
 }

@@ -17,6 +17,7 @@ use crate::event::{Event, FileStatus, Outcome, Pass, Stage};
 use crate::format;
 use crate::hash::{HashConfig, Hashes};
 use crate::log::{self, TransferLog};
+use crate::mhl;
 use crate::pipeline::BufferPool;
 use crate::plan::{self, Plan};
 use crate::platform;
@@ -75,10 +76,28 @@ pub struct JobSpec {
     pub include_system_files: bool,
     /// Where to write the transfer log; `None` for no log.
     pub log_dir: Option<PathBuf>,
+    /// Checksum files to write next to the footage.
+    pub sidecars: Sidecars,
     /// Keep the computer from sleeping while the job runs.
     pub keep_awake: bool,
     #[doc(hidden)]
     pub faults: Option<Arc<dyn Faults>>,
+}
+
+/// Checksum files written at each destination root once its files are verified.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Sidecars {
+    /// An ASC MHL generation in `ascmhl/` listing every verified file.
+    pub mhl: bool,
+    /// `checksums.md5` (md5sum format), when MD5 is on and every file verified.
+    pub md5_list: bool,
+}
+
+impl Default for Sidecars {
+    fn default() -> Self {
+        Self { mhl: true, md5_list: false }
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -123,6 +142,8 @@ pub struct JobReport {
     /// Indexed like [`Plan::files`].
     pub files: Vec<FileReport>,
     pub log_path: Option<PathBuf>,
+    /// MHL manifests and `.md5` lists written next to the footage.
+    pub sidecars: Vec<PathBuf>,
     pub warnings: Vec<String>,
 }
 
@@ -259,6 +280,8 @@ impl Job {
             copy_pool: BufferPool::new(),
             verify_pools: self.dests.iter().map(|_| BufferPool::new()).collect(),
             cache_warned: false,
+            stamps: vec![vec![None; self.dests.len()]; self.plan.files.len()],
+            sidecars: Vec::new(),
         };
         if let Some(dir) = &self.spec.log_dir {
             match TransferLog::create(dir, started, &self.plan.source.label) {
@@ -272,13 +295,22 @@ impl Job {
 
         let all: Vec<usize> = (0..self.dests.len()).collect();
         let mut released = false;
+        let mut completed = vec![false; self.dests.len()];
         let end = match self.spec.mode {
             CopyMode::Sequential => {
                 let end = r.pass(Pass::Copy, None, &[0]);
+                completed[0] = matches!(end, PassEnd::Done);
                 if matches!(end, PassEnd::Done) && r.all_verified(&[0]) && self.plan.problems.is_empty() {
                     released = true;
                     r.release();
-                    if self.dests.len() > 1 { r.pass(Pass::Backup, Some(0), &all[1..]) } else { end }
+                    if self.dests.len() > 1 {
+                        let end = r.pass(Pass::Backup, Some(0), &all[1..]);
+                        let done = matches!(end, PassEnd::Done);
+                        completed[1..].iter_mut().for_each(|c| *c = done);
+                        end
+                    } else {
+                        end
+                    }
                 } else {
                     if matches!(end, PassEnd::Done) && self.dests.len() > 1 {
                         r.note("Backup on hold: the copy didn't fully verify.");
@@ -288,6 +320,7 @@ impl Job {
             }
             CopyMode::FanOut => {
                 let end = r.pass(Pass::FanOut, None, &all);
+                completed.iter_mut().for_each(|c| *c = matches!(end, PassEnd::Done));
                 if matches!(end, PassEnd::Done) && r.all_verified(&all) && self.plan.problems.is_empty() {
                     released = true;
                     r.release();
@@ -295,6 +328,14 @@ impl Job {
                 end
             }
         };
+
+        // Sidecars go last: in sequential mode the backup re-reads the copy, including any
+        // ascmhl history that came off the card, so the copy must not change before then.
+        for (d, done) in completed.iter().enumerate() {
+            if *done {
+                r.write_sidecars(d);
+            }
+        }
 
         let outcome = match end {
             PassEnd::Cancelled => Outcome::Cancelled,
@@ -319,6 +360,7 @@ impl Job {
             finished: Some(finished.into()),
             log_path: r.log.as_ref().map(|l| l.path().to_path_buf()),
             files: r.files,
+            sidecars: r.sidecars,
             warnings: r.warnings,
         }
     }
@@ -373,6 +415,9 @@ struct Runner<'a> {
     copy_pool: BufferPool,
     verify_pools: Vec<BufferPool>,
     cache_warned: bool,
+    /// When each file was verified on each destination (for MHL hash dates).
+    stamps: Vec<Vec<Option<SystemTime>>>,
+    sidecars: Vec<PathBuf>,
 }
 
 impl Runner<'_> {
@@ -381,6 +426,13 @@ impl Runner<'_> {
         (self.emit)(&Event::SourceReleased);
     }
 
+    /// Records a new status in the report.
+    fn set_status(&mut self, i: usize, d: usize, status: &FileStatus) {
+        if status.is_verified() {
+            self.stamps[i][d] = Some(SystemTime::now());
+        }
+        self.files[i].dests[d] = status.clone();
+    }
     fn warn(&mut self, message: String) {
         self.note(&message);
         (self.emit)(&Event::Warning { message: message.clone() });
@@ -390,6 +442,69 @@ impl Runner<'_> {
     fn note(&mut self, s: &str) {
         if let Some(l) = self.log.as_mut() {
             l.line(s);
+        }
+    }
+
+    /// Writes the MHL generation (and `.md5` list) for destination `d`. A failure here
+    /// is a warning: the footage itself is verified either way.
+    fn write_sidecars(&mut self, d: usize) {
+        let job = self.job;
+        let spec = &job.spec;
+        let root = &job.dests[d].root;
+        let verified: Vec<usize> = (0..job.plan.files.len())
+            .filter(|&i| self.files[i].dests[d].is_verified() && self.files[i].hashes.is_some())
+            .collect();
+        if verified.is_empty() {
+            return;
+        }
+        if spec.sidecars.mhl {
+            let written = {
+                let entries: Vec<mhl::NewEntry> = verified
+                    .iter()
+                    .filter(|&&i| !in_mhl_folder(&job.plan.files[i].dest_rel))
+                    .map(|&i| {
+                        let f = &job.plan.files[i];
+                        mhl::NewEntry {
+                            path: format::rel_path(&f.dest_rel),
+                            size: f.size,
+                            modified: f.modified,
+                            hashes: self.files[i].hashes.as_ref().expect("filtered above"),
+                            hashed_at: self.stamps[i][d].unwrap_or_else(SystemTime::now),
+                            from_earlier_run: false,
+                        }
+                    })
+                    .collect();
+                mhl::write_generation(root, &entries, &ignore_patterns(spec))
+            };
+            match written {
+                Ok(Some(p)) => {
+                    self.note(&format!("Sidecar      {}", p.display()));
+                    self.sidecars.push(p);
+                }
+                Ok(None) => {}
+                Err(e) => self.warn(format!("Couldn't write the ASC MHL manifest in {}: {e}", root.display())),
+            }
+        }
+        let complete = verified.len() == job.plan.files.len() && job.plan.problems.is_empty();
+        let has_list = fs::read_dir(root).into_iter().flatten().flatten().any(|e| {
+            let n = e.file_name().to_string_lossy().to_ascii_lowercase();
+            n.starts_with("checksums") && n.ends_with(".md5")
+        });
+        if spec.sidecars.md5_list && spec.hash.md5 && complete && !has_list {
+            let entries: Vec<(String, String)> = verified
+                .iter()
+                .filter_map(|&i| {
+                    let md5 = self.files[i].hashes.and_then(|h| h.md5_hex())?;
+                    Some((format::rel_path(&job.plan.files[i].dest_rel), md5))
+                })
+                .collect();
+            match mhl::write_md5_list(root, &entries) {
+                Ok(p) => {
+                    self.note(&format!("Sidecar      {}", p.display()));
+                    self.sidecars.push(p);
+                }
+                Err(e) => self.warn(format!("Couldn't write the .md5 list in {}: {e}", root.display())),
+            }
         }
     }
 
@@ -583,7 +698,7 @@ impl Runner<'_> {
                         if cancelled {
                             // Verified siblings keep their final names; nothing partial remains.
                             for (t, status) in results {
-                                self.files[i].dests[t] = status;
+                                self.set_status(i, t, &status);
                             }
                             return PassEnd::Cancelled;
                         }
@@ -601,7 +716,7 @@ impl Runner<'_> {
                 if let Some(l) = self.log.as_mut() {
                     l.file(&log::role_title(&job.dests[*t]).to_lowercase(), f, self.files[i].hashes.as_ref(), status);
                 }
-                self.files[i].dests[*t] = status.clone();
+                self.set_status(i, *t, status);
             }
             (self.emit)(&Event::FileFinished { pass, file: i, hashes: self.files[i].hashes, results });
             done += f.size * 2;
@@ -661,6 +776,27 @@ impl Runner<'_> {
             handles.into_iter().map(|h| h.join().expect("verify thread panicked")).collect()
         })
     }
+}
+
+/// A file inside an `ascmhl` history that came off the source: copied and verified like
+/// any file, but not listed in our own manifest (MHL ignores its own folder).
+fn in_mhl_folder(rel: &Path) -> bool {
+    rel.components().next().is_some_and(|c| c.as_os_str().eq_ignore_ascii_case(mhl::FOLDER))
+}
+
+/// What MHL tools should ignore at a destination: MHL's defaults, our `.md5` lists, and
+/// the OS housekeeping we skipped.
+fn ignore_patterns(spec: &JobSpec) -> Vec<String> {
+    let mut p: Vec<String> =
+        [".DS_Store", "ascmhl", "ascmhl/", "checksums*.md5"].iter().map(|s| s.to_string()).collect();
+    if !spec.include_system_files {
+        for s in scan::system_patterns() {
+            if !p.contains(&s) {
+                p.push(s);
+            }
+        }
+    }
+    p
 }
 
 /// Gives a verified temp file its real name, without ever replacing anything.
