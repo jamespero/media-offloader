@@ -8,6 +8,7 @@ if (import.meta.env.DEV && !("__TAURI_INTERNALS__" in window && "invoke" in (win
 }
 
 import { open } from "@tauri-apps/plugin-dialog";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { api, failureText, type EngineEvent, type JobReport, type OffloadArgs, type Outcome, type VolumeEntry } from "./api";
 import {
   about,
@@ -19,6 +20,7 @@ import {
   currentSettingsTab,
   destMenu,
   mainMenu,
+  overlay,
   settings,
   showLog,
   srcMenu,
@@ -29,6 +31,7 @@ import { S, filesFromPlan, fileManager, hasBackup, running, saveSettings, sep, s
 import { resolveRoot, type Token, type TokenType } from "./tokens";
 import { chooseAndReverify, initReverify, reverifyIntro, reverifyLog } from "./reverify";
 import { markEarlierRun, openHistory, refreshHistory } from "./history";
+import { chime, notify } from "./notify";
 import { applyPreset, deletePreset, presetMenu, saveCurrentAs, savePresetDialog } from "./presets";
 import { initThumbs, requestThumbs, stopThumbs } from "./thumbs";
 import { historyApi, type HistoryDetail } from "./api";
@@ -462,12 +465,16 @@ function finish(outcome: Outcome) {
       for (const t of s.tokens) if (t.t === "reel") s.reels[t.v || "A"] = (s.reels[t.v || "A"] ?? 1) + 1;
       saveSettings();
       toast(true, "Offload complete", `${fmtSize(totalBytes())} verified on ${drives}`);
+      chime(true);
+      notify("Offload complete", `${S.src?.label ?? "Media"}: ${fmtSize(totalBytes())} verified on ${drives}.`);
       break;
     }
     case "failed":
       S.phase = "error";
       if (S.failCopy + S.failBak === 0) S.failCopy = outcome.files;
       toast(false, "Offload not complete", `${outcome.files} file${outcome.files === 1 ? "" : "s"} didn't verify. Keep the card.`);
+      chime(false);
+      notify("Offload not complete", `${outcome.files} file${outcome.files === 1 ? "" : "s"} didn't verify. Keep the card.`);
       break;
     case "cancelled":
       S.phase = "ready";
@@ -477,6 +484,8 @@ function finish(outcome: Outcome) {
       S.phase = "error";
       S.abortReason = outcome.reason;
       toast(false, "Offload stopped", outcome.reason);
+      chime(false);
+      notify("Offload stopped", outcome.reason);
       break;
   }
   render();
@@ -496,6 +505,7 @@ function onReport(r: JobReport) {
   });
   render();
   refreshHistory().then(render);
+  if (quitAfterStop) getCurrentWindow().destroy();
 }
 
 function newOffload() {
@@ -835,6 +845,22 @@ document.addEventListener("mousemove", (e) => {
   const y = Math.min(e.clientY + 16, innerHeight - tip.offsetHeight - 8);
   tip.style.left = x + "px";
   tip.style.top = y + "px";
+});
+
+/* Closing the window mid-offload asks first, then stops cleanly. */
+let quitAfterStop = false;
+getCurrentWindow().onCloseRequested((event) => {
+  if (!running()) return;
+  event.preventDefault();
+  overlay(`<div class="dialog"><h3>Stop and quit?</h3>
+    <p>An offload is still running. Verified files are kept; the file in progress is removed.</p>
+    <div class="acts"><button class="btn" data-act="closeov">Keep going</button><button class="btn danger" id="quitBtn">Stop and quit</button></div></div>`);
+  document.getElementById("quitBtn")!.onclick = () => {
+    quitAfterStop = true;
+    closeOverlay();
+    api.cancel();
+    setTimeout(() => getCurrentWindow().destroy(), 5000); // in case the report never comes
+  };
 });
 
 /* ---------------------------------------------------------------- boot */
