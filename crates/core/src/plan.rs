@@ -27,10 +27,8 @@ pub struct PlannedFile {
     #[serde(skip)]
     pub(crate) partial_rel: PathBuf,
     #[serde(skip)]
-    #[allow(dead_code)] // applied by the copy job
     pub(crate) accessed: Option<SystemTime>,
     #[serde(skip)]
-    #[allow(dead_code)] // applied by the copy job
     pub(crate) created: Option<SystemTime>,
 }
 
