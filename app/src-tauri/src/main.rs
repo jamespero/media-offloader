@@ -5,6 +5,8 @@
 //! events are forwarded to the window as `engine` events (progress throttled), with the
 //! final report as `engine-report`.
 
+mod thumbs;
+
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
@@ -307,6 +309,13 @@ async fn read_text(path: PathBuf) -> Result<String, String> {
     blocking(move || std::fs::read_to_string(&path).map_err(|e| e.to_string())).await
 }
 
+/// Queues thumbnails for these files, replacing any earlier request. Results arrive as
+/// `thumb` events tagged with `generation`.
+#[tauri::command]
+fn thumbs_request(thumbs: State<'_, thumbs::Thumbs>, generation: u64, items: Vec<thumbs::ThumbRequest>) {
+    thumbs.request(generation, items);
+}
+
 /// Makes a card or drive safe to pull.
 #[tauri::command]
 async fn eject(path: PathBuf) -> Result<(), String> {
@@ -335,6 +344,11 @@ fn main() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .manage(Engine::default())
+        .setup(|app| {
+            let cache = app.path().app_cache_dir()?.join("thumbs");
+            app.manage(thumbs::Thumbs::start(app.handle().clone(), cache));
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             list_sources,
             preview_source,
@@ -351,6 +365,7 @@ fn main() {
             read_text,
             log_dir,
             eject,
+            thumbs_request,
             reveal,
             open_folder
         ])

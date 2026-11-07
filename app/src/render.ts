@@ -2,6 +2,7 @@
 
 import { historyTabs, interruptedBanner, renderHistory, resumeLabel } from "./history";
 import { presetButton } from "./presets";
+import { thumbUrl } from "./thumbs";
 import { ic } from "./icons";
 import { S, sep, totalBytes, running, hasBackup, shownFiles, type FileView, tokenContext } from "./state";
 import { resolveRoot, tokenInfo, hasFormat } from "./tokens";
@@ -376,6 +377,8 @@ const PHOTO = new Set(["JPG", "JPEG", "NEF", "NRW", "CR2", "CR3", "ARW", "DNG", 
 const AUDIO = new Set(["WAV", "BWF", "MP3", "AAC", "M4A", "FLAC", "AIF", "AIFF", "OGG"]);
 
 function thumbArt(f: FileView) {
+  const url = thumbUrl(f);
+  if (url) return `<div class="img"><img src="${url}" alt=""></div>`;
   const icon = VIDEO.has(f.ext) ? ic.film(30) : PHOTO.has(f.ext) ? ic.image(30) : AUDIO.has(f.ext) ? ic.wave(30) : ic.file(28);
   return `<div class="img">${icon}</div>`;
 }
