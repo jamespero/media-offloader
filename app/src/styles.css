@@ -274,3 +274,5 @@ input { user-select: text }
 .preset b { color: var(--tx); font-weight: 500; max-width: 180px; overflow: hidden; text-overflow: ellipsis }
 .preset svg { color: var(--tx3) }
 
+/* real thumbnails */
+.thumb .img img { width: 100%; height: 100%; object-fit: cover; display: block }

@@ -1,5 +1,5 @@
 // Controller: source selection, destinations, starting/stopping, and mapping engine
-// events onto the panels.
+// events onto the panels and thumbnails.
 
 // In `vite dev` outside Tauri, fake the backend so the UI can be previewed in a browser.
 // Must run before anything below talks to Tauri; compiled out of production builds.
@@ -24,12 +24,13 @@ import {
   srcMenu,
   toast,
 } from "./menus";
-import { $, esc, fmtSize, flashThumb, render, renderBak, renderCopy, renderFoot, renderSrc, renderStrip, updateLive, updateThumb } from "./render";
+import { $, byGridKind, esc, fmtSize, flashThumb, render, renderBak, renderCopy, renderFoot, renderSrc, renderStrip, updateLive, updateThumb } from "./render";
 import { S, filesFromPlan, fileManager, hasBackup, running, saveSettings, sep, shownFiles, tokenContext, totalBytes, type Settings, type Source } from "./state";
 import { resolveRoot, type Token, type TokenType } from "./tokens";
 import { chooseAndReverify, initReverify, reverifyIntro, reverifyLog } from "./reverify";
 import { markEarlierRun, openHistory, refreshHistory } from "./history";
 import { applyPreset, deletePreset, presetMenu, saveCurrentAs, savePresetDialog } from "./presets";
+import { initThumbs, requestThumbs, stopThumbs } from "./thumbs";
 import { historyApi, type HistoryDetail } from "./api";
 
 /* ---------------------------------------------------------------- source */
@@ -87,6 +88,21 @@ async function selectSource(path: string, hint?: VolumeEntry) {
   S.scanning = false;
   render();
   schedulePrepare();
+  thumbsForCurrent();
+}
+
+/** Thumbnails for the Current tab: from the card before a run, from the verified copy after. */
+function thumbsForCurrent() {
+  if (!S.src || running()) return;
+  const copy = S.dests?.[0]?.root;
+  if ((S.phase === "done" || S.phase === "error") && copy) requestThumbs(byGridKind(S.files), copy, true);
+  else if (S.phase === "ready") requestThumbs(byGridKind(S.files), S.src.path, false);
+}
+
+function thumbsForHistory() {
+  const d = S.detail;
+  if (!d) return;
+  requestThumbs(byGridKind(S.histFiles), d.item.roots[0] ?? d.item.source, !!d.item.roots[0]);
 }
 
 function samePath(a: string, b: string) {
@@ -132,6 +148,7 @@ async function resumeFrom(path: string) {
   await prepare();
   S.scanning = false;
   render();
+  thumbsForCurrent();
 }
 
 /** Ejects the card (not while it's being read). */
@@ -308,6 +325,7 @@ async function startOffload() {
   S.files.forEach((f) => Object.assign(f, { state: "pending", p: 0, verify: false, failure: undefined }));
   render();
   try {
+    stopThumbs(); // the card is about to be read; thumbnails wait
     await api.start();
   } catch (e) {
     S.phase = "ready";
@@ -463,6 +481,7 @@ function finish(outcome: Outcome) {
   }
   render();
   if (outcome.kind === "cancelled") schedulePrepare();
+  thumbsForCurrent();
 }
 
 function onReport(r: JobReport) {
@@ -645,11 +664,14 @@ document.addEventListener("click", async (ev) => {
         S.kind = null;
         S.detail = null;
         render();
+        thumbsForCurrent();
       } else {
         S.view = path;
         render(); // shows "Loading…" until the journal is read
         await openHistory(path);
         render();
+        const d = S.detail;
+        if (d && S.view === path) thumbsForHistory();
       }
       break;
     }
@@ -678,6 +700,9 @@ document.addEventListener("click", async (ev) => {
     case "kind":
       S.kind = b.dataset.k as typeof S.kind;
       render();
+      // Thumbnails for what's now shown come first.
+      if (S.view) thumbsForHistory();
+      else thumbsForCurrent();
       break;
     case "presets":
       presetMenu(b);
@@ -816,6 +841,7 @@ document.addEventListener("mousemove", (e) => {
 
 api.onEngine(onEngine);
 api.onReport(onReport);
+initThumbs();
 initReverify();
 render();
 refreshHistory().then(render);

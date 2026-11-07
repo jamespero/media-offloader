@@ -219,3 +219,8 @@ export const historyApi = {
   prepareResume: (journalPath: string) => invoke<Prepared>("prepare_resume", { journalPath }),
 };
 
+export const thumbsApi = {
+  request: (generation: number, items: { key: string; path: string }[]) => invoke<void>("thumbs_request", { generation, items }),
+  onThumb: (f: (t: { generation: number; key: string; url: string | null }) => void) =>
+    listen<{ generation: number; key: string; url: string | null }>("thumb", (e) => f(e.payload)),
+};
