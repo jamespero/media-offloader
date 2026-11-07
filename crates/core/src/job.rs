@@ -16,6 +16,7 @@ use crate::error::{FileFailure, PrepareError};
 use crate::event::{Event, FileStatus, Outcome, Pass, Stage};
 use crate::format;
 use crate::hash::{HashConfig, Hashes};
+use crate::journal::{self, JournalWriter};
 use crate::log::{self, TransferLog};
 use crate::mhl;
 use crate::pipeline::BufferPool;
@@ -78,10 +79,43 @@ pub struct JobSpec {
     pub log_dir: Option<PathBuf>,
     /// Checksum files to write next to the footage.
     pub sidecars: Sidecars,
+    /// Continue an earlier run of this offload in the same folders instead of starting
+    /// fresh (see [`crate::journal::Record::resume_spec`]).
+    pub resume: Option<Resume>,
+    /// Record progress in this journal file (appending, for a resumed offload).
+    pub journal: Option<PathBuf>,
     /// Keep the computer from sleeping while the job runs.
     pub keep_awake: bool,
     #[doc(hidden)]
     pub faults: Option<Arc<dyn Faults>>,
+}
+
+/// What an earlier run of the same offload achieved.
+#[derive(Clone, Debug, Default)]
+pub struct Resume {
+    /// The folders that run wrote to: copy first, then backups.
+    pub roots: Vec<PathBuf>,
+    /// Per destination: the files it verified, by `/`-separated path.
+    pub verified: Vec<HashMap<String, VerifiedFile>>,
+}
+
+#[derive(Clone, Debug)]
+pub struct VerifiedFile {
+    pub size: u64,
+    pub modified: Option<SystemTime>,
+    pub hashes: Hashes,
+    pub at: SystemTime,
+}
+
+/// A file's state on a destination before a resumed run starts.
+#[derive(Clone, Debug)]
+enum Pre {
+    /// Still to copy.
+    Todo,
+    /// Verified by the earlier run and still there.
+    Done(Hashes, SystemTime),
+    /// Something else has that name now; never overwritten.
+    Blocked(FileFailure),
 }
 
 /// Checksum files written at each destination root once its files are verified.
@@ -162,6 +196,8 @@ pub struct Job {
     spec: JobSpec,
     plan: Plan,
     dests: Vec<Destination>,
+    /// File × destination, for a resumed run; empty otherwise.
+    pre: Vec<Vec<Pre>>,
 }
 
 /// Slack on top of the cluster-rounded total, for file system metadata.
@@ -211,8 +247,12 @@ impl Job {
 
         let mut dests = Vec::with_capacity(requested.len());
         let mut clusters = Vec::with_capacity(requested.len());
-        for ((role, req), vol) in requested.into_iter().zip(vols) {
-            let (root, conflict) = resolve_root(&req, &plan)?;
+        for (idx, ((role, req), vol)) in requested.into_iter().zip(vols).enumerate() {
+            // A resumed offload continues in the folders it already wrote to.
+            let (root, conflict) = match spec.resume.as_ref().and_then(|r| r.roots.get(idx)) {
+                Some(root) => (root.clone(), None),
+                None => resolve_root(&req, &plan)?,
+            };
             let available = faults.and_then(|f| f.available_space(&req)).unwrap_or(vol.available);
             clusters.push(vol.cluster_size);
             dests.push(Destination {
@@ -226,8 +266,13 @@ impl Job {
                 volume_id: vol.id,
             });
         }
+        let pre = match &spec.resume {
+            Some(r) => resume_state(&plan, &dests, r),
+            None => Vec::new(),
+        };
         for (d, dest) in dests.iter_mut().enumerate() {
-            dest.required = required_bytes(&plan, clusters[d]);
+            let todo = |i: usize| pre.get(i).is_none_or(|row| matches!(row[d], Pre::Todo));
+            dest.required = required_bytes(&plan, clusters[d], todo);
         }
 
         // Destinations sharing a volume need room for all of them.
@@ -245,11 +290,17 @@ impl Job {
             }
         }
 
-        Ok(Job { spec, plan, dests })
+        Ok(Job { spec, plan, dests, pre })
     }
 
     pub fn spec(&self) -> &JobSpec {
         &self.spec
+    }
+
+    /// Records progress in this journal file (see [`crate::journal`]). Lets callers name
+    /// it after the scanned source label.
+    pub fn set_journal(&mut self, path: Option<PathBuf>) {
+        self.spec.journal = path;
     }
 
     pub fn plan(&self) -> &Plan {
@@ -259,6 +310,22 @@ impl Job {
     /// Copy destination first, then backups.
     pub fn destinations(&self) -> &[Destination] {
         &self.dests
+    }
+
+    /// A file's status before this run: pending, or what a resumed run already knows.
+    fn initial_report(&self, i: usize) -> FileReport {
+        let mut r = FileReport { hashes: None, dests: vec![FileStatus::Pending; self.dests.len()] };
+        for (d, pre) in self.pre.get(i).into_iter().flatten().enumerate() {
+            match pre {
+                Pre::Done(h, _) => {
+                    r.hashes = Some(*h);
+                    r.dests[d] = FileStatus::Verified;
+                }
+                Pre::Blocked(failure) => r.dests[d] = FileStatus::Failed { failure: failure.clone() },
+                Pre::Todo => {}
+            }
+        }
+        r
     }
 
     /// Runs the offload. Blocks until done; `cancel` stops it between chunks.
@@ -273,15 +340,23 @@ impl Job {
             emit: on_event,
             faults: self.spec.faults.as_deref(),
             log: None,
-            files: (0..self.plan.files.len())
-                .map(|_| FileReport { hashes: None, dests: vec![FileStatus::Pending; self.dests.len()] })
-                .collect(),
+            files: (0..self.plan.files.len()).map(|i| self.initial_report(i)).collect(),
             warnings: Vec::new(),
             copy_pool: BufferPool::new(),
             verify_pools: self.dests.iter().map(|_| BufferPool::new()).collect(),
             cache_warned: false,
-            stamps: vec![vec![None; self.dests.len()]; self.plan.files.len()],
+            stamps: (0..self.plan.files.len())
+                .map(|i| {
+                    (0..self.dests.len())
+                        .map(|d| match self.pre.get(i).map(|row| &row[d]) {
+                            Some(Pre::Done(_, at)) => Some(*at),
+                            _ => None,
+                        })
+                        .collect()
+                })
+                .collect(),
             sidecars: Vec::new(),
+            journal: None,
         };
         if let Some(dir) = &self.spec.log_dir {
             match TransferLog::create(dir, started, &self.plan.source.label) {
@@ -290,6 +365,15 @@ impl Job {
                     r.log = Some(l);
                 }
                 Err(e) => r.warn(format!("Couldn't create the transfer log in {}: {e}", dir.display())),
+            }
+        }
+        if let Some(path) = &self.spec.journal {
+            match JournalWriter::open(path) {
+                Ok(mut j) => {
+                    j.start(self, r.log.as_ref().map(|l| l.path()));
+                    r.journal = Some(j);
+                }
+                Err(e) => r.warn(format!("Couldn't open the journal {}: {e}", path.display())),
             }
         }
 
@@ -351,6 +435,9 @@ impl Job {
         if let Some(l) = r.log.as_mut() {
             l.footer(finished, t0.elapsed(), &outcome, released);
         }
+        if let Some(j) = r.journal.as_mut() {
+            j.end(&outcome, &r.sidecars);
+        }
         (r.emit)(&Event::Finished { outcome: outcome.clone() });
 
         JobReport {
@@ -393,8 +480,49 @@ fn occupied(root: &Path, plan: &Plan) -> bool {
         || plan.dirs.iter().any(|d| matches!(fs::symlink_metadata(root.join(d)), Ok(m) if !m.is_dir()))
 }
 
-fn required_bytes(plan: &Plan, cluster: u64) -> u64 {
-    let files: u64 = plan.files.iter().map(|f| f.size.div_ceil(cluster) * cluster).sum();
+/// For a resumed run: which files are already done on each destination. A file counts
+/// as done only if the earlier run verified it, it is still there at the right size,
+/// and the source file still has the size and date it had then. Anything else already
+/// using the name is left alone and reported.
+fn resume_state(plan: &Plan, dests: &[Destination], r: &Resume) -> Vec<Vec<Pre>> {
+    let same_time = |a: Option<SystemTime>, b: Option<SystemTime>| match (a, b) {
+        (Some(a), Some(b)) => journal::ms(a) == journal::ms(b),
+        _ => true,
+    };
+    plan.files
+        .iter()
+        .map(|f| {
+            let rel = format::rel_path(&f.dest_rel);
+            dests
+                .iter()
+                .enumerate()
+                .map(|(d, dest)| {
+                    let final_path = dest.root.join(&f.dest_rel);
+                    let on_disk = fs::symlink_metadata(&final_path).ok();
+                    let recorded = r.verified.get(d).and_then(|m| m.get(&rel));
+                    match (recorded, on_disk) {
+                        (Some(v), Some(m))
+                            if m.is_file()
+                                && m.len() == f.size
+                                && v.size == f.size
+                                && same_time(v.modified, f.modified) =>
+                        {
+                            Pre::Done(v.hashes, v.at)
+                        }
+                        (_, Some(_)) => {
+                            Pre::Blocked(FileFailure::AlreadyExists { path: final_path.display().to_string() })
+                        }
+                        (_, None) => Pre::Todo,
+                    }
+                })
+                .collect()
+        })
+        .collect()
+}
+
+fn required_bytes(plan: &Plan, cluster: u64, todo: impl Fn(usize) -> bool) -> u64 {
+    let files: u64 =
+        plan.files.iter().enumerate().filter(|(i, _)| todo(*i)).map(|(_, f)| f.size.div_ceil(cluster) * cluster).sum();
     files + (plan.dirs.len() as u64 + 1) * cluster + SPACE_MARGIN
 }
 
@@ -418,16 +546,38 @@ struct Runner<'a> {
     /// When each file was verified on each destination (for MHL hash dates).
     stamps: Vec<Vec<Option<SystemTime>>>,
     sidecars: Vec<PathBuf>,
+    journal: Option<JournalWriter>,
 }
 
 impl Runner<'_> {
-    /// Every file is verified off the source: tell the UI.
+    /// Every file is verified off the source: tell the UI, and remember it.
     fn release(&mut self) {
+        if let Some(j) = self.journal.as_mut() {
+            j.released();
+        }
         (self.emit)(&Event::SourceReleased);
     }
 
-    /// Records a new status in the report.
+    /// Whether an earlier run had already verified file `i` on destination `d`.
+    fn pre_verified(&self, i: usize, d: usize) -> bool {
+        matches!(self.job.pre.get(i).map(|row| &row[d]), Some(Pre::Done(..)))
+    }
+
+    /// Records a new status in the report and the journal.
     fn set_status(&mut self, i: usize, d: usize, status: &FileStatus) {
+        let f = &self.job.plan.files[i];
+        if let Some(j) = self.journal.as_mut() {
+            let rel = format::rel_path(&f.dest_rel);
+            match status {
+                FileStatus::Verified => {
+                    if let Some(h) = &self.files[i].hashes {
+                        j.verified(d, rel, f.size, f.modified, h, SystemTime::now());
+                    }
+                }
+                FileStatus::Failed { failure } => j.failed(d, rel, failure.to_string()),
+                FileStatus::Pending => {}
+            }
+        }
         if status.is_verified() {
             self.stamps[i][d] = Some(SystemTime::now());
         }
@@ -470,7 +620,7 @@ impl Runner<'_> {
                             modified: f.modified,
                             hashes: self.files[i].hashes.as_ref().expect("filtered above"),
                             hashed_at: self.stamps[i][d].unwrap_or_else(SystemTime::now),
-                            from_earlier_run: false,
+                            from_earlier_run: self.pre_verified(i, d),
                         }
                     })
                     .collect();
@@ -587,6 +737,12 @@ impl Runner<'_> {
                 Some(d) => job.dests[d].root.join(&f.dest_rel),
             };
             let partials: Vec<PathBuf> = targets.iter().map(|&t| job.dests[t].root.join(&f.partial_rel)).collect();
+            if job.spec.resume.is_some() {
+                // Temp files left by the interrupted run are ours; start them over.
+                for p in &partials {
+                    transfer::discard(p);
+                }
+            }
             let expect = SourceExpect { size: f.size, modified: f.modified, accessed: f.accessed, created: f.created };
             let emit = self.emit;
             let copied = transfer::copy_to_partials(

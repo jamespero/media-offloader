@@ -10,7 +10,8 @@ use std::time::{Duration, Instant};
 
 use clap::{Args, Parser, Subcommand};
 use offloader_core::{
-    CopyMode, Event, FileStatus, HashConfig, Job, JobSpec, Outcome, Pass, Sidecars, Stage, format, hash, log, reverify,
+    CopyMode, Event, FileStatus, HashConfig, Job, JobSpec, Outcome, Pass, Sidecars, Stage, format, hash, journal, log,
+    reverify,
 };
 
 #[derive(Parser)]
@@ -26,6 +27,15 @@ enum Cmd {
     Copy(CopyArgs),
     /// Show what `copy` would do, without writing anything.
     Plan(CopyArgs),
+    /// Continue an interrupted offload, or retry its failed files, from its journal.
+    Resume {
+        /// The journal (.jsonl) of that offload; see `offload history`.
+        journal: PathBuf,
+        #[arg(long)]
+        json: bool,
+    },
+    /// List recent offloads (from their journals).
+    History,
     /// Make a card or drive safe to remove (dismount and eject).
     Eject { volume: PathBuf },
     /// Re-check a folder against its ASC MHL history (or .md5 list), reading every file from disk.
@@ -94,10 +104,22 @@ impl CopyArgs {
             include_system_files: self.include_system_files,
             log_dir: if self.no_log { None } else { self.log_dir.clone().or_else(log::default_log_dir) },
             sidecars: Sidecars { mhl: !self.no_mhl, md5_list: self.md5_list },
+            resume: None,
+            journal: if self.no_log { None } else { new_journal(&self.source) },
             keep_awake: true,
             faults: None,
         }
     }
+}
+
+/// A journal path for a new offload, named after the source folder or drive.
+fn new_journal(source: &std::path::Path) -> Option<PathBuf> {
+    let dir = journal::default_journal_dir()?;
+    let label = source
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_else(|| source.to_string_lossy().trim_end_matches(['\\', '/', ':']).to_string());
+    Some(journal::new_journal_path(&dir, &label))
 }
 
 fn main() -> ExitCode {
@@ -114,6 +136,8 @@ fn main() -> ExitCode {
             Ok(job) => run_job(&job, args.json),
             Err(e) => fail(&e),
         },
+        Cmd::Resume { journal: path, json } => resume(&path, json),
+        Cmd::History => history(),
         Cmd::Eject { volume } => match offloader_core::platform::eject(&volume) {
             Ok(()) => {
                 eprintln!("Ejected {}; it can be removed.", volume.display());
@@ -123,6 +147,62 @@ fn main() -> ExitCode {
         },
         Cmd::Verify { folder, log_dir } => verify(&folder, log_dir.or_else(log::default_log_dir)),
     }
+}
+
+/// Continues an interrupted offload (or retries its failed files) from its journal.
+fn resume(path: &std::path::Path, json: bool) -> ExitCode {
+    let record = match journal::Record::read(path) {
+        Ok(r) => r,
+        Err(e) => return fail(&format!("{}: {e}", path.display())),
+    };
+    if !record.resumable() {
+        eprintln!("That offload already finished with every file verified; nothing to resume.");
+        return ExitCode::SUCCESS;
+    }
+    let done = record.verified_count(0);
+    eprintln!(
+        "Resuming {}: {done} of {} files already verified on the copy.",
+        record.header.source_label,
+        record.header.files.len()
+    );
+    match Job::prepare(record.resume_spec(log::default_log_dir())) {
+        Ok(job) => run_job(&job, json),
+        Err(e) => fail(&e),
+    }
+}
+
+/// Lists recent offloads from their journals.
+fn history() -> ExitCode {
+    let Some(dir) = journal::default_journal_dir() else { return fail(&"no app data folder") };
+    let records = journal::list(&dir);
+    if records.is_empty() {
+        eprintln!("No offloads yet.");
+    }
+    for r in records.iter().take(30) {
+        let when = chrono_like(r.first_started);
+        let state = match &r.outcome {
+            Some(Outcome::Verified) => "verified".to_string(),
+            Some(Outcome::Failed { files }) => format!("{files} failed"),
+            Some(Outcome::Cancelled) => "stopped".to_string(),
+            Some(Outcome::Aborted { reason }) => format!("stopped: {reason}"),
+            None => "interrupted".to_string(),
+        };
+        println!(
+            "{when}  {:<16} {:>5} files  {:>9}  {state:<12} {}",
+            r.header.source_label,
+            r.header.files.len(),
+            format::size(r.header.total_bytes),
+            r.path.display()
+        );
+    }
+    ExitCode::SUCCESS
+}
+
+/// "YYYY-MM-DD HH:MM" in local time from ms since the epoch.
+fn chrono_like(ms: u64) -> String {
+    let t = std::time::UNIX_EPOCH + Duration::from_millis(ms);
+    let d: chrono::DateTime<chrono::Local> = t.into();
+    d.format("%Y-%m-%d %H:%M").to_string()
 }
 
 fn fail(e: &dyn std::fmt::Display) -> ExitCode {
