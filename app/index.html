@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Media Offloader</title>
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="band">
+      <section class="panel src" id="pSrc"></section>
+      <section class="panel" id="pCopy"></section>
+      <section class="panel" id="pBak"></section>
+    </div>
+    <div class="strip">
+      <div class="tabs" id="tabs"></div>
+      <div class="seg kinds" id="kinds"></div>
+      <button class="preset" id="presetBtn" data-act="presets" title="Preset: subfolder pattern"></button>
+      <button class="iconbtn" id="menuBtn" title="Menu" aria-label="Menu"></button>
+    </div>
+    <div class="gridwrap" id="gridwrap"></div>
+    <div class="foot">
+      <span id="fl"></span>
+      <span class="c" id="fc"></span>
+      <span class="r" id="fr"></span>
+    </div>
+  </div>
+  <div class="tip" id="tip"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
