@@ -38,7 +38,6 @@ pub(crate) enum PumpError {
 pub(crate) struct Pumped {
     pub bytes: u64,
     /// One entry per sink, in order: the first error that sink hit, if any.
-    #[allow(dead_code)] // read by the copy job
     pub sink_errors: Vec<Option<io::Error>>,
 }
 

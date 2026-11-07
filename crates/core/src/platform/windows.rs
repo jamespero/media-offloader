@@ -9,8 +9,8 @@ use std::time::Duration;
 
 use windows_sys::Win32::Foundation::{ERROR_ACCESS_DENIED, ERROR_INVALID_PARAMETER, ERROR_SHARING_VIOLATION};
 use windows_sys::Win32::Storage::FileSystem::{
-    FILE_FLAG_NO_BUFFERING, GetDiskFreeSpaceExW, GetDiskFreeSpaceW, GetDriveTypeW, GetLogicalDrives,
-    GetVolumeInformationW, GetVolumePathNameW, MOVEFILE_WRITE_THROUGH, MoveFileExW,
+    FILE_FLAG_NO_BUFFERING, FILE_FLAG_SEQUENTIAL_SCAN, GetDiskFreeSpaceExW, GetDiskFreeSpaceW, GetDriveTypeW,
+    GetLogicalDrives, GetVolumeInformationW, GetVolumePathNameW, MOVEFILE_WRITE_THROUGH, MoveFileExW,
 };
 
 use super::VolumeInfo;
@@ -96,6 +96,20 @@ impl Read for UncachedReader {
 
 fn is_err(e: &io::Error, code: u32) -> bool {
     e.raw_os_error() == Some(code as i32)
+}
+
+pub fn open_source(path: &Path) -> io::Result<File> {
+    OpenOptions::new().read(true).custom_flags(FILE_FLAG_SEQUENTIAL_SCAN).open(path)
+}
+
+pub fn create_partial(path: &Path) -> io::Result<File> {
+    OpenOptions::new().write(true).create_new(true).open(path)
+}
+
+pub fn evict_from_cache(_path: &Path) {}
+
+pub fn sync_dir(_dir: &Path) -> io::Result<()> {
+    Ok(())
 }
 
 pub fn rename_no_replace(from: &Path, to: &Path) -> io::Result<()> {

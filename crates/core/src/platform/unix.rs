@@ -1,5 +1,5 @@
 use std::ffi::CString;
-use std::fs::{self, File};
+use std::fs::{self, File, OpenOptions};
 use std::io::{self, Read};
 use std::os::unix::ffi::OsStrExt;
 use std::os::unix::io::AsRawFd;
@@ -70,6 +70,43 @@ fn drop_cached_pages(_file: &File) -> bool {
     false
 }
 
+pub fn open_source(path: &Path) -> io::Result<File> {
+    File::open(path)
+}
+
+pub fn create_partial(path: &Path) -> io::Result<File> {
+    let f = OpenOptions::new().write(true).create_new(true).open(path)?;
+    // Keep what we write out of the cache so the verify read can't be served from it.
+    no_cache(&f);
+    Ok(f)
+}
+
+#[cfg(target_os = "macos")]
+pub fn evict_from_cache(path: &Path) {
+    // msync(MS_INVALIDATE) on a shared mapping throws away the file's cached pages
+    // (the same trick vmtouch uses to evict on macOS). Best effort.
+    let Ok(file) = File::open(path) else { return };
+    let Ok(len) = file.metadata().map(|m| m.len() as usize) else { return };
+    if len == 0 {
+        return;
+    }
+    // SAFETY: read-only shared mapping of a file we hold open; unmapped before return.
+    unsafe {
+        let p = libc::mmap(std::ptr::null_mut(), len, libc::PROT_READ, libc::MAP_SHARED, file.as_raw_fd(), 0);
+        if p != libc::MAP_FAILED {
+            libc::msync(p, len, libc::MS_INVALIDATE);
+            libc::munmap(p, len);
+        }
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn evict_from_cache(path: &Path) {
+    if let Ok(f) = File::open(path) {
+        drop_cached_pages(&f);
+    }
+}
+
 pub fn rename_no_replace(from: &Path, to: &Path) -> io::Result<()> {
     #[cfg(target_os = "macos")]
     {
@@ -90,6 +127,19 @@ pub fn rename_no_replace(from: &Path, to: &Path) -> io::Result<()> {
         return Err(io::Error::new(io::ErrorKind::AlreadyExists, format!("{} already exists", to.display())));
     }
     fs::rename(from, to)
+}
+
+pub fn sync_dir(dir: &Path) -> io::Result<()> {
+    let d = File::open(dir)?;
+    // SAFETY: valid fd. Plain fsync: F_FULLFSYNC isn't supported on directories everywhere.
+    if unsafe { libc::fsync(d.as_raw_fd()) } == 0 {
+        return Ok(());
+    }
+    let err = io::Error::last_os_error();
+    match err.raw_os_error() {
+        Some(libc::EINVAL) | Some(libc::ENOTSUP) => Ok(()),
+        _ => Err(err),
+    }
 }
 
 #[cfg(target_os = "macos")]

@@ -2,7 +2,7 @@
 //! free space and volume details. Windows and macOS are the targets; other Unixes get
 //! best-effort fallbacks so the engine still builds and tests there.
 
-use std::fs;
+use std::fs::{self, File};
 use std::io;
 use std::path::{Path, PathBuf};
 
@@ -99,9 +99,30 @@ pub fn canonical_lenient(path: &Path) -> io::Result<PathBuf> {
     Ok(fs::canonicalize(&existing)?.join(tail))
 }
 
+/// Opens a source file for a single sequential read.
+pub(crate) fn open_source(path: &Path) -> io::Result<File> {
+    imp::open_source(path)
+}
+
+/// Creates a new temp file for writing. Fails if anything already has that name.
+pub(crate) fn create_partial(path: &Path) -> io::Result<File> {
+    imp::create_partial(path)
+}
+
+/// Drops any cached pages of a just-written, fsynced file so the verify read has to
+/// come from the disk. No-op where the verify read itself bypasses the cache (Windows).
+pub(crate) fn evict_from_cache(path: &Path) {
+    imp::evict_from_cache(path)
+}
+
 /// Renames `from` to `to`, failing with `AlreadyExists` rather than replacing `to`.
 pub fn rename_no_replace(from: &Path, to: &Path) -> io::Result<()> {
     imp::rename_no_replace(from, to)
+}
+
+/// Makes a rename inside `dir` durable. (On Windows the rename is already write-through.)
+pub(crate) fn sync_dir(dir: &Path) -> io::Result<()> {
+    imp::sync_dir(dir)
 }
 
 /// Makes a card or drive safe to remove (dismount/eject). Refuses folders and the
