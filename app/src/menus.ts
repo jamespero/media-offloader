@@ -227,6 +227,7 @@ const SETTINGS_TABS: [string, string, IconName][] = [
   ["verify", "Verification", "shield"],
   ["transfers", "Transfers", "layers"],
   ["naming", "Naming & Presets", "star"],
+  ["notify", "Notifications", "bell"],
   ["logs", "Logs", "file"],
 ];
 
@@ -252,6 +253,9 @@ export async function settings(tab = "general") {
       ${set("Copy mode", "Sequential: copy, verify, free the card, then back up from the copy (classic). Fan-out: read the card once and write every drive at the same time.", `<div class="seg"><button class="${s.fanOut ? "" : "on"}" data-act="fan" data-v="0" ${busy ? "disabled" : ""}>Sequential</button><button class="${s.fanOut ? "on" : ""}" data-act="fan" data-v="1" ${busy ? "disabled" : ""}>Fan-out</button></div>`)}
       ${set("When the destination already exists", "Never overwrite. Repeat offloads go into copy-conflicted, copy-conflicted-1, …", `<span class="meta">Always on</span>`)}`,
     naming: namingPane(set),
+    notify: `<h5>notifications</h5><p class="intro">Know it's done without watching the screen.</p>
+      ${set("Play a sound when finished", "A rising chime when everything verified, a lower one when something needs attention.", t(s.sound, "sound"))}
+      ${set("System notification", "Shows in Notification Center / the Windows notification area when the app isn't in front.", t(s.notify, "notify"))}`,
     logs: `<h5>logs</h5><p class="intro">A plain-text log is kept for every offload: each file's checksums, what was skipped or renamed, and how it ended.</p>
       ${set("Log location", `<span class="mono">${esc(logDir)}</span>`, `<button class="btn sm" data-act="logsfolder">${ic.reveal(13)} Show</button>`)}`,
   };

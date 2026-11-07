@@ -38,6 +38,8 @@ export interface Settings {
   autoSelect: boolean;
   ejectWhenVerified: boolean;
   keepAwake: boolean;
+  sound: boolean;
+  notify: boolean;
   importNo: number;
   reels: Record<string, number>;
   shootDay: number;
@@ -62,6 +64,8 @@ const DEFAULTS: Settings = {
   autoSelect: true,
   ejectWhenVerified: false,
   keepAwake: true,
+  sound: true,
+  notify: true,
   importNo: 1,
   reels: {},
   shootDay: 1,

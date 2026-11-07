@@ -343,6 +343,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .manage(Engine::default())
         .setup(|app| {
             let cache = app.path().app_cache_dir()?.join("thumbs");
