@@ -65,6 +65,30 @@ if (lock !== null) {
   }
 }
 
+// `tauri build` refuses to run if a Tauri crate and its npm package differ in major.minor.
+// Only release builds run it, so check here to catch that on the pull request instead.
+const npmLock = read("app/package-lock.json");
+if (lock !== null && npmLock !== null) {
+  const crates = new Map();
+  for (const block of lock.split("[[package]]")) {
+    const name = block.match(/^name = "([^"]*)"/m)?.[1];
+    const version = block.match(/^version = "([^"]*)"/m)?.[1];
+    if (name && version) crates.set(name, version);
+  }
+  const packages = JSON.parse(npmLock).packages ?? {};
+  for (const [path, info] of Object.entries(packages)) {
+    const pkg = path.match(/^node_modules\/@tauri-apps\/(api|plugin-[\w-]+)$/)?.[1];
+    if (!pkg) continue;
+    const crate = pkg === "api" ? "tauri" : `tauri-${pkg}`;
+    const version = crates.get(crate);
+    if (version === undefined) continue;
+    const majorMinor = (v) => v.split(".").slice(0, 2).join(".");
+    if (majorMinor(version) !== majorMinor(info.version)) {
+      problems.push(`Tauri versions differ: ${crate} ${version} (Cargo.lock), @tauri-apps/${pkg} ${info.version} (app/package-lock.json). tauri build needs the same major.minor`);
+    }
+  }
+}
+
 json(".release-please-manifest.json", (d) => [['"."', d["."]]]);
 json("app/package.json", (d) => [["version", d.version]]);
 json("app/package-lock.json", (d) => [
