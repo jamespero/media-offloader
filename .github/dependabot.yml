@@ -1,6 +1,17 @@
-# Keeps the SHA-pinned GitHub Actions current: Dependabot opens a PR that bumps the
-# commit SHA and its version comment together.
+# Keeps dependencies current. GitHub Actions are pinned to commit SHAs, and Dependabot bumps
+# the SHA and its version comment together. npm and Cargo share one weekly pull request
+# because Tauri's npm packages and Rust crates have to move together (the version
+# consistency check fails if their major.minor versions differ).
 version: 2
+
+multi-ecosystem-groups:
+  app-and-engine:
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build
+      include: scope
+
 updates:
   - package-ecosystem: github-actions
     directory: /
@@ -12,3 +23,13 @@ updates:
     commit-message:
       prefix: build
       include: scope
+
+  - package-ecosystem: npm
+    directory: /app
+    patterns: ["*"]
+    multi-ecosystem-group: app-and-engine
+
+  - package-ecosystem: cargo
+    directory: /
+    patterns: ["*"]
+    multi-ecosystem-group: app-and-engine
