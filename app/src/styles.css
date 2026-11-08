@@ -170,12 +170,6 @@ input { user-select: text }
 .banner .tx { flex: 1; font-size: 12.5px; color: var(--tx2) } .banner .tx b { color: var(--tx); font-weight: 600 }
 .mono { font-family: var(--f-mono) }
 
-/* ---------- footer ---------- */
-.foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px; font-size: 11.5px; color: var(--tx3); border-top: 1px solid var(--line); white-space: nowrap; overflow: hidden }
-.foot .c { color: var(--tx2); font-variant-numeric: tabular-nums }
-.foot .r { display: flex; gap: 12px; align-items: center }
-.foot .r span { display: inline-flex; gap: 5px; align-items: center }
-
 /* ---------- tooltip ---------- */
 .tip { position: fixed; z-index: 80; pointer-events: none; background: rgba(13,12,17,.96); border: 1px solid var(--line2); border-radius: 9px; padding: 8px 10px;
   font-size: 11.5px; color: var(--tx2); box-shadow: 0 10px 30px rgba(0,0,0,.5); display: none; max-width: 320px }

@@ -96,7 +96,7 @@ offload hash D:\Jobs\Day1\DCIM\100NCZ_R\DSC_0001.NEF --md5
 
 ## App
 
-The desktop app lives in `app/` (Tauri 2, Vite + TypeScript). Needs Node 20+ and the Rust toolchain; on Windows, WebView2 (built into Windows 11). From `app/`:
+The desktop app lives in `app/` (Tauri 2, Svelte 5, Vite + TypeScript). Needs Node 20+ and the Rust toolchain; on Windows, WebView2 (built into Windows 11). From `app/`:
 
 ```bash
 npm install

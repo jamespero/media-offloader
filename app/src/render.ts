@@ -1,5 +1,6 @@
 // Rendering. Full re-renders on state changes; cheap in-place updates for progress.
 
+import { setFooter } from "./components/Footer/footerState.svelte.ts";
 import { historyTabs, interruptedBanner, renderHistory, resumeLabel } from "./history";
 import { presetButton } from "./presets";
 import { thumbUrl } from "./thumbs";
@@ -494,9 +495,16 @@ export function flashThumb(i: number, label: string) {
 
 export function renderFoot() {
   if (S.view) return; // a history tab is showing
-  $("fl").innerHTML = S.src ? `<span style="color:var(--tx2)">${esc(S.src.label)}</span> · ${esc(S.src.media)}` : "No source";
-  $("fc").textContent = S.src && S.plan ? `${S.files.length} file${S.files.length === 1 ? "" : "s"} · ${fmtSize(totalBytes())}` : "";
-  $("fr").innerHTML = `<span>${ic.shield(12)} xxHash64${S.settings.md5 ? " + MD5" : ""}</span><span>${S.settings.mhl ? "MHL on" : "MHL off"}</span><span>${S.settings.fanOut ? "Fan-out" : "Sequential"}</span>`;
+  setFooter({
+    title: S.src?.label ?? null,
+    detail: S.src?.media ?? "",
+    count: S.src && S.plan ? `${S.files.length} file${S.files.length === 1 ? "" : "s"} · ${fmtSize(totalBytes())}` : "",
+    items: [
+      { icon: "shield", text: `xxHash64${S.settings.md5 ? " + MD5" : ""}` },
+      { text: S.settings.mhl ? "MHL on" : "MHL off" },
+      { text: S.settings.fanOut ? "Fan-out" : "Sequential" },
+    ],
+  });
 }
 
 export function render() {

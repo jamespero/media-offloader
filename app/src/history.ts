@@ -1,6 +1,7 @@
 // History: one tab per past offload (from its journal), a read-only view of each, and
 // Resume / Retry for offloads that didn't finish.
 
+import { setFooter } from "./components/Footer/footerState.svelte.ts";
 import { historyApi, type HistoryDetail, type HistoryItem } from "./api";
 import { ic } from "./icons";
 import { $, esc, fmtSize, gridTiles } from "./render";
@@ -181,9 +182,12 @@ export function renderHistory() {
   w.innerHTML = `<div class="banner">${ic2}<div class="tx"><b>${esc(it.label)}</b>, offloaded ${esc(when)}${runs} · ${it.files} files, ${fmtSize(it.bytes)}.${esc(note)}</div></div>
     <div class="grid">${gridTiles(S.histFiles)}</div>`;
 
-  $("fl").innerHTML = `<span style="color:var(--tx2)">${esc(it.label)}</span> · ${day(it.started)}`;
-  $("fc").textContent = `${it.files} file${it.files === 1 ? "" : "s"} · ${fmtSize(it.bytes)}`;
-  $("fr").innerHTML = `<span>${ic.file(12)} History</span>`;
+  setFooter({
+    title: it.label,
+    detail: day(it.started),
+    count: `${it.files} file${it.files === 1 ? "" : "s"} · ${fmtSize(it.bytes)}`,
+    items: [{ icon: "file", text: "History" }],
+  });
 }
 
 /** Banner for the Current tab when the last offload didn't finish. */
