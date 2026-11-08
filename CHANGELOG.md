@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0](https://github.com/jamespero/media-offloader/compare/v0.3.1...v0.4.0) (2026-11-08)
+
+
+### Dependencies
+
+* **deps:** raise Rust to 1.90 and update Tauri and small dependencies ([#44](https://github.com/jamespero/media-offloader/issues/44)) ([877e961](https://github.com/jamespero/media-offloader/commit/877e961d92f9f11aa53a50c28bfdb14755a4fc35))
+* **deps:** update quick-xml, jpeg-encoder and windows ([#45](https://github.com/jamespero/media-offloader/issues/45)) ([edb44e7](https://github.com/jamespero/media-offloader/commit/edb44e74fe0357fa57d28b796841d36f80b969b6))
+
+
+### Continuous Integration
+
+* update tauri-action and release-please-action ([#47](https://github.com/jamespero/media-offloader/issues/47)) ([d3793ba](https://github.com/jamespero/media-offloader/commit/d3793bad41694abb21454ea8741c8ffee494f6d2))
+
 ## [0.3.1](https://github.com/jamespero/media-offloader/compare/v0.3.0...v0.3.1) (2026-11-08)
 
 
