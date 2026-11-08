@@ -1,0 +1,162 @@
+/* Design tokens. docs/design-system.md explains how to use them; keep the two in step. */
+
+:root {
+  /* ---- base ---- */
+  --gray-925: #0E0D12;
+  --gray-900: #111015;
+  --gray-875: #15141B;
+  --gray-850: #17161C;
+  --gray-825: #1A1920;
+  --gray-800: #201E26;
+  --gray-750: #2A2832;
+  --gray-700: #35323E;
+  --gray-650: #413E4B;
+  --gray-600: #4E4B5C;
+  --gray-500: #75728A;
+  --gray-450: #8C899A;
+  --gray-300: #ABA8B9;
+  --gray-50: #F3F2F8;
+  --white: #FFFFFF;
+  --violet-400: #8E7CFF;
+  --violet-500: #6F5CF0;
+  --mint-400: #4BE3A3;
+  --mint-950: #072619;
+  --red-400: #FF5C5C;
+  --red-500: #E8484D;
+
+  /* ---- surfaces, darkest to lightest ---- */
+  --color-surface-well: var(--gray-925);       /* inset areas: logs, re-verify list */
+  --color-surface-app: var(--gray-900);        /* window background */
+  --color-surface-0: var(--gray-850);          /* source panel */
+  --color-surface-thumb: var(--gray-825);      /* thumbnail tiles */
+  --color-surface-1: var(--gray-800);          /* panels, dialogs */
+  --color-surface-2: var(--gray-750);          /* controls */
+  --color-surface-3: var(--gray-700);          /* hover and selected states */
+  --color-surface-4: var(--gray-650);          /* hover on buttons, toggle tracks */
+  --color-surface-menu: rgba(30, 28, 36, .97);
+  --color-surface-tooltip: rgba(13, 12, 17, .96);
+  --color-scrim: rgba(6, 5, 9, .55);           /* behind dialogs */
+  --color-thumb-shade: rgba(17, 16, 21, .62);  /* dims a thumbnail */
+  --color-thumb-caption: rgba(0, 0, 0, .7);    /* behind a thumbnail's file name */
+  --color-thumb-badge: rgba(0, 0, 0, .5);      /* behind a thumbnail's file type */
+
+  /* ---- text ---- */
+  --color-text: var(--gray-50);
+  --color-text-secondary: var(--gray-300);
+  --color-text-tertiary: var(--gray-500);
+  --color-text-placeholder: var(--gray-600);   /* empty-state heading */
+  --color-text-on-light: var(--gray-875);      /* on the white primary button */
+  --color-text-on-status: var(--white);        /* on violet and red panels */
+  --color-text-on-status-2: rgba(255, 255, 255, .85);
+  --color-text-on-status-3: rgba(255, 255, 255, .62);
+  --color-text-on-done: var(--mint-950);       /* on the mint panel */
+  --color-text-on-done-2: rgba(7, 38, 25, .72);
+
+  /* ---- borders ---- */
+  --color-border: rgba(255, 255, 255, .07);
+  --color-border-strong: rgba(255, 255, 255, .12);
+  --color-border-on-status: rgba(255, 255, 255, .25);
+  --color-border-working: rgba(142, 124, 255, .55);
+  --color-focus-ring: var(--white);
+
+  /* ---- status: the only colors that carry meaning ---- */
+  --color-status-working: var(--violet-400);
+  --color-status-working-deep: var(--violet-500);    /* start of the progress fill */
+  --color-status-working-soft: rgba(142, 124, 255, .16);
+  --color-status-done: var(--mint-400);
+  --color-status-done-soft: rgba(75, 227, 163, .14);
+  --color-status-problem: var(--red-400);
+  --color-status-problem-deep: var(--red-500);       /* destructive button */
+  --color-status-problem-soft: rgba(255, 92, 92, .15);
+
+  /* ---- controls and overlays on status panels ---- */
+  --color-primary: var(--gray-50);             /* the white primary button */
+  --color-primary-hover: var(--white);
+  --color-toggle-knob: var(--gray-450);
+  --color-overlay-on-status: rgba(0, 0, 0, .18);
+  --color-overlay-on-status-hover: rgba(0, 0, 0, .3);
+  --color-overlay-on-done: rgba(7, 38, 25, .12);
+  --color-overlay-on-done-hover: rgba(7, 38, 25, .2);
+
+  --font-heading: 'Outfit', system-ui, sans-serif;
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  --line-height-tight: 1;     /* large numbers and headings */
+  --line-height-ui: 1.4;      /* body default */
+  --line-height-code: 1.6;    /* logs and lists of paths */
+
+  --tracking-tighter: -.03em; /* the big percentage */
+  --tracking-tight: -.015em;  /* headings */
+  --tracking-wide: .04em;
+  --tracking-caps: .07em;     /* small uppercase labels */
+
+  /* UI text */
+  --font-size-2xs: 10px;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;       /* body default */
+  --font-size-lg: 15px;
+
+  /* headings and display */
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;      /* source panel heading */
+  --font-size-4xl: 30px;      /* copy and backup panel headings */
+  --font-size-5xl: 34px;      /* empty state heading */
+  --font-size-6xl: 44px;      /* result percentage */
+  --font-size-7xl: 56px;      /* running percentage */
+
+  /* spacing: --space-n is n × 2px */
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 10px;
+  --space-6: 12px;
+  --space-7: 14px;
+  --space-8: 16px;
+  --space-9: 18px;
+  --space-10: 20px;
+  --space-12: 24px;
+  --space-30: 60px;           /* empty states */
+
+  /* radius */
+  --radius-xs: 4px;
+  --radius-sm: 6px;           /* controls inside a group */
+  --radius-md: 8px;           /* controls; a group's radius is its children's + its padding */
+  --radius-lg: 10px;
+  --radius-xl: 12px;          /* menus, toasts */
+  --radius-panel: 14px;
+  --radius-dialog: 16px;
+  --radius-full: 999px;       /* pills and toggles */
+  --radius-circle: 50%;
+
+  /* control heights */
+  --control-height-sm: 26px;
+  --control-height-md: 30px;
+  --control-height-lg: 34px;  /* the primary button */
+
+  --shadow-dialog: 0 30px 80px rgba(0, 0, 0, .6);
+  --shadow-menu: 0 22px 60px rgba(0, 0, 0, .55);
+  --shadow-toast: 0 18px 50px rgba(0, 0, 0, .5);
+  --shadow-tooltip: 0 10px 30px rgba(0, 0, 0, .5);
+
+  /* layers across the whole window, lowest first */
+  --z-toast: 30;
+  --z-scrim: 40;
+  --z-menu: 60;
+  --z-tooltip: 80;
+
+  --duration-fast: 150ms;      /* menus, scrims */
+  --duration-base: 200ms;      /* toggles, progress */
+  --duration-moderate: 300ms;  /* toasts, thumbnail borders */
+  --duration-slow: 450ms;      /* a panel changing state */
+
+  --opacity-disabled: .45;
+  --opacity-inactive: .38;     /* a panel that isn't available yet */
+}

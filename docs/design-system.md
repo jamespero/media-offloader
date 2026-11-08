@@ -2,7 +2,7 @@
 
 How Media Offloader looks, and which values to use. The UI has to be readable at a glance from across a set, and it shows one screen of mostly status, so the rules are few and strict.
 
-**Status:** the tokens below are defined but not yet applied. The design tokens work (#25) moves them into `app/src/styles/tokens.css` and replaces the literal values. Don't confuse design tokens with `app/src/tokens.ts`, which is the folder-naming feature.
+The tokens live in `app/src/styles/tokens.css`, and that file and this page should stay in step. Don't confuse design tokens with `app/src/tokens.ts`, which is the folder-naming feature.
 
 ## Rules
 

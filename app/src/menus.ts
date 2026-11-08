@@ -74,7 +74,7 @@ export function srcMenu(a: Element) {
 export function destMenu(a: Element, w: "copy" | "bak") {
   const recent = (w === "copy" ? S.settings.recentCopy : S.settings.recentBak).slice(0, 5);
   const items = recent.map((r) =>
-    mi("folder", `<span style="font-family:var(--f-mono);font-size:12px">${esc(r)}</span>`, "setdest", "", `data-w="${w}" data-v="${esc(r)}"`),
+    mi("folder", `<span style="font-family:var(--font-mono);font-size:12px">${esc(r)}</span>`, "setdest", "", `data-w="${w}" data-v="${esc(r)}"`),
   );
   openMenu(
     a,
@@ -122,7 +122,7 @@ export function chipMenu(a: Element, i: number, onEdit: () => void) {
       `<div class="sep"></div>` +
       numberRow(`Next ${tk.v || "A"} roll`, ctx.reelNo(tk.v || "A"), "Counts up after each completed offload. Change it to match the card's label.");
   } else {
-    h = `<div class="mh">${tokenInfo(tk.t).label}</div><div class="mnote">Resolves to <span style="font-family:var(--f-mono);color:var(--tx2)">${esc(tokenText(tk, ctx))}</span></div>`;
+    h = `<div class="mh">${tokenInfo(tk.t).label}</div><div class="mnote">Resolves to <span style="font-family:var(--font-mono);color:var(--color-text-secondary)">${esc(tokenText(tk, ctx))}</span></div>`;
   }
   const n = S.settings.tokens.length;
   h += `<div class="sep"></div>${i > 0 ? mi("chevL", "Move Left", "mvl", "", `data-i="${i}"`) : ""}${i < n - 1 ? mi("chevR", "Move Right", "mvr", "", `data-i="${i}"`) : ""}${mi("trash", "Remove", "rmtok", "", `data-i="${i}"`)}`;
@@ -156,7 +156,7 @@ export function chipMenu(a: Element, i: number, onEdit: () => void) {
 
 /** A labelled number field for the chip menus (shoot day, next roll). */
 function numberRow(label: string, value: number, note: string) {
-  return `<div class="row" style="padding:4px 10px 6px;gap:8px;justify-content:space-between"><span style="font-size:12px;color:var(--tx2)">${esc(label)}</span><input class="tin" id="numIn" type="number" min="1" max="999" value="${value}" style="width:76px"></div><div class="mnote">${esc(note)}</div>`;
+  return `<div class="row" style="padding:4px 10px 6px;gap:8px;justify-content:space-between"><span style="font-size:12px;color:var(--color-text-secondary)">${esc(label)}</span><input class="tin" id="numIn" type="number" min="1" max="999" value="${value}" style="width:76px"></div><div class="mnote">${esc(note)}</div>`;
 }
 
 /* ---------------------------------------------------------------- overlays */
@@ -220,7 +220,7 @@ export async function about() {
   overlay(`<div class="dialog"><h3>Media Offloader</h3>
     <p>Version ${esc(version)} · open source under MIT or Apache-2.0</p>
     <p>Copies camera cards with checksum verification (xxHash64, optional MD5), re-reading every copy from disk, and never overwrites anything.</p>
-    <p style="color:var(--tx3)">Fonts: Outfit, Inter and JetBrains Mono, under the SIL Open Font License.</p>
+    <p style="color:var(--color-text-tertiary)">Fonts: Outfit, Inter and JetBrains Mono, under the SIL Open Font License.</p>
     <div class="acts"><button class="btn" data-act="openrepo">View on GitHub</button><button class="btn" data-act="closeov">Close</button></div></div>`);
 }
 

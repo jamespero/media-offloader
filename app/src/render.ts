@@ -131,7 +131,7 @@ export function renderSrc() {
       <button class="btn primary" data-act="start" style="margin-top:4px" ${can ? "" : "disabled"} title="${esc(why)}">${label}</button>`;
   } else if (ph === "copying" || (ph === "backing" && S.runFanOut)) {
     h = `${srcIcon()}<h2>source</h2>${volBtn()}
-      <div class="row" style="margin-top:4px"><span class="pulse"></span><span class="sub" style="color:var(--tx)">Copying from this source</span></div>
+      <div class="row" style="margin-top:4px"><span class="pulse"></span><span class="sub" style="color:var(--color-text)">Copying from this source</span></div>
       <div class="sub">Keep it connected until the copy is verified.</div>`;
   } else if (ph === "backing") {
     h = `${srcIcon()}<h2>source</h2>${volBtn()}<span class="safe">${ic.check(13)} Copy verified</span>
@@ -279,7 +279,7 @@ export function renderBak() {
     const note = S.runFanOut ? "Reading the card once, writing every drive" : "Reading from the verified copy";
     h = liveBlock("backing up to", root, S.bakP, S.runFanOut ? S.cur : S.curB, note);
   } else if (st === "hold") {
-    h = `<h2>backup</h2>${pathLine(root)}<span class="qpill"><i style="background:var(--err)"></i>On hold</span>
+    h = `<h2>backup</h2>${pathLine(root)}<span class="qpill"><i style="background:var(--color-status-problem)"></i>On hold</span>
       <div class="sub">Resolve the copy errors first.</div>`;
   } else if (st === "error") {
     el.classList.add("error");
