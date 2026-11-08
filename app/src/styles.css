@@ -36,7 +36,7 @@ input { user-select: text }
 .dim .content { opacity: var(--opacity-inactive); pointer-events: none }
 
 /* running fill */
-.fill { position: absolute; inset: 0 auto 0 0; width: 0; z-index: 1; background: linear-gradient(90deg, var(--color-status-working-deep), var(--color-status-working)); transition: width var(--duration-base) linear }
+.fill { position: absolute; inset: 0 auto 0 0; width: var(--p, 0%); z-index: 1; background: linear-gradient(90deg, var(--color-status-working-deep), var(--color-status-working)); transition: width var(--duration-base) linear }
 .fill::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.14) 50%, transparent 70%);
   background-size: 220% 100%; animation: sheen 2.4s linear infinite }
 @keyframes sheen { from { background-position: 120% 0 } to { background-position: -120% 0 } }
@@ -161,12 +161,12 @@ input { user-select: text }
 
 /* ---------- tooltip ---------- */
 .tip { position: fixed; z-index: var(--z-tooltip); pointer-events: none; background: var(--color-surface-tooltip); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-4) var(--space-5);
-  font-size: var(--font-size-sm); color: var(--color-text-secondary); box-shadow: var(--shadow-tooltip); display: none; max-width: 320px }
+  font-size: var(--font-size-sm); color: var(--color-text-secondary); box-shadow: var(--shadow-tooltip); display: none; max-width: 320px; left: var(--x); top: var(--y) }
 .tip b { display: block; font: var(--font-weight-medium) var(--font-size-sm) var(--font-mono); color: var(--color-text); margin-bottom: var(--space-2); word-break: break-all }
 .tip .h { font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin-top: var(--space-2); word-break: break-all }
 
 /* ---------- menus ---------- */
-.menu { position: fixed; z-index: var(--z-menu); min-width: 230px; max-width: 460px; max-height: calc(100vh - 16px); overflow: auto; background: var(--color-surface-menu); backdrop-filter: blur(18px); border: 1px solid var(--color-border-strong);
+.menu { position: fixed; left: var(--x); top: var(--y); z-index: var(--z-menu); min-width: 230px; max-width: 460px; max-height: calc(100vh - 16px); overflow: auto; background: var(--color-surface-menu); backdrop-filter: blur(18px); border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-xl); padding: var(--space-3); box-shadow: var(--shadow-menu); font-size: var(--font-size-md); animation: pop var(--duration-fast) ease-out }
 @keyframes pop { from { transform: translateY(-4px); opacity: 0 } }
 .mi { display: flex; align-items: center; gap: var(--space-5); min-height: var(--control-height-md); padding: 0 var(--space-5); border-radius: var(--radius-sm); color: var(--color-text); border: 0; background: none; width: 100%; text-align: left }
@@ -260,3 +260,34 @@ input { user-select: text }
 
 /* real thumbnails */
 .thumb .img img { width: 100%; height: 100%; object-fit: cover; display: block }
+
+/* ---------- states and small variants ---------- */
+[hidden] { display: none !important }
+.tip.on { display: block }
+.tip .state { margin-top: var(--space-3) }
+.tip .state.done { color: var(--color-status-done) }
+.tip .state.problem { color: var(--color-status-problem) }
+.problem-text, .dialog p.problem-text { color: var(--color-status-problem) }
+.dialog p.note { color: var(--color-text-tertiary) }
+.dialog .field { margin-top: var(--space-6) }
+.pct.result { font-size: var(--font-size-6xl) }
+.qpill i.problem { background: var(--color-status-problem) }
+.row.result-actions { margin-top: var(--space-4) }
+.row.in-progress { margin-top: var(--space-2) }
+.row.tight { gap: var(--space-2) }
+.row.tighter { gap: var(--space-1) }
+.panel .sub.strong { color: var(--color-text) }
+.btn.primary.start { margin-top: var(--space-2) }
+.btn.primary.compact { height: var(--control-height-md) }
+.iconbtn.sm { width: 24px; height: 24px }
+.vol.static, .chip.static { cursor: default }
+.meta.stepper-value { color: var(--color-text); min-width: 34px; text-align: center }
+.mi-icon { width: 15px }
+.mi .recent-path { font-family: var(--font-mono); font-size: var(--font-size-sm) }
+.mi-field { padding: var(--space-2) var(--space-3) var(--space-3) }
+.mono-value { font-family: var(--font-mono); color: var(--color-text-secondary) }
+.row.num-row { padding: var(--space-2) var(--space-5) var(--space-3); gap: var(--space-4); justify-content: space-between }
+.num-row .label { font-size: var(--font-size-sm); color: var(--color-text-secondary) }
+.num-row .tin { width: 76px }
+.empty-art { display: grid; place-items: center }
+.empty.inline { position: static; padding: var(--space-30) 0 }
