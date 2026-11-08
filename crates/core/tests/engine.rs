@@ -351,10 +351,11 @@ fn cancelling_keeps_verified_files_and_removes_the_partial_one() {
     // Cancel part-way through copying the 16 MB file.
     let cancel = AtomicBool::new(false);
     let report = job.run(&cancel, &|e| {
-        if let Event::Progress { file, stage: Stage::Copy, file_bytes, .. } = e {
-            if *file == big && *file_bytes >= CHUNK as u64 {
-                cancel.store(true, Ordering::SeqCst);
-            }
+        if let Event::Progress { file, stage: Stage::Copy, file_bytes, .. } = e
+            && *file == big
+            && *file_bytes >= CHUNK as u64
+        {
+            cancel.store(true, Ordering::SeqCst);
         }
     });
     assert_eq!(report.outcome, Outcome::Cancelled);

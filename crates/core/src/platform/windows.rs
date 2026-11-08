@@ -67,7 +67,7 @@ impl Read for UncachedReader {
             return Ok(0);
         }
         if self.direct {
-            let aligned = (buf.as_ptr() as usize) % BUF_ALIGN == 0 && buf.len() % BUF_ALIGN == 0;
+            let aligned = (buf.as_ptr() as usize).is_multiple_of(BUF_ALIGN) && buf.len().is_multiple_of(BUF_ALIGN);
             if aligned {
                 match self.file.read(buf) {
                     Ok(n) => {

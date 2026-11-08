@@ -173,10 +173,10 @@ fn extract(path: &Path) -> Option<(&'static str, Vec<u8>)> {
         }
 
         // Premultiplied BGRA (or alpha all zero, meaning opaque) → RGB over the tile colour.
-        let opaque = bgra.chunks_exact(4).all(|p| p[3] == 0);
+        let opaque = bgra.as_chunks::<4>().0.iter().all(|p| p[3] == 0);
         let bg = [0x1a_u32, 0x19, 0x20];
         let mut rgb = Vec::with_capacity((w * h * 3) as usize);
-        for p in bgra.chunks_exact(4) {
+        for p in bgra.as_chunks::<4>().0 {
             let a = if opaque { 255 } else { u32::from(p[3]) };
             for (c, b) in [p[2], p[1], p[0]].into_iter().zip(bg) {
                 rgb.push((u32::from(c) + b * (255 - a) / 255).min(255) as u8);
