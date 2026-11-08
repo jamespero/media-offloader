@@ -40,6 +40,7 @@ export interface Settings {
   keepAwake: boolean;
   sound: boolean;
   notify: boolean;
+  autoUpdate: boolean;
   importNo: number;
   reels: Record<string, number>;
   shootDay: number;
@@ -66,6 +67,7 @@ const DEFAULTS: Settings = {
   keepAwake: true,
   sound: true,
   notify: true,
+  autoUpdate: false,
   importNo: 1,
   reels: {},
   shootDay: 1,

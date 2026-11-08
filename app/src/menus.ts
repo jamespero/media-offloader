@@ -245,7 +245,8 @@ export async function settings(tab = "general") {
       ${set("Auto-select inserted media", "When a card or drive is connected, make it the source. Folders are never auto-selected.", t(s.autoSelect, "autoSelect"))}
       ${set("Copy hidden system files", "Include .Trashes, .Spotlight-V100, System Volume Information. Off still copies every camera file and folder.", t(s.includeSystemFiles, "includeSystemFiles"))}
       ${set("Eject source when verified", "Unmount the card as soon as its copy is verified, so it is safe to pull. The backup carries on from the copy.", t(s.ejectWhenVerified, "ejectWhenVerified"))}
-      ${set("Keep the computer awake", "Prevent sleep while a transfer is running.", t(s.keepAwake, "keepAwake"))}`,
+      ${set("Keep the computer awake", "Prevent sleep while a transfer is running.", t(s.keepAwake, "keepAwake"))}
+      ${set("Install updates automatically", "When a new version is out, install it as the app starts, before you begin. Off: the app asks first. Never during an offload.", t(s.autoUpdate, "autoUpdate"))}`,
     verify: `<h5>verification</h5><p class="intro">Every file is read back from the destination and compared to the source.</p>
       ${set("Checksum", "xxHash64 is fast and is what ASC MHL uses. Add MD5 when production or insurance asks for it.", `<div class="seg"><button class="${s.md5 ? "" : "on"}" data-act="md5" data-v="0" ${busy ? "disabled" : ""}>xxHash64</button><button class="${s.md5 ? "on" : ""}" data-act="md5" data-v="1" ${busy ? "disabled" : ""}>xxHash64 + MD5</button></div>`)}
       ${set("Write ASC MHL manifest", "Saves an ascmhl folder next to the footage so any copy can be re-verified later, here or in any MHL tool.", t(s.mhl, "mhl"))}

@@ -216,6 +216,7 @@ input { user-select: text }
 .set .l span { display: block; color: var(--tx3); font-size: 11.5px; margin-top: 2px; max-width: 380px }
 .tog { width: 36px; height: 21px; border-radius: 11px; background: var(--s4); position: relative; border: 0; flex: none; transition: background .2s }
 .tog::after { content: ""; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: #8C899A; transition: all .2s }
+.dialog .set.updauto { margin-top: 10px; border-top: 1px solid var(--line) }
 .tog.on { background: var(--tx) } .tog.on::after { left: 17px; background: #15141B }
 .tog.lock { opacity: .5; cursor: not-allowed }
 .seg { display: inline-flex; background: var(--s0); border: 1px solid var(--line2); border-radius: 9px; padding: 2px; flex: none }
