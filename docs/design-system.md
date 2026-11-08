@@ -255,11 +255,9 @@ These are small enough that nobody should notice, and the tokens above already r
 | `1.65` | `--line-height-code` (`1.6`) | Log lines |
 | Opacity `.4`, `.5` | `--opacity-disabled` (`.45`) | Disabled menu item, locked toggle |
 
-### Waiting for a decision
+### Accepted on purpose
 
-These can be seen in a side-by-side comparison, by up to a pixel or half a point. The scales above assume all of them, because a tidy scale is the point of this work, but each needs a deliberate yes.
-
-Until then, #25 keeps each old value as a token of its own, named `--legacy-…`, so the UI doesn't change. Accepting a merge means deleting that token.
+These can be seen in a side-by-side comparison, by up to a pixel or half a point. They were reviewed and accepted, because a tidy scale is the point of this work, and they land separately from the rest of #25 so any visual change is easy to review.
 
 | # | From | To | Where | Risk to look for |
 |---|---|---|---|---|
