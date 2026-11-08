@@ -102,6 +102,6 @@ export function namingPane(set: (b: string, sub: string, ctl: string) => string)
     ${set(
       "Import # counter",
       "The next import number. Counts up after each completed offload.",
-      `<div class="row" style="gap:4px"><button class="btn sm" data-act="importdec" aria-label="Lower">−</button><span class="meta mono" style="color:var(--tx);min-width:34px;text-align:center">${n}</span><button class="btn sm" data-act="importinc" aria-label="Raise">+</button></div>`,
+      `<div class="row" style="gap:4px"><button class="btn sm" data-act="importdec" aria-label="Lower">−</button><span class="meta mono" style="color:var(--color-text);min-width:34px;text-align:center">${n}</span><button class="btn sm" data-act="importinc" aria-label="Raise">+</button></div>`,
     )}`;
 }

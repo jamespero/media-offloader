@@ -139,7 +139,7 @@ function destPanel(el: HTMLElement, it: HistoryItem, d: number) {
   if (stopped) {
     el.innerHTML = `<div class="content"><h2>${backup ? "backup" : "copy"}</h2>${pathLine(root)}
       <div class="pct" style="font-size:44px">${pct}%<small>${done} of ${it.files} files verified</small></div>
-      <span class="qpill"><i ${it.outcome ? "" : 'style="background:var(--err)"'}></i>${it.outcome ? "Stopped" : "Didn't finish"}</span></div>`;
+      <span class="qpill"><i ${it.outcome ? "" : 'style="background:var(--color-status-problem)"'}></i>${it.outcome ? "Stopped" : "Didn't finish"}</span></div>`;
     return;
   }
   el.classList.add("error");

@@ -840,7 +840,7 @@ document.addEventListener("mousemove", (e) => {
     backed: "Copied & backed up · verified",
     failed: f.failure ?? "Not verified",
   }[f.state];
-  const color = f.state === "failed" ? "var(--err)" : /backed|copied/.test(f.state) ? "var(--done)" : "var(--tx2)";
+  const color = f.state === "failed" ? "var(--color-status-problem)" : /backed|copied/.test(f.state) ? "var(--color-status-done)" : "var(--color-text-secondary)";
   const when = f.modified ? new Date(f.modified) : null;
   tip.innerHTML = `<b>${esc(f.name)}</b>${fmtSize(f.size)}${when ? ` · ${when.toLocaleDateString(undefined, { month: "short", day: "numeric" })} ${when.toTimeString().slice(0, 8)}` : ""}
     <div class="h">${esc(f.srcRel)}</div><div style="margin-top:5px;color:${color}">${esc(st)}</div>

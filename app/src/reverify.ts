@@ -25,7 +25,7 @@ const R = {
 export function reverifyIntro() {
   overlay(`<div class="dialog"><h3>Re-verify a folder</h3>
     <p>Pick a folder that has an <span class="mono">ascmhl</span> manifest (or a .md5 list). Every file is re-read from disk and compared against the checksums recorded when it was offloaded.</p>
-    <p style="color:var(--tx3)">Use it to check an archive drive, or to find out which copy is good when two disagree. Nothing in the folder is changed.</p>
+    <p style="color:var(--color-text-tertiary)">Use it to check an archive drive, or to find out which copy is good when two disagree. Nothing in the folder is changed.</p>
     <div class="acts"><button class="btn" data-act="closeov">Cancel</button><button class="btn primary" data-act="rvchoose" style="height:30px">Choose Folder…</button></div></div>`);
 }
 
@@ -80,7 +80,7 @@ function draw() {
     const pct = R.bytes ? (R.done / R.bytes) * 100 : 0;
     el.innerHTML = `<div class="rvbar"><div class="fill" style="width:${pct}%"></div></div>
       <div class="rvstat"><span class="pct-s">${Math.floor(pct)}%</span><span class="f mono">${esc(R.current)}</span></div>
-      <div class="rvnote">${R.files ? `${R.checked} of ${R.files} files · ${fmtSize(R.bytes)} · checking against ${sourceText(R.source)}` : "Reading the manifest…"}${R.failed ? ` · <span style="color:var(--err)">${R.failed} not matching so far</span>` : ""}</div>
+      <div class="rvnote">${R.files ? `${R.checked} of ${R.files} files · ${fmtSize(R.bytes)} · checking against ${sourceText(R.source)}` : "Reading the manifest…"}${R.failed ? ` · <span style="color:var(--color-status-problem)">${R.failed} not matching so far</span>` : ""}</div>
       <div class="acts"><button class="btn" data-act="closeov">Stop</button></div>`;
     return;
   }
