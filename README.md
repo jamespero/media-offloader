@@ -29,7 +29,7 @@ Each [release](https://github.com/jamespero/media-offloader/releases) has instal
 - **Windows:** SmartScreen may warn that the app is from an unknown publisher. Choose **More info**, then **Run anyway**.
 - **macOS:** Gatekeeper blocks the first launch. Open **System Settings → Privacy & Security** and choose **Open Anyway** next to Media Offloader.
 
-After that, the app updates itself. It checks the latest release when it starts and every few hours, downloads a new version in the background, and asks before installing it. It never asks while an offload or re-verify is running, because installing restarts the app. Settings and presets are kept. Updates are signed, and the app refuses any that aren't.
+After that, the app updates itself. It checks the latest release when it starts and every few hours, downloads a new version in the background, and asks before installing it. It never asks while an offload or re-verify is running, because installing restarts the app. Settings and presets are kept. Turn on **Install updates automatically** (in that dialog, or Settings → General) to skip the question: updates then install as the app starts, before you begin. Updates are signed, and the app refuses any that aren't.
 
 v0.2.0 doesn't have the updater yet, so install the next release by hand once. If you installed v0.2.0 from the `.msi`, uninstall it (Settings → Apps) before running the new `-setup.exe`, so you don't end up with two copies.
 
