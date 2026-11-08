@@ -3,6 +3,12 @@ name: Release
 on:
   push:
     branches: [main]
+  # Rebuilds the app for an existing release, e.g. if a build failed: run it with the tag.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and attach the apps to (e.g. v0.2.0)
+        required: true
 
 permissions:
   contents: write
@@ -11,13 +17,68 @@ permissions:
 jobs:
   release-please:
     name: Release PR
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       # Pull requests opened with the default GITHUB_TOKEN don't trigger other workflows,
       # so the release PR's required checks would never run. RELEASE_PLEASE_TOKEN is a
       # fine-grained token (contents + pull requests: read/write) that avoids that.
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  # Builds the app installers and attaches them to the release. Unsigned for now.
+  app:
+    name: App (${{ matrix.name }})
+    needs: release-please
+    if: >-
+      always() &&
+      (needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            args: ""
+          - name: macOS
+            os: macos-latest
+            args: --target universal-apple-darwin
+    runs-on: ${{ matrix.os }}
+    env:
+      TAG: ${{ inputs.tag || needs.release-please.outputs.tag_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install app dependencies
+        run: npm ci
+        working-directory: app
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: app
+          tagName: ${{ env.TAG }}
+          releaseName: ${{ env.TAG }}
+          args: ${{ matrix.args }}
