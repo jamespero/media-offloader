@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/jamespero/media-offloader/compare/v0.3.0...v0.3.1) (2026-11-08)
+
+
+### Bug Fixes
+
+* **app:** align the updater plugins' npm and Rust versions ([#38](https://github.com/jamespero/media-offloader/issues/38)) ([179cb81](https://github.com/jamespero/media-offloader/commit/179cb81f06970fd759a044e3e2fd06d45e0897fd))
+
 ## [0.3.0](https://github.com/jamespero/media-offloader/compare/v0.2.0...v0.3.0) (2026-11-08)
 
 
