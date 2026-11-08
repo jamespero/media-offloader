@@ -25,13 +25,13 @@ export function openMenu(anchor: Element, html: string, align: "left" | "right" 
   let y = r.bottom + 6;
   if (y + m.offsetHeight > innerHeight - 8) y = Math.max(8, r.top - m.offsetHeight - 6);
   x = Math.max(8, Math.min(x, innerWidth - m.offsetWidth - 8));
-  m.style.left = x + "px";
-  m.style.top = y + "px";
+  m.style.setProperty("--x", x + "px");
+  m.style.setProperty("--y", y + "px");
   return m;
 }
 
 export const mi = (icon: IconName | null, label: string, act: string, extra = "", attrs = "") =>
-  `<button class="mi" data-act="${act}" ${attrs}>${icon ? ic[icon](15) : '<span style="width:15px"></span>'}<span>${label}</span>${extra}</button>`;
+  `<button class="mi" data-act="${act}" ${attrs}>${icon ? ic[icon](15) : '<span class="mi-icon"></span>'}<span>${label}</span>${extra}</button>`;
 
 const mod = navigator.userAgent.includes("Mac") ? "⌘" : "Ctrl+";
 
@@ -74,7 +74,7 @@ export function srcMenu(a: Element) {
 export function destMenu(a: Element, w: "copy" | "bak") {
   const recent = (w === "copy" ? S.settings.recentCopy : S.settings.recentBak).slice(0, 5);
   const items = recent.map((r) =>
-    mi("folder", `<span style="font-family:var(--font-mono);font-size:12px">${esc(r)}</span>`, "setdest", "", `data-w="${w}" data-v="${esc(r)}"`),
+    mi("folder", `<span class="recent-path">${esc(r)}</span>`, "setdest", "", `data-w="${w}" data-v="${esc(r)}"`),
   );
   openMenu(
     a,
@@ -99,7 +99,7 @@ export function chipMenu(a: Element, i: number, onEdit: () => void) {
       `<div class="mh">${tk.t === "now" ? "Now: current date/time" : "Shot: capture date/time"}</div>` +
       DATE_FMTS.map(
         (f) =>
-          `<button class="mi" data-act="fmt" data-i="${i}" data-f="${f}"><span style="width:15px">${(tk.fmt ?? "YY-MM-DD") === f ? ic.check(14) : ""}</span><span>${f}</span><span class="sm">${esc(fmtDate(sample, f))}</span></button>`,
+          `<button class="mi" data-act="fmt" data-i="${i}" data-f="${f}"><span class="mi-icon">${(tk.fmt ?? "YY-MM-DD") === f ? ic.check(14) : ""}</span><span>${f}</span><span class="sm">${esc(fmtDate(sample, f))}</span></button>`,
       ).join("");
   } else if (tk.t === "day") {
     const sample = ctx.shotDate ?? ctx.now;
@@ -109,10 +109,10 @@ export function chipMenu(a: Element, i: number, onEdit: () => void) {
       `<div class="sep"></div><div class="mh">Format</div>` +
       DAY_FMTS.map(
         (f) =>
-          `<button class="mi" data-act="fmt" data-i="${i}" data-f="${f}"><span style="width:15px">${(tk.fmt ?? "Day01") === f ? ic.check(14) : ""}</span><span>${f}</span><span class="sm">${esc(fmtDay(S.settings.shootDay, f, sample))}</span></button>`,
+          `<button class="mi" data-act="fmt" data-i="${i}" data-f="${f}"><span class="mi-icon">${(tk.fmt ?? "Day01") === f ? ic.check(14) : ""}</span><span>${f}</span><span class="sm">${esc(fmtDay(S.settings.shootDay, f, sample))}</span></button>`,
       ).join("");
   } else if (tk.t === "text" || tk.t === "project") {
-    h = `<div class="mh">${tk.t === "text" ? "Custom text" : "Project name"}</div><div style="padding:4px 6px 6px"><input class="tin" id="txtIn" value="${esc(tk.v ?? "")}" spellcheck="false"></div>`;
+    h = `<div class="mh">${tk.t === "text" ? "Custom text" : "Project name"}</div><div class="mi-field"><input class="tin" id="txtIn" value="${esc(tk.v ?? "")}" spellcheck="false"></div>`;
   } else if (tk.t === "reel") {
     h =
       `<div class="mh">Reel letter</div>` +
@@ -122,7 +122,7 @@ export function chipMenu(a: Element, i: number, onEdit: () => void) {
       `<div class="sep"></div>` +
       numberRow(`Next ${tk.v || "A"} roll`, ctx.reelNo(tk.v || "A"), "Counts up after each completed offload. Change it to match the card's label.");
   } else {
-    h = `<div class="mh">${tokenInfo(tk.t).label}</div><div class="mnote">Resolves to <span style="font-family:var(--font-mono);color:var(--color-text-secondary)">${esc(tokenText(tk, ctx))}</span></div>`;
+    h = `<div class="mh">${tokenInfo(tk.t).label}</div><div class="mnote">Resolves to <span class="mono-value">${esc(tokenText(tk, ctx))}</span></div>`;
   }
   const n = S.settings.tokens.length;
   h += `<div class="sep"></div>${i > 0 ? mi("chevL", "Move Left", "mvl", "", `data-i="${i}"`) : ""}${i < n - 1 ? mi("chevR", "Move Right", "mvr", "", `data-i="${i}"`) : ""}${mi("trash", "Remove", "rmtok", "", `data-i="${i}"`)}`;
@@ -156,7 +156,7 @@ export function chipMenu(a: Element, i: number, onEdit: () => void) {
 
 /** A labelled number field for the chip menus (shoot day, next roll). */
 function numberRow(label: string, value: number, note: string) {
-  return `<div class="row" style="padding:4px 10px 6px;gap:8px;justify-content:space-between"><span style="font-size:12px;color:var(--color-text-secondary)">${esc(label)}</span><input class="tin" id="numIn" type="number" min="1" max="999" value="${value}" style="width:76px"></div><div class="mnote">${esc(note)}</div>`;
+  return `<div class="row num-row"><span class="label">${esc(label)}</span><input class="tin" id="numIn" type="number" min="1" max="999" value="${value}"></div><div class="mnote">${esc(note)}</div>`;
 }
 
 /* ---------------------------------------------------------------- overlays */
@@ -220,7 +220,7 @@ export async function about() {
   overlay(`<div class="dialog"><h3>Media Offloader</h3>
     <p>Version ${esc(version)} · open source under MIT or Apache-2.0</p>
     <p>Copies camera cards with checksum verification (xxHash64, optional MD5), re-reading every copy from disk, and never overwrites anything.</p>
-    <p style="color:var(--color-text-tertiary)">Fonts: Outfit, Inter and JetBrains Mono, under the SIL Open Font License.</p>
+    <p class="note">Fonts: Outfit, Inter and JetBrains Mono, under the SIL Open Font License.</p>
     <div class="acts"><button class="btn" data-act="openrepo">View on GitHub</button><button class="btn" data-act="closeov">Close</button></div></div>`);
 }
 

@@ -56,8 +56,8 @@ export function savePresetDialog() {
   const suggestion = activePreset()?.name ?? (S.src ? `${S.src.label}` : "");
   overlay(`<div class="dialog"><h3>Save preset</h3>
     <p>Saves the subfolder pattern, so the next card from this camera is one click. The destinations aren't saved: they stay as they are, set once per project.</p>
-    <div style="margin-top:12px"><input class="tin" id="presetName" placeholder="e.g. Nikon ZR" value="${esc(suggestion)}" spellcheck="false"></div>
-    <div class="acts"><button class="btn" data-act="closeov">Cancel</button><button class="btn primary" data-act="dosavepreset" style="height:30px">Save</button></div></div>`);
+    <div class="field"><input class="tin" id="presetName" placeholder="e.g. Nikon ZR" value="${esc(suggestion)}" spellcheck="false"></div>
+    <div class="acts"><button class="btn" data-act="closeov">Cancel</button><button class="btn primary compact" data-act="dosavepreset">Save</button></div></div>`);
   const input = document.getElementById("presetName") as HTMLInputElement;
   input.focus();
   input.select();
@@ -102,6 +102,6 @@ export function namingPane(set: (b: string, sub: string, ctl: string) => string)
     ${set(
       "Import # counter",
       "The next import number. Counts up after each completed offload.",
-      `<div class="row" style="gap:4px"><button class="btn sm" data-act="importdec" aria-label="Lower">−</button><span class="meta mono" style="color:var(--color-text);min-width:34px;text-align:center">${n}</span><button class="btn sm" data-act="importinc" aria-label="Raise">+</button></div>`,
+      `<div class="row tight"><button class="btn sm" data-act="importdec" aria-label="Lower">−</button><span class="meta mono stepper-value">${n}</span><button class="btn sm" data-act="importinc" aria-label="Raise">+</button></div>`,
     )}`;
 }

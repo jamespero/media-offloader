@@ -829,7 +829,7 @@ document.addEventListener("mousemove", (e) => {
   const t = (e.target as Element).closest<HTMLElement>(".thumb");
   const f = t ? shownFiles()[+t.dataset.i!] : undefined;
   if (!f) {
-    tip.style.display = "none";
+    tip.classList.remove("on");
     return;
   }
   const st = {
@@ -840,16 +840,16 @@ document.addEventListener("mousemove", (e) => {
     backed: "Copied & backed up · verified",
     failed: f.failure ?? "Not verified",
   }[f.state];
-  const color = f.state === "failed" ? "var(--color-status-problem)" : /backed|copied/.test(f.state) ? "var(--color-status-done)" : "var(--color-text-secondary)";
+  const stateClass = f.state === "failed" ? " problem" : /backed|copied/.test(f.state) ? " done" : "";
   const when = f.modified ? new Date(f.modified) : null;
   tip.innerHTML = `<b>${esc(f.name)}</b>${fmtSize(f.size)}${when ? ` · ${when.toLocaleDateString(undefined, { month: "short", day: "numeric" })} ${when.toTimeString().slice(0, 8)}` : ""}
-    <div class="h">${esc(f.srcRel)}</div><div style="margin-top:5px;color:${color}">${esc(st)}</div>
+    <div class="h">${esc(f.srcRel)}</div><div class="state${stateClass}">${esc(st)}</div>
     <div class="h">Double-click to show in ${fileManager}</div>`;
-  tip.style.display = "block";
+  tip.classList.add("on");
   const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8);
   const y = Math.min(e.clientY + 16, innerHeight - tip.offsetHeight - 8);
-  tip.style.left = x + "px";
-  tip.style.top = y + "px";
+  tip.style.setProperty("--x", x + "px");
+  tip.style.setProperty("--y", y + "px");
 });
 
 /* Closing the window mid-offload asks first, then stops cleanly. */

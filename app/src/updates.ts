@@ -60,7 +60,7 @@ function maybePrompt() {
 function autoInstall(u: Update) {
   const o = overlay(`<div class="dialog"><h3>Updating</h3>
     <p>Installing Media Offloader ${esc(u.version)}. The app restarts in a moment.</p>
-    <p id="updMsg" style="color:var(--color-text-tertiary)">Automatic updates can be turned off in Settings → General.</p>
+    <p id="updMsg" class="note">Automatic updates can be turned off in Settings → General.</p>
     <div class="acts"><button class="btn" id="updLater">Not now</button><button class="btn primary" id="updGo" disabled>Installing…</button></div></div>`);
   whenOverlayCloses(() => {
     declined = u.version;
@@ -108,7 +108,7 @@ async function install(u: Update, o: HTMLElement) {
     await relaunch();
   } catch (err) {
     msg.textContent = `The update didn't install (${err}). Try again, or download it from the releases page.`;
-    msg.style.color = "var(--color-status-problem)";
+    msg.className = "problem-text";
     buttons.forEach((b) => (b.disabled = false));
     go.textContent = "Try again";
   }

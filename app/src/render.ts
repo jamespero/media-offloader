@@ -96,8 +96,8 @@ const canEject = () => !!S.src && S.src.kind !== "folder" && !S.ejected && !card
 function volBtn() {
   const s = S.src!;
   const pick = running() ? "" : `data-act="srcmenu"`;
-  const ej = canEject() ? `<button class="iconbtn" style="width:24px;height:24px" title="Eject" data-act="eject">${ic.eject(14)}</button>` : "";
-  return `<div class="row" style="gap:2px"><button class="vol" ${pick} title="${esc(s.path)}"><span>${esc(s.label)}</span> ${running() ? "" : ic.chev()}</button>${ej}</div>
+  const ej = canEject() ? `<button class="iconbtn sm" title="Eject" data-act="eject">${ic.eject(14)}</button>` : "";
+  return `<div class="row tighter"><button class="vol" ${pick} title="${esc(s.path)}"><span>${esc(s.label)}</span> ${running() ? "" : ic.chev()}</button>${ej}</div>
     <div class="meta">${esc(s.media)}</div>`;
 }
 
@@ -128,10 +128,10 @@ export function renderSrc() {
         ? "Picks up where it stopped. Files already verified aren't copied again."
         : "Media files have not been copied from this source.";
     h = `${srcIcon()}<h2>source</h2>${volBtn()}<div class="sub">${sub}</div>
-      <button class="btn primary" data-act="start" style="margin-top:4px" ${can ? "" : "disabled"} title="${esc(why)}">${label}</button>`;
+      <button class="btn primary start" data-act="start" ${can ? "" : "disabled"} title="${esc(why)}">${label}</button>`;
   } else if (ph === "copying" || (ph === "backing" && S.runFanOut)) {
     h = `${srcIcon()}<h2>source</h2>${volBtn()}
-      <div class="row" style="margin-top:4px"><span class="pulse"></span><span class="sub" style="color:var(--color-text)">Copying from this source</span></div>
+      <div class="row in-progress"><span class="pulse"></span><span class="sub strong">Copying from this source</span></div>
       <div class="sub">Keep it connected until the copy is verified.</div>`;
   } else if (ph === "backing") {
     h = `${srcIcon()}<h2>source</h2>${volBtn()}<span class="safe">${ic.check(13)} Copy verified</span>
@@ -230,15 +230,15 @@ export function renderCopy() {
       ${tokensRow()}${previewLine("copy")}`;
   } else if (st === "running") {
     el.classList.add("running");
-    extra = `<div class="fill" style="width:${S.copyP}%"></div><span class="tagline">${S.runFanOut ? "Fan-out" : "Copy"}</span>
+    extra = `<div class="fill" style="--p:${S.copyP}%"></div><span class="tagline">${S.runFanOut ? "Fan-out" : "Copy"}</span>
       <button class="corner" data-act="cancel" title="Stop">${ic.x()}</button>`;
     h = liveBlock("copying to", root, S.copyP, S.cur, rateText());
   } else if (st === "error") {
     el.classList.add("error");
     const n = S.failCopy;
     const big = n > 0 ? `${n} file${n === 1 ? "" : "s"}<small>failed verification</small>` : `stopped<small>${esc(S.abortReason ?? "")}</small>`;
-    h = `<h2>copy incomplete</h2>${pathLine(root)}<div class="pct" style="font-size:44px">${big}</div>
-      <div class="row" style="margin-top:8px"><button class="btn sm" data-act="log">${ic.file(13)} Show log</button></div>`;
+    h = `<h2>copy incomplete</h2>${pathLine(root)}<div class="pct result">${big}</div>
+      <div class="row result-actions"><button class="btn sm" data-act="log">${ic.file(13)} Show log</button></div>`;
   } else {
     el.classList.add("done");
     h = `<h2>copied to</h2>${pathLine(root)}<div class="pct">100%<small>complete</small></div>
@@ -268,25 +268,25 @@ export function renderBak() {
     h = `<h2>backup</h2><div class="sub">Media files will also be copied to:</div>
       <button class="btn sm" data-act="dest" data-w="bak">${ic.folder(14)} Choose…</button>
       ${pathLine(dest + (dest.endsWith(sep) ? "" : sep))}
-      <div class="lbl">Subfolders</div><div class="chips"><span class="chip" style="cursor:default">${ic.layers(13)} Same as copy</span></div>
+      <div class="lbl">Subfolders</div><div class="chips"><span class="chip static">${ic.layers(13)} Same as copy</span></div>
       ${previewLine("bak")}`;
   } else if (st === "queued") {
     h = `<h2>backup</h2>${pathLine(root)}<span class="qpill"><i></i>Queued</span><div class="sub">Starts as soon as the copy is verified.</div>`;
   } else if (st === "running") {
     el.classList.add("running");
-    extra = `<div class="fill" style="width:${S.bakP}%"></div><span class="tagline">Backup</span>
+    extra = `<div class="fill" style="--p:${S.bakP}%"></div><span class="tagline">Backup</span>
       <button class="corner" data-act="cancel" title="Stop">${ic.x()}</button>`;
     const note = S.runFanOut ? "Reading the card once, writing every drive" : "Reading from the verified copy";
     h = liveBlock("backing up to", root, S.bakP, S.runFanOut ? S.cur : S.curB, note);
   } else if (st === "hold") {
-    h = `<h2>backup</h2>${pathLine(root)}<span class="qpill"><i style="background:var(--color-status-problem)"></i>On hold</span>
+    h = `<h2>backup</h2>${pathLine(root)}<span class="qpill"><i class="problem"></i>On hold</span>
       <div class="sub">Resolve the copy errors first.</div>`;
   } else if (st === "error") {
     el.classList.add("error");
     const n = S.failBak;
     const big = n > 0 ? `${n} file${n === 1 ? "" : "s"}<small>failed verification</small>` : `stopped<small>${esc(S.abortReason ?? "")}</small>`;
-    h = `<h2>backup incomplete</h2>${pathLine(root)}<div class="pct" style="font-size:44px">${big}</div>
-      <div class="row" style="margin-top:8px"><button class="btn sm" data-act="log">${ic.file(13)} Show log</button></div>`;
+    h = `<h2>backup incomplete</h2>${pathLine(root)}<div class="pct result">${big}</div>
+      <div class="row result-actions"><button class="btn sm" data-act="log">${ic.file(13)} Show log</button></div>`;
   } else {
     el.classList.add("done");
     h = `<h2>backed up to</h2>${pathLine(root)}<div class="pct">100%<small>complete</small></div>
@@ -303,7 +303,7 @@ export function updateLive() {
     const fill = el.querySelector<HTMLElement>(".fill");
     const n = el.querySelector(".pct .n");
     if (!fill || !n) return false;
-    fill.style.width = pct + "%";
+    fill.style.setProperty("--p", pct + "%");
     n.textContent = Math.floor(pct) + "%";
     el.querySelector(".status")!.innerHTML = statusHtml(cur);
     if (rate !== null) el.querySelector(".rate")!.textContent = rate;
@@ -326,10 +326,10 @@ export function renderStrip() {
   $("menuBtn").innerHTML = ic.menu();
   const kinds = $("kinds");
   kinds.innerHTML = kindsSeg();
-  kinds.style.display = kinds.innerHTML ? "" : "none";
+  kinds.hidden = !kinds.innerHTML;
   const pb = $("presetBtn");
   pb.innerHTML = presetButton();
-  pb.style.display = S.view ? "none" : "";
+  pb.hidden = !!S.view;
   // Keep the Current tab in view when there's a long history.
   const tabs = $("tabs");
   tabs.scrollLeft = tabs.scrollWidth;
@@ -410,7 +410,7 @@ export function renderGrid() {
   if (S.view) return; // a history tab is showing
   const w = $("gridwrap");
   if (!S.src) {
-    w.innerHTML = `${interruptedBanner()}<div class="empty"><div><div style="display:grid;place-items:center">${ic.cardInsert()}</div>
+    w.innerHTML = `${interruptedBanner()}<div class="empty"><div><div class="empty-art">${ic.cardInsert()}</div>
       <h3>${S.scanning ? "Reading…" : "Waiting for media"}</h3><div>Insert a card or drive, or choose a folder to begin.</div></div></div>`;
     return;
   }
@@ -455,7 +455,7 @@ export function renderGrid() {
     );
   }
   if (!S.files.length) {
-    w.innerHTML = banners + `<div class="empty" style="position:static;padding:60px 0"><div><h3>${S.scanning ? "Reading…" : "No files"}</h3><div>${S.scanning ? "" : "This source has no files to copy."}</div></div></div>`;
+    w.innerHTML = banners + `<div class="empty inline"><div><h3>${S.scanning ? "Reading…" : "No files"}</h3><div>${S.scanning ? "" : "This source has no files to copy."}</div></div></div>`;
     return;
   }
   w.innerHTML = banners + `<div class="grid">${gridTiles(S.files)}</div>`;

@@ -138,16 +138,16 @@ function destPanel(el: HTMLElement, it: HistoryItem, d: number) {
   const stopped = !it.outcome || it.outcome.kind === "cancelled";
   if (stopped) {
     el.innerHTML = `<div class="content"><h2>${backup ? "backup" : "copy"}</h2>${pathLine(root)}
-      <div class="pct" style="font-size:44px">${pct}%<small>${done} of ${it.files} files verified</small></div>
-      <span class="qpill"><i ${it.outcome ? "" : 'style="background:var(--color-status-problem)"'}></i>${it.outcome ? "Stopped" : "Didn't finish"}</span></div>`;
+      <div class="pct result">${pct}%<small>${done} of ${it.files} files verified</small></div>
+      <span class="qpill"><i ${it.outcome ? "" : 'class="problem"'}></i>${it.outcome ? "Stopped" : "Didn't finish"}</span></div>`;
     return;
   }
   el.classList.add("error");
   const failed = it.failed[d] ?? 0;
   const big = failed > 0 ? `${failed} file${failed === 1 ? "" : "s"}<small>failed verification</small>` : `${pct}%<small>${done} of ${it.files} files verified</small>`;
   el.innerHTML = `<div class="content"><h2>${backup ? "backup incomplete" : "copy incomplete"}</h2>${pathLine(root)}
-    <div class="pct" style="font-size:44px">${big}</div>
-    <div class="row" style="margin-top:8px"><button class="btn sm" data-act="histlog">${ic.file(13)} Show log</button></div></div>`;
+    <div class="pct result">${big}</div>
+    <div class="row result-actions"><button class="btn sm" data-act="histlog">${ic.file(13)} Show log</button></div></div>`;
 }
 
 /** Renders the read-only view of the history tab being shown. */
@@ -163,12 +163,12 @@ export function renderHistory() {
   let action = "";
   if (it.resumable) {
     action = it.sourcePresent
-      ? `<button class="btn primary" data-act="resume" data-path="${esc(it.path)}" style="margin-top:4px" ${running() ? "disabled" : ""}>${resumeLabel(it)}</button>`
+      ? `<button class="btn primary start" data-act="resume" data-path="${esc(it.path)}" ${running() ? "disabled" : ""}>${resumeLabel(it)}</button>`
       : `<div class="sub">Connect ${esc(it.label)} to ${resumeLabel(it).toLowerCase()}.</div>`;
   }
   $("pSrc").className = "panel src";
   $("pSrc").innerHTML = `<div class="content"><div class="srcicon">${icon}</div><h2>source</h2>
-    <div class="vol" style="cursor:default"><span>${esc(it.label)}</span></div><div class="meta">${day(it.started)} · ${clock(it.started)}</div>
+    <div class="vol static"><span>${esc(it.label)}</span></div><div class="meta">${day(it.started)} · ${clock(it.started)}</div>
     ${statusChip(it)}${action}</div>`;
   destPanel($("pCopy"), it, 0);
   destPanel($("pBak"), it, 1);
