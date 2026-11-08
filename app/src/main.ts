@@ -34,6 +34,7 @@ import { markEarlierRun, openHistory, refreshHistory } from "./history";
 import { chime, notify } from "./notify";
 import { applyPreset, deletePreset, presetMenu, saveCurrentAs, savePresetDialog } from "./presets";
 import { initThumbs, requestThumbs, stopThumbs } from "./thumbs";
+import { initUpdates } from "./updates";
 import { historyApi, type HistoryDetail } from "./api";
 
 /* ---------------------------------------------------------------- source */
@@ -872,6 +873,7 @@ api.onEngine(onEngine);
 api.onReport(onReport);
 initThumbs();
 initReverify();
+initUpdates();
 render();
 refreshHistory().then(render);
 pollVolumes();

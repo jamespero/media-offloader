@@ -347,11 +347,27 @@ fn open_repo(app: AppHandle) -> Result<(), String> {
     app.opener().open_url(env!("CARGO_PKG_REPOSITORY"), None::<&str>).map_err(|e| e.to_string())
 }
 
+/// Opens a release's notes on GitHub. Only version strings are accepted, so the UI
+/// can't use this to open arbitrary links.
+#[tauri::command]
+fn open_release(app: AppHandle, version: String) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
+    let valid =
+        !version.is_empty() && version.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '+'));
+    if !valid {
+        return Err(format!("not a version: {version}"));
+    }
+    let url = format!("{}/releases/tag/v{version}", env!("CARGO_PKG_REPOSITORY"));
+    app.opener().open_url(url, None::<&str>).map_err(|e| e.to_string())
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .manage(Engine::default())
         .setup(|app| {
             let cache = app.path().app_cache_dir()?.join("thumbs");
@@ -377,7 +393,8 @@ fn main() {
             thumbs_request,
             reveal,
             open_folder,
-            open_repo
+            open_repo,
+            open_release
         ])
         .run(tauri::generate_context!())
         .expect("error while running Media Offloader");

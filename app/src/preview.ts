@@ -5,6 +5,7 @@
 //   http://localhost:1420/            normal run
 //   http://localhost:1420/?fail       two files fail verification
 //   http://localhost:1420/?slow       slower simulation
+//   http://localhost:1420/?update     an update is available (offered about 7 s after load)
 
 import { emit } from "@tauri-apps/api/event";
 import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
@@ -229,6 +230,22 @@ mockIPC(
         return null;
       case "plugin:app|version":
         return version;
+      case "plugin:updater|check":
+        return params.has("update")
+          ? { rid: 1, currentVersion: version, version: "9.9.9", date: new Date().toISOString(), body: "", rawJson: {} }
+          : null;
+      case "plugin:updater|download":
+        await sleep(2000);
+        return null;
+      case "plugin:updater|install":
+        await sleep(1500);
+        return null;
+      case "plugin:process|restart":
+        location.reload();
+        return null;
+      case "open_release":
+        window.open(`https://github.com/jamespero/media-offloader/releases/tag/v${String(p.version)}`, "_blank");
+        return null;
       case "plugin:dialog|open": {
         const title = String((p.options as { title?: string } | undefined)?.title ?? "");
         if (title.startsWith("Back up")) return isWin ? "F:\\Jobs\\2026-Fall" : "/Volumes/SHUTTLE_B/Jobs/2026-Fall";
