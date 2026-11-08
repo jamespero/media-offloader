@@ -106,6 +106,9 @@ function draw() {
       <button class="btn" data-act="closeov">Close</button></div>`;
 }
 
+/** True while a re-verify check is reading files. */
+export const reverifyRunning = () => R.running;
+
 export function initReverify() {
   reverifyApi.onEvent((e) => {
     switch (e.type) {

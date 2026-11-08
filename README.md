@@ -24,10 +24,14 @@ Early. The engine, CLI and app work on Windows; on macOS the tests pass and the 
 
 ## Download
 
-Each [release](https://github.com/jamespero/media-offloader/releases) has installers for Windows (`.msi` and `-setup.exe`) and macOS (a universal `.dmg` for Apple silicon and Intel). They aren't signed yet:
+Each [release](https://github.com/jamespero/media-offloader/releases) has installers for Windows (`-setup.exe`) and macOS (a universal `.dmg` for Apple silicon and Intel). They aren't signed yet:
 
 - **Windows:** SmartScreen may warn that the app is from an unknown publisher. Choose **More info**, then **Run anyway**.
 - **macOS:** Gatekeeper blocks the first launch. Open **System Settings → Privacy & Security** and choose **Open Anyway** next to Media Offloader.
+
+After that, the app updates itself. It checks the latest release when it starts and every few hours, downloads a new version in the background, and asks before installing it. It never asks while an offload or re-verify is running, because installing restarts the app. Settings and presets are kept. Updates are signed, and the app refuses any that aren't.
+
+v0.2.0 doesn't have the updater yet, so install the next release by hand once. If you installed v0.2.0 from the `.msi`, uninstall it (Settings → Apps) before running the new `-setup.exe`, so you don't end up with two copies.
 
 Installers in releases after v0.2.0 come with a [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations): a signed record of the commit and workflow run that built it. To check that a download came from this repository's release workflow, install the [GitHub CLI](https://cli.github.com) and run:
 

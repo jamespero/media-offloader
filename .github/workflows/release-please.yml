@@ -48,7 +48,6 @@ jobs:
             os: windows-latest
             args: ""
             bundles: |
-              target/release/bundle/msi/*.msi
               target/release/bundle/nsis/*-setup.exe
           - name: macOS
             os: macos-latest
@@ -84,14 +83,20 @@ jobs:
         run: npm ci
         working-directory: app
 
+      # Release builds also produce signed update packages and a latest.json for the
+      # in-app updater. That needs the updater's private key, so it's switched on here
+      # rather than in tauri.conf.json, and local builds work without the key.
       - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: app
           tagName: ${{ env.TAG }}
           releaseName: ${{ env.TAG }}
-          args: ${{ matrix.args }}
+          includeUpdaterJson: true
+          args: '--config {"bundle":{"createUpdaterArtifacts":true}} ${{ matrix.args }}'
 
       # Publishes a signed record that these installers were built by this workflow from
       # the tagged commit. Check a download with: gh attestation verify <file> --repo <owner/repo>

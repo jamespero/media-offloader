@@ -120,6 +120,7 @@ export const api = {
   logDir: () => invoke<string | null>("log_dir"),
   reveal: (path: string) => invoke<void>("reveal", { path }),
   openRepo: () => invoke<void>("open_repo"),
+  openRelease: (version: string) => invoke<void>("open_release", { version }),
   openFolder: (path: string) => invoke<void>("open_folder", { path }),
   onEngine: (f: (e: EngineEvent) => void): Promise<UnlistenFn> => listen<EngineEvent>("engine", (e) => f(e.payload)),
   onReport: (f: (r: JobReport) => void): Promise<UnlistenFn> => listen<JobReport>("engine-report", (e) => f(e.payload)),
