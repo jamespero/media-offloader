@@ -213,10 +213,10 @@ pub(crate) fn pump(
             total += n as u64;
             let chunk = Arc::new(Chunk { buf: Some(buf), pool: pool.clone() });
             for slot in senders.iter_mut() {
-                if let Some(tx) = slot {
-                    if tx.send(Arc::clone(&chunk)).is_err() {
-                        *slot = None;
-                    }
+                if let Some(tx) = slot
+                    && tx.send(Arc::clone(&chunk)).is_err()
+                {
+                    *slot = None;
                 }
             }
             drop(chunk);
@@ -249,10 +249,10 @@ fn pump_inline(
         };
         total += n as u64;
         for (sink, err) in sinks.iter_mut().zip(sink_errors.iter_mut()) {
-            if err.is_none() {
-                if let Err(e) = sink.consume(buf.data()) {
-                    *err = Some(e);
-                }
+            if err.is_none()
+                && let Err(e) = sink.consume(buf.data())
+            {
+                *err = Some(e);
             }
         }
         progress(total);

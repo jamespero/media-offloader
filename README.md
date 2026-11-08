@@ -61,7 +61,7 @@ Then install Node 20+ (e.g. from nodejs.org or `brew install node`) and follow t
 
 ## Build and test
 
-Needs Rust 1.85+ (stable).
+Needs Rust 1.90+ (stable).
 
 ```bash
 cargo test --workspace

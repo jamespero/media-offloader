@@ -22,10 +22,12 @@ fn with_journal(spec: JobSpec, journal: &Path) -> JobSpec {
 fn run_and_stop(job: &Job, pass: Pass, stop_at: usize) -> Outcome {
     let cancel = AtomicBool::new(false);
     let report = job.run(&cancel, &|e| {
-        if let Event::Progress { pass: p, file, stage: Stage::Copy, file_bytes, .. } = e {
-            if *p == pass && *file == stop_at && *file_bytes >= CHUNK as u64 {
-                cancel.store(true, Ordering::SeqCst);
-            }
+        if let Event::Progress { pass: p, file, stage: Stage::Copy, file_bytes, .. } = e
+            && *p == pass
+            && *file == stop_at
+            && *file_bytes >= CHUNK as u64
+        {
+            cancel.store(true, Ordering::SeqCst);
         }
     });
     report.outcome
