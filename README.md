@@ -20,7 +20,14 @@ It is built for shooters, camera assistants and DITs who want a single screen wi
 
 ## Status
 
-Early, and not yet packaged. The engine, CLI and app work on Windows; on macOS the tests pass and the app launches, but eject, keep-awake, notifications and QuickLook thumbnails haven't been tried with a real card yet. Still to come: a Camera Model naming token, real volume watching (sources are polled every 2 s today) and signed installers.
+Early. The engine, CLI and app work on Windows; on macOS the tests pass and the app launches, but eject, keep-awake, notifications and QuickLook thumbnails haven't been tried with a real card yet. Still to come: a Camera Model naming token, real volume watching (sources are polled every 2 s today) and signed installers.
+
+## Download
+
+Each [release](https://github.com/jamespero/media-offloader/releases) has installers for Windows (`.msi` and `-setup.exe`) and macOS (a universal `.dmg` for Apple silicon and Intel). They aren't signed yet:
+
+- **Windows:** SmartScreen may warn that the app is from an unknown publisher. Choose **More info**, then **Run anyway**.
+- **macOS:** Gatekeeper blocks the first launch. Open **System Settings → Privacy & Security** and choose **Open Anyway** next to Media Offloader.
 
 ## Layout
 
