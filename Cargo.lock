@@ -2223,7 +2223,7 @@ dependencies = [
 
 [[package]]
 name = "media-offloader-app"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "jpeg-encoder",
  "offloader-core",
@@ -2622,7 +2622,7 @@ dependencies = [
 
 [[package]]
 name = "offloader-cli"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "clap",
@@ -2633,7 +2633,7 @@ dependencies = [
 
 [[package]]
 name = "offloader-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "libc",

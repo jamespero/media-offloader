@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.0](https://github.com/jamespero/media-offloader/compare/v0.2.0...v0.3.0) (2026-11-08)
+
+
+### Features
+
+* **app:** check for updates and install them from the app ([#22](https://github.com/jamespero/media-offloader/issues/22)) ([8e0d579](https://github.com/jamespero/media-offloader/commit/8e0d5793621d344909907002cce912b3ab48b652))
+* **app:** offer to install updates automatically ([#23](https://github.com/jamespero/media-offloader/issues/23)) ([e3f3300](https://github.com/jamespero/media-offloader/commit/e3f3300fd48742baac23f71431beeea757eb7db8))
+* **app:** show the real version and a repository link in About ([#20](https://github.com/jamespero/media-offloader/issues/20)) ([f7bdd36](https://github.com/jamespero/media-offloader/commit/f7bdd36404d4b4b410ffcaa9285f046018917649))
+
 ## [0.2.0](https://github.com/jamespero/media-offloader/compare/v0.1.0...v0.2.0) (2026-11-08)
 
 
