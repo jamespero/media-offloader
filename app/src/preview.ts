@@ -8,6 +8,7 @@
 
 import { emit } from "@tauri-apps/api/event";
 import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
+import { version } from "../package.json";
 import type { Destination, EngineEvent, HistoryDetail, HistoryItem, JobReport, OffloadArgs, Plan, PlannedFile, VolumeEntry } from "./api";
 
 const GB = 1e9;
@@ -152,7 +153,7 @@ async function simulate() {
   running = false;
 }
 
-const LOG = `Media Offloader 0.1.0 — transfer log (browser preview)
+const LOG = `Media Offloader ${version} — transfer log (browser preview)
 Started      2026-10-05 14:12:15 -04:00
 Source       ZR_CARD_A  (E:\\)
 Copy         D:\\Jobs\\2026-Fall\\26-10-05\\ZR_CARD_A
@@ -223,6 +224,8 @@ mockIPC(
       case "eject":
         await sleep(400);
         return null;
+      case "plugin:app|version":
+        return version;
       case "plugin:dialog|open": {
         const title = String((p.options as { title?: string } | undefined)?.title ?? "");
         if (title.startsWith("Back up")) return isWin ? "F:\\Jobs\\2026-Fall" : "/Volumes/SHUTTLE_B/Jobs/2026-Fall";

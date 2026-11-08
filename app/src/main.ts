@@ -754,7 +754,7 @@ document.addEventListener("click", async (ev) => {
       break;
     case "about":
       closeMenus();
-      about();
+      void about();
       break;
     case "reverify":
       closeMenus();
