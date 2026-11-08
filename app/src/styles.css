@@ -27,7 +27,7 @@ input { user-select: text }
 .content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-8) var(--space-9); max-width: 100%; width: 100% }
 .panel h2 { font: var(--font-weight-semibold) var(--font-size-4xl)/var(--line-height-tight) var(--font-heading); letter-spacing: var(--tracking-tight); margin: 0 0 var(--space-1); text-transform: lowercase }
 .src h2 { font-size: var(--font-size-3xl) }
-.sub { color: var(--color-text-secondary); font-size: var(--font-size-md); max-width: 340px }
+.sub { color: var(--color-text-secondary); font-size: var(--font-size-md); max-width: 360px }
 .path { font: var(--font-size-sm) var(--font-mono); color: var(--color-text-secondary); max-width: 92%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: rtl; text-align: center }
 .path bdi { direction: ltr; unicode-bidi: isolate }
 .preview { font: var(--font-size-sm) var(--font-mono); color: var(--color-text-tertiary); max-width: 92%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
