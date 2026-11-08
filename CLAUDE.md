@@ -9,7 +9,7 @@ Maintainer: James Pero. How to contribute (branches, Conventional Commits, PR ch
 - This is an original project. Don't reference, imitate the branding of, or describe it as a clone of any other product.
 
 ## Locked decisions
-- **Stack:** Tauri 2 + Rust. Copy/hash engine in a UI-agnostic Rust crate with a CLI for testing; web UI (TypeScript, plain CSS variables).
+- **Stack:** Tauri 2 + Rust. Copy/hash engine in a UI-agnostic Rust crate with a CLI for testing; web UI (Svelte 5, TypeScript, plain CSS variables).
 - **Platforms:** Windows + macOS. Unsigned builds for now.
 - **License:** MIT OR Apache-2.0. Bundled fonts are SIL OFL.
 - **Verification:** xxHash64 by default; MD5 optional (computed in the same read). Verify by re-reading the destination **with the OS cache bypassed** (`F_NOCACHE` on macOS, `FILE_FLAG_NO_BUFFERING` on Windows).

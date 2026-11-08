@@ -35,6 +35,7 @@ import { chime, notify } from "./notify";
 import { applyPreset, deletePreset, presetMenu, saveCurrentAs, savePresetDialog } from "./presets";
 import { initThumbs, requestThumbs, stopThumbs } from "./thumbs";
 import { initUpdates } from "./updates";
+import { mountFooter } from "./components/Footer/footerState.svelte.ts";
 import { historyApi, type HistoryDetail } from "./api";
 
 /* ---------------------------------------------------------------- source */
@@ -871,6 +872,7 @@ getCurrentWindow().onCloseRequested((event) => {
 
 api.onEngine(onEngine);
 api.onReport(onReport);
+mountFooter($("app"));
 initThumbs();
 initReverify();
 initUpdates();

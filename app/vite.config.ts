@@ -1,9 +1,11 @@
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { defineConfig } from "vite";
 
 // Tauri expects a fixed dev port and handles the console itself.
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
+  plugins: [svelte()],
   clearScreen: false,
   server: {
     port: 1420,

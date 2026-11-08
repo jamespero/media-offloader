@@ -43,6 +43,25 @@ For the UI:
 - Dark only. Outfit for headings (lowercase), Inter for UI text, JetBrains Mono for paths and file names, all bundled locally. No CDNs.
 - All artwork is drawn for this project. Don't add third-party logos, icons or screenshots.
 
+## UI components
+
+The UI is moving to [Svelte 5](https://svelte.dev), one component at a time. Parts not yet moved still render by hand.
+
+Each component has its own folder, with its CSS in a separate file that's scoped to it:
+
+```text
+app/src/components/Footer/
+  Footer.svelte            markup and logic; ends with <style src="./Footer.css"></style>
+  Footer.css               the component's styles
+  footerState.svelte.ts    state shared with code outside the component, if it needs any
+```
+
+Name a state module differently from its component. `Footer.svelte` and `footer.svelte.ts` collide on the case-insensitive filesystems Windows and macOS use by default.
+
+**Two TypeScript versions.** `svelte-check` doesn't support TypeScript 7 yet, so `app/package.json` installs both: `typescript7` checks `.ts` files, and `typescript` (version 6) is used only by `svelte-check`. Both install a `tsc` command, so the `typecheck` script calls version 7 by path. #43 removes this once `svelte-check` catches up, and until then Dependabot ignores major updates to `typescript`.
+
+`npm run typecheck` runs both checkers and treats warnings as errors, including accessibility warnings and unused CSS selectors. `npm run build` and `tauri build` run it first.
+
 ## Making a change
 
 1. Fork the repo (or branch, if you're a maintainer) and make your change on a branch.

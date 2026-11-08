@@ -28,6 +28,10 @@ updates:
     directory: /app
     patterns: ["*"]
     multi-ecosystem-group: app-and-engine
+    ignore:
+      # TypeScript 6 is installed only for svelte-check, which doesn't accept 7 yet (#43).
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: cargo
     directory: /

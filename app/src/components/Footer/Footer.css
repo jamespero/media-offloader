@@ -1,0 +1,5 @@
+.foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px; font-size: 11.5px; color: var(--tx3); border-top: 1px solid var(--line); white-space: nowrap; overflow: hidden }
+.title { color: var(--tx2) }
+.count { color: var(--tx2); font-variant-numeric: tabular-nums }
+.items { display: flex; gap: 12px; align-items: center }
+.items span { display: inline-flex; gap: 5px; align-items: center }
