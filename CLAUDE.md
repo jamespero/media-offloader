@@ -25,6 +25,7 @@ Maintainer: James Pero. How to contribute (branches, Conventional Commits, PR ch
 5. Preserve the card's folder structure exactly; copy every file (hidden OS junk optional, off by default).
 
 ## Design rules
+Full details and tokens: `docs/design-system.md`.
 - **Color means status; controls stay neutral.** Violet `#8E7CFF` = working, mint `#4BE3A3` = done & safe, red `#FF5C5C` = problem. Buttons, chips, toggles, menus are neutral grays; the one primary action (Start) is white.
 - Dark only. Fonts: Outfit (headings, lowercase), Inter (UI), JetBrains Mono (paths/filenames) — bundled locally (SIL OFL), no CDN.
 - All artwork (icons, app icon) is drawn for this project.

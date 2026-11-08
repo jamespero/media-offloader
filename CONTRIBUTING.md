@@ -37,7 +37,7 @@ These are not up for debate in a PR. If you think one is wrong, open an issue fi
 5. Preserve the card's folder structure exactly and copy every file (hidden OS junk is optional and off by default).
 6. Verify reads bypass the OS cache (`F_NOCACHE` on macOS, `FILE_FLAG_NO_BUFFERING` on Windows), so a match proves what is on the disk.
 
-For the UI:
+For the UI (the [design system](docs/design-system.md) has the details, including which values to use):
 
 - Color means status; controls stay neutral. Violet `#8E7CFF` is working, mint `#4BE3A3` is done and safe, red `#FF5C5C` is a problem. Buttons, chips, toggles and menus are neutral grays; the one primary action (Start) is white.
 - Dark only. Outfit for headings (lowercase), Inter for UI text, JetBrains Mono for paths and file names, all bundled locally. No CDNs.
