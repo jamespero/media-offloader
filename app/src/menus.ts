@@ -1,5 +1,6 @@
 // Menus, dialogs, the settings sheet, the log viewer and toasts.
 
+import { getVersion } from "@tauri-apps/api/app";
 import { api } from "./api";
 import { ic, type IconName } from "./icons";
 import { $, esc, fmtSize } from "./render";
@@ -214,12 +215,13 @@ export async function showLog(path: string) {
     <button class="iconbtn" data-act="closeov" aria-label="Close">${ic.x()}</button></header><pre>${lines.join("\n")}</pre></div>`);
 }
 
-export function about() {
+export async function about() {
+  const version = await getVersion().catch(() => "unknown");
   overlay(`<div class="dialog"><h3>Media Offloader</h3>
-    <p>Version 0.1.0 · open source under MIT or Apache-2.0</p>
+    <p>Version ${esc(version)} · open source under MIT or Apache-2.0</p>
     <p>Copies camera cards with checksum verification (xxHash64, optional MD5), re-reading every copy from disk, and never overwrites anything.</p>
     <p style="color:var(--tx3)">Fonts: Outfit, Inter and JetBrains Mono, under the SIL Open Font License.</p>
-    <div class="acts"><button class="btn" data-act="closeov">Close</button></div></div>`);
+    <div class="acts"><button class="btn" data-act="openrepo">View on GitHub</button><button class="btn" data-act="closeov">Close</button></div></div>`);
 }
 
 const SETTINGS_TABS: [string, string, IconName][] = [

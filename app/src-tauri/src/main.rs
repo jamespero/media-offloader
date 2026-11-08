@@ -339,6 +339,14 @@ fn open_folder(app: AppHandle, path: PathBuf) -> Result<(), String> {
     app.opener().open_path(path.to_string_lossy(), None::<&str>).map_err(|e| e.to_string())
 }
 
+/// Opens the project's repository (the `repository` field in Cargo.toml) in the browser.
+/// The URL is fixed here rather than passed in, so the UI can't open arbitrary links.
+#[tauri::command]
+fn open_repo(app: AppHandle) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
+    app.opener().open_url(env!("CARGO_PKG_REPOSITORY"), None::<&str>).map_err(|e| e.to_string())
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -368,7 +376,8 @@ fn main() {
             eject,
             thumbs_request,
             reveal,
-            open_folder
+            open_folder,
+            open_repo
         ])
         .run(tauri::generate_context!())
         .expect("error while running Media Offloader");
