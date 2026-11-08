@@ -372,19 +372,19 @@ fn walk_xml(text: &str, mut f: impl FnMut(&[String], &[(String, String)], &str))
         e.attributes()
             .flatten()
             .map(|a| {
-                let key = String::from_utf8_lossy(a.key.local_name().as_ref()).into_owned();
-                (key, unescape(&String::from_utf8_lossy(&a.value)))
+                let key = a.key.local_name().into_inner().to_string();
+                (key, unescape(&a.value))
             })
             .collect()
     };
     loop {
         match reader.read_event().map_err(|e| e.to_string())? {
             Xml::Start(e) => {
-                let name = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                let name = e.local_name().into_inner().to_string();
                 stack.push((name, attrs_of(&e), String::new()));
             }
             Xml::Empty(e) => {
-                let name = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                let name = e.local_name().into_inner().to_string();
                 let attrs = attrs_of(&e);
                 let mut names: Vec<String> = stack.iter().map(|s| s.0.clone()).collect();
                 names.push(name);
@@ -392,18 +392,17 @@ fn walk_xml(text: &str, mut f: impl FnMut(&[String], &[(String, String)], &str))
             }
             Xml::Text(t) => {
                 if let Some(top) = stack.last_mut() {
-                    top.2.push_str(&t.decode().map_err(|e| e.to_string())?);
+                    top.2.push_str(&t.xml10_content());
                 }
             }
             Xml::CData(t) => {
                 if let Some(top) = stack.last_mut() {
-                    top.2.push_str(&String::from_utf8_lossy(&t));
+                    top.2.push_str(&t);
                 }
             }
             Xml::GeneralRef(r) => {
                 if let Some(top) = stack.last_mut() {
-                    let name = r.decode().map_err(|e| e.to_string())?;
-                    top.2.push_str(&unescape(&format!("&{name};")));
+                    top.2.push_str(&unescape(&format!("&{};", &*r)));
                 }
             }
             Xml::End(_) => {
@@ -757,5 +756,88 @@ mod tests {
         assert_eq!(m["b.txt"].hashes[0].1, "900150983cd24fb0d6963f7d28e17f72");
         assert!(m.contains_key("c d.txt") && m.contains_key("a/empty.dat"));
         let _ = fs::remove_dir_all(&dir);
+    }
+}
+
+#[cfg(test)]
+mod xml_tests {
+    use super::walk_xml;
+
+    /// (element path, attributes, text)
+    type Element = (String, Vec<(String, String)>, String);
+
+    fn walk(xml: &str) -> Vec<Element> {
+        let mut out = Vec::new();
+        walk_xml(xml, |names, attrs, text| out.push((names.join("/"), attrs.to_vec(), text.to_string()))).unwrap();
+        out
+    }
+
+    fn text_of(xml: &str, element: &str) -> String {
+        walk(xml).into_iter().find(|(n, _, _)| n == element).map(|(_, _, t)| t).unwrap()
+    }
+
+    #[test]
+    fn entities_in_text_are_decoded() {
+        let xml = "<r><path>A &amp; B &lt;1&gt; &quot;x&quot; &apos;y&apos;.mov</path></r>";
+        assert_eq!(text_of(xml, "r/path"), r#"A & B <1> "x" 'y'.mov"#);
+    }
+
+    #[test]
+    fn numeric_character_references_in_text_are_decoded() {
+        assert_eq!(text_of("<r><path>caf&#233;_&#xE9;.mov</path></r>", "r/path"), "café_é.mov");
+    }
+
+    #[test]
+    fn non_ascii_text_passes_through() {
+        assert_eq!(text_of("<r><path>日本語/café 🎬.mov</path></r>", "r/path"), "日本語/café 🎬.mov");
+    }
+
+    #[test]
+    fn cdata_is_taken_literally() {
+        assert_eq!(text_of("<r><path><![CDATA[a &amp; <b>.mov]]></path></r>", "r/path"), "a &amp; <b>.mov");
+    }
+
+    #[test]
+    fn surrounding_whitespace_is_trimmed_but_inner_spaces_are_kept() {
+        assert_eq!(
+            text_of(
+                "<r><path>
+   A  B.mov 
+ </path></r>",
+                "r/path"
+            ),
+            "A  B.mov"
+        );
+    }
+
+    #[test]
+    fn attributes_are_read_and_their_entities_decoded() {
+        let found = walk(r#"<r><path size="12" note="a &amp; b &#233;">x</path></r>"#);
+        let (_, attrs, _) = found.iter().find(|(n, _, _)| n == "r/path").unwrap();
+        assert_eq!(attrs, &vec![("size".to_string(), "12".to_string()), ("note".to_string(), "a & b é".to_string())]);
+    }
+
+    #[test]
+    fn namespace_prefixes_are_ignored() {
+        let found = walk(r#"<m:r xmlns:m="urn:x"><m:path m:size="3">x</m:path></m:r>"#);
+        let (_, attrs, text) = found.iter().find(|(n, _, _)| n == "r/path").unwrap();
+        assert_eq!(text, "x");
+        assert!(attrs.iter().any(|(k, v)| k == "size" && v == "3"));
+    }
+
+    #[test]
+    fn empty_elements_are_reported_with_their_attributes() {
+        let found = walk(r#"<r><hash algo="xx"/></r>"#);
+        assert_eq!(found[0], ("r/hash".to_string(), vec![("algo".to_string(), "xx".to_string())], String::new()));
+    }
+
+    #[test]
+    fn mismatched_tags_are_an_error() {
+        assert!(walk_xml("<r><a></b></r>", |_, _, _| {}).is_err());
+    }
+
+    #[test]
+    fn line_endings_inside_text_are_normalized() {
+        assert_eq!(text_of("<r><path>a\r\nb</path></r>", "r/path"), "a\nb");
     }
 }

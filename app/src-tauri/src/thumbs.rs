@@ -239,6 +239,15 @@ fn encode_jpeg(w: u16, h: u16, rgb: &[u8]) -> Option<(&'static str, Vec<u8>)> {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(windows)]
+    #[test]
+    fn encodes_rgb_as_a_jpeg_of_the_same_size() {
+        let (mime, bytes) = super::encode_jpeg(16, 8, &[128; 16 * 8 * 3]).unwrap();
+        assert_eq!(mime, "image/jpeg");
+        assert_eq!(bytes[..2], [0xFF, 0xD8], "start of image");
+        assert_eq!(bytes[bytes.len() - 2..], [0xFF, 0xD9], "end of image");
+    }
+
     #[test]
     fn base64_matches_known_vectors() {
         let enc = |s: &str| super::data_url("x", s.as_bytes()).trim_start_matches("data:x;base64,").to_string();
