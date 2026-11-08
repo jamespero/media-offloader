@@ -78,6 +78,8 @@ Every pull request is checked when it's opened and again on every push:
 
 All checks must pass, and the branch must be up to date with `main`, before a pull request can be merged. Pull requests are squash-merged, so the title becomes the commit on `main`.
 
+Workflows pin every action to a full commit SHA, with the version in a comment (`uses: owner/action@<sha> # v1.2.3`). Pin any action you add the same way; Dependabot keeps the pins current.
+
 ## Conventional Commits
 
 Pull request titles (and ideally your commits) follow [Conventional Commits](https://www.conventionalcommits.org):

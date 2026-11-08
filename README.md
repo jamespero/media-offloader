@@ -29,6 +29,12 @@ Each [release](https://github.com/jamespero/media-offloader/releases) has instal
 - **Windows:** SmartScreen may warn that the app is from an unknown publisher. Choose **More info**, then **Run anyway**.
 - **macOS:** Gatekeeper blocks the first launch. Open **System Settings → Privacy & Security** and choose **Open Anyway** next to Media Offloader.
 
+Installers in releases after v0.2.0 come with a [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations): a signed record of the commit and workflow run that built it. To check that a download came from this repository's release workflow, install the [GitHub CLI](https://cli.github.com) and run:
+
+```bash
+gh attestation verify "Media.Offloader_<version>_universal.dmg" --repo jamespero/media-offloader
+```
+
 ## Layout
 
 | Path | What |
