@@ -26,7 +26,7 @@ jobs:
       # Pull requests opened with the default GITHUB_TOKEN don't trigger other workflows,
       # so the release PR's required checks would never run. RELEASE_PLEASE_TOKEN is a
       # fine-grained token (contents + pull requests: read/write) that avoids that.
-      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
@@ -83,19 +83,26 @@ jobs:
         run: npm ci
         working-directory: app
 
+      # tauri-action rewrites the name and body of a release it finds by tag, which would
+      # replace release-please's changelog. Given a release ID, it only uploads to it.
+      - name: Find the release
+        id: release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "id=$(gh api "repos/${{ github.repository }}/releases/tags/$TAG" --jq .id)" >> "$GITHUB_OUTPUT"
+
       # Release builds also produce signed update packages and a latest.json for the
       # in-app updater. That needs the updater's private key, so it's switched on here
       # rather than in tauri.conf.json, and local builds work without the key.
-      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: app
-          tagName: ${{ env.TAG }}
-          releaseName: ${{ env.TAG }}
-          includeUpdaterJson: true
+          releaseId: ${{ steps.release.outputs.id }}
           args: '--config {"bundle":{"createUpdaterArtifacts":true}} ${{ matrix.args }}'
 
       # Publishes a signed record that these installers were built by this workflow from
