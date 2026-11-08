@@ -224,6 +224,9 @@ mockIPC(
       case "eject":
         await sleep(400);
         return null;
+      case "open_repo":
+        window.open("https://github.com/jamespero/media-offloader", "_blank");
+        return null;
       case "plugin:app|version":
         return version;
       case "plugin:dialog|open": {

@@ -628,6 +628,9 @@ document.addEventListener("click", async (ev) => {
       closeMenus();
       if (S.dests?.[0]) api.reveal(S.dests[0].root).catch(() => {});
       break;
+    case "openrepo":
+      api.openRepo().catch(() => {});
+      break;
     case "revealpath":
       api.reveal(b.dataset.path!).catch(() => {});
       break;
