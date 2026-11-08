@@ -106,7 +106,7 @@ Media Offloader uses [Semantic Versioning](https://semver.org). The version live
 
 - **Don't bump versions in your pull request.** Maintainers decide when to release and what the version is.
 - Releases are prepared automatically from the commit history: a release pull request collects the changes since the last release, bumps every version and updates `CHANGELOG.md`. Merging it tags the release, and the Release workflow then builds the Windows and macOS installers and attaches them to it. If a build fails, re-run the workflow by hand with the tag.
-- While the version is below 1.0, `feat` and breaking changes bump the minor version and `fix` bumps the patch version. A maintainer can override the next version with a `Release-As: x.y.z` line in a commit message.
+- While the version is below 1.0, `feat` and breaking changes bump the minor version and `fix` and `build` bump the patch version. `build` commits, such as dependency updates, appear in the changelog under Dependencies, so they open a release pull request too; it only ships if a maintainer merges it. A maintainer can override the next version with a `Release-As: x.y.z` line in a commit message.
 
 ## License
 
