@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Button from "../Button/Button.svelte";
   import Dialog from "./Dialog.svelte";
   let { version }: { version: string } = $props();
 </script>
@@ -9,7 +10,7 @@
   <p>Copies camera cards with checksum verification (xxHash64, optional MD5), re-reading every copy from disk, and never overwrites anything.</p>
   <p class="note">Fonts: Outfit, Inter and JetBrains Mono, under the SIL Open Font License.</p>
   <div class="acts">
-    <button class="btn" data-act="openrepo">View on GitHub</button>
-    <button class="btn" data-act="closeov">Close</button>
+    <Button data-act="openrepo">View on GitHub</Button>
+    <Button data-act="closeov">Close</Button>
   </div>
 </Dialog>

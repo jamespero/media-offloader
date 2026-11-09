@@ -6,7 +6,7 @@
 
 <div class="mh">Connected media</div>
 {#each S.volumes as v (v.path)}
-  <MenuItem icon="disk" label={v.label} act="pick" data-path={v.path} title={v.path}><span class="sm">{fmtSize(v.total)}</span></MenuItem>
+  <MenuItem icon="disk" label={v.label} act="pick" data-path={v.path} title={v.path} hint={fmtSize(v.total)} />
 {:else}
   <div class="mnote">No cards or drives found.</div>
 {/each}

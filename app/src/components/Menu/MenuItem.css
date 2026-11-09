@@ -1,0 +1,75 @@
+.mi {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  border: 0;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.mi:hover {
+  background: var(--color-surface-3);
+}
+
+.mi:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: default;
+  background: none;
+}
+
+.mi:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.mi :global(svg) {
+  color: var(--color-text-secondary);
+  flex: none;
+}
+
+.mi > span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mi .kb {
+  margin-left: auto;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.mi .ck {
+  margin-left: auto;
+  color: var(--color-text);
+}
+
+.mi .sm {
+  margin-left: auto;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  padding-left: var(--space-6);
+}
+
+.mi.on {
+  background: var(--color-surface-2);
+}
+
+.mi.tall {
+  height: 32px;
+}
+
+.mi-icon {
+  width: 15px;
+}
+
+.mi .recent-path {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}

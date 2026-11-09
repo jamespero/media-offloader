@@ -1,4 +1,5 @@
 .rvpath {
+  font-family: var(--font-mono);
   flex: 1;
   min-width: 0;
   color: var(--color-text-tertiary);
@@ -45,6 +46,7 @@
 }
 
 .rvstat .f {
+  font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   overflow: hidden;
@@ -75,7 +77,7 @@
   color: var(--color-text-on-done);
 }
 
-.rvres.bad {
+.rvres.failed {
   background: var(--color-status-problem);
   border-color: var(--color-status-problem);
   color: var(--color-text-on-status);
@@ -104,4 +106,8 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--space-4);
+}
+
+.problem {
+  color: var(--color-status-problem);
 }

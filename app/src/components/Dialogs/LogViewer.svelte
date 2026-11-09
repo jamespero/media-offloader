@@ -1,4 +1,6 @@
 <script lang="ts">
+  import IconButton from "../IconButton/IconButton.svelte";
+  import Button from "../Button/Button.svelte";
   import { ic } from "../../icons";
   import { fileManager } from "../../state.svelte.ts";
   import LogBox from "./LogBox.svelte";
@@ -18,8 +20,8 @@
 <LogBox>
   <header>
     {@html ic.file()}<b>Transfer log</b>
-    <button class="btn sm" data-act="revealpath" data-path={path}>{@html ic.reveal(13)} Show in {fileManager}</button>
-    <button class="iconbtn" data-act="closeov" aria-label="Close">{@html ic.x()}</button>
+    <Button size="sm" data-act="revealpath" data-path={path}>{@html ic.reveal(13)} Show in {fileManager}</Button>
+    <IconButton data-act="closeov" aria-label="Close">{@html ic.x()}</IconButton>
   </header>
   <pre>{#each lines as [line, cls], i}{#if i > 0}{"\n"}{/if}{#if cls}<span class={cls}>{line}</span>{:else}{line}{/if}{/each}</pre>
 </LogBox>

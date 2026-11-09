@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Button from "../Button/Button.svelte";
   import Dialog from "./Dialog.svelte";
   import { S } from "../../state.svelte.ts";
 
@@ -10,7 +11,7 @@
   <p>{done} of {S.files.length} files are already copied and verified. Those stay where they are.</p>
   <p>The file in progress will be removed so nothing half-written is left behind.</p>
   <div class="acts">
-    <button class="btn" data-act="closeov">Keep going</button>
-    <button class="btn danger" data-act="dostop">Stop</button>
+    <Button data-act="closeov">Keep going</Button>
+    <Button variant="danger" data-act="dostop">Stop</Button>
   </div>
 </Dialog>

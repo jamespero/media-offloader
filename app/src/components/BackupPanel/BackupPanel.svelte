@@ -1,4 +1,6 @@
 <script lang="ts">
+  import StatusPill from "../StatusPill/StatusPill.svelte";
+  import Button from "../Button/Button.svelte";
   import { ic } from "../../icons";
   import { bakState, rootFor } from "../../panelState";
   import { S, hasBackup, running, sep, totalBytes } from "../../state.svelte.ts";
@@ -47,18 +49,18 @@
   {:else if unset}
     <h2>backup</h2>
     <div class="sub">Select a location to save a second copy of all media files.</div>
-    <button class="btn sm" data-act="dest" data-w="bak">{@html ic.folder(14)} Choose…</button>
+    <Button size="sm" data-act="dest" data-w="bak">{@html ic.folder(14)} Choose…</Button>
   {:else if panel === "idle"}
     <h2>backup</h2>
     <div class="sub">Media files will also be copied to:</div>
-    <button class="btn sm" data-act="dest" data-w="bak">{@html ic.folder(14)} Choose…</button>
+    <Button size="sm" data-act="dest" data-w="bak">{@html ic.folder(14)} Choose…</Button>
     <PathLine path={dest + (dest.endsWith(sep) ? "" : sep)} />
     <TokenChips sameAsCopy />
     <PreviewLine which="bak" />
   {:else if panel === "queued"}
     <h2>backup</h2>
     <PathLine path={root} />
-    <span class="qpill"><i></i>Queued</span>
+    <StatusPill tone="queued">Queued</StatusPill>
     <div class="sub">Starts as soon as the copy is verified.</div>
   {:else if panel === "running"}
     <LiveStatus
@@ -71,7 +73,7 @@
   {:else if panel === "hold"}
     <h2>backup</h2>
     <PathLine path={root} />
-    <span class="qpill"><i class="problem"></i>On hold</span>
+    <StatusPill tone="held">On hold</StatusPill>
     <div class="sub">Resolve the copy errors first.</div>
   {:else if panel === "error"}
     <ProblemStatus heading="backup incomplete" {root} failed={S.failBak} fallback="stopped" fallbackNote={S.abortReason ?? ""} logAct="log" />

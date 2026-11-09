@@ -1,4 +1,6 @@
 <script lang="ts">
+  import TextInput from "../TextInput/TextInput.svelte";
+  import Button from "../Button/Button.svelte";
   import Dialog from "./Dialog.svelte";
   import { onMount } from "svelte";
   import { activePreset } from "../../presets";
@@ -6,12 +8,12 @@
 
   const suggestion = activePreset()?.name ?? S.src?.label ?? "";
 
-  let input: HTMLInputElement;
-  let save: HTMLButtonElement;
+  let input = $state<HTMLInputElement>();
+  let save = $state<HTMLButtonElement>();
 
   onMount(() => {
-    input.focus();
-    input.select();
+    input?.focus();
+    input?.select();
   });
 </script>
 
@@ -19,20 +21,19 @@
   <h3>Save preset</h3>
   <p>Saves the subfolder pattern, so the next card from this camera is one click. The destinations aren't saved: they stay as they are, set once per project.</p>
   <div class="field">
-    <input
-      class="tin"
+    <TextInput
       id="presetName"
       placeholder="e.g. Nikon ZR"
       value={suggestion}
       spellcheck="false"
-      bind:this={input}
-      onkeydown={(e) => {
-        if (e.key === "Enter") save.click();
+      bind:element={input}
+      onkeydown={(e: KeyboardEvent) => {
+        if (e.key === "Enter") save?.click();
       }}
     />
   </div>
   <div class="acts">
-    <button class="btn" data-act="closeov">Cancel</button>
-    <button class="btn primary compact" data-act="dosavepreset" bind:this={save}>Save</button>
+    <Button data-act="closeov">Cancel</Button>
+    <Button variant="primary" size="compact" data-act="dosavepreset" bind:element={save}>Save</Button>
   </div>
 </Dialog>

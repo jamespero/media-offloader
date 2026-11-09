@@ -20,7 +20,7 @@
 <div class={["set", boxed && "boxed"]}>
   <div class="l">
     {#if title}<b>{title}</b>{/if}
-    <span>{#if mono}<span class="mono">{note}</span>{:else}{note}{/if}</span>
+    <span>{#if mono}<span class="path">{note}</span>{:else}{note}{/if}</span>
   </div>
   {@render children?.()}
 </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
+  import TextInput from "../TextInput/TextInput.svelte";
   import { onMount, untrack } from "svelte";
   import { closeMenus } from "../Menu/menuState.svelte.ts";
-  import { ic } from "../../icons";
   import { S, tokenContext } from "../../state.svelte.ts";
   import { DATE_FMTS, DAY_FMTS, fmtDate, fmtDay, tokenInfo, tokenText } from "../../tokens";
   import MenuItem from "../Menu/MenuItem.svelte";
@@ -43,17 +43,15 @@
 
 <!-- A labelled number field: shoot day, next roll. -->
 {#snippet numberRow(label: string, note: string)}
-  <div class="row num-row">
+  <div class="num-row">
     <span class="label">{label}</span>
-    <input class="tin" id="numIn" type="number" min="1" max="999" value={firstNumber} oninput={setNumber} onkeydown={closeOnEnter} />
+    <TextInput narrow id="numIn" type="number" min="1" max="999" value={firstNumber} oninput={setNumber} onkeydown={closeOnEnter} />
   </div>
   <div class="mnote">{note}</div>
 {/snippet}
 
 {#snippet format(f: string, sample: string, chosen: boolean)}
-  <button class="mi" data-act="fmt" data-i={index} data-f={f}>
-    <span class="mi-icon">{#if chosen}{@html ic.check(14)}{/if}</span><span>{f}</span><span class="sm">{sample}</span>
-  </button>
+  <MenuItem marked={chosen} label={f} act="fmt" data-i={index} data-f={f} hint={sample} />
 {/snippet}
 
 {#if token.t === "now" || token.t === "shot"}
@@ -68,14 +66,12 @@
 {:else if token.t === "text" || token.t === "project"}
   <div class="mh">{token.t === "text" ? "Custom text" : "Project name"}</div>
   <div class="mi-field">
-    <input class="tin" id="txtIn" value={firstText} spellcheck="false" bind:this={textInput} oninput={setText} onkeydown={closeOnEnter} />
+    <TextInput id="txtIn" value={firstText} spellcheck="false" bind:element={textInput} oninput={setText} onkeydown={closeOnEnter} />
   </div>
 {:else if token.t === "reel"}
   <div class="mh">Reel letter</div>
   {#each ["A", "B", "C", "D"] as l}
-    <MenuItem icon="tag" label="{l}{String(ctx.reelNo(l)).padStart(3, '0')}, {l}{String(ctx.reelNo(l) + 1).padStart(3, '0')}…" act="reel" data-i={index} data-v={l}>
-      {#if reel === l}<span class="ck">{@html ic.check(14)}</span>{/if}
-    </MenuItem>
+    <MenuItem icon="tag" label="{l}{String(ctx.reelNo(l)).padStart(3, '0')}, {l}{String(ctx.reelNo(l) + 1).padStart(3, '0')}…" act="reel" data-i={index} data-v={l} checked={reel === l} />
   {/each}
   <div class="sep"></div>
   {@render numberRow(`Next ${reel} roll`, "Counts up after each completed offload. Change it to match the card's label.")}

@@ -73,20 +73,10 @@
 }
 
 .kinds {
+  display: flex;
+  flex: none;
   margin-left: auto;
   margin-right: var(--space-2);
-}
-
-.kinds button {
-  height: 24px;
-  padding: 0 var(--space-4);
-  font-size: var(--font-size-sm);
-}
-
-.kinds .n {
-  color: var(--color-text-tertiary);
-  font-variant-numeric: tabular-nums;
-  margin-left: var(--space-1);
 }
 
 .tab .x {

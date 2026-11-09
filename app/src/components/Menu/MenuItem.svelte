@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
   import { ic, type IconName } from "../../icons";
 
   let {
@@ -8,7 +7,12 @@
     act,
     disabled = false,
     mono = false,
-    children,
+    on = false,
+    tall = false,
+    marked,
+    shortcut,
+    hint,
+    checked = false,
     ...attrs
   }: {
     icon?: IconName | null;
@@ -17,14 +21,33 @@
     disabled?: boolean;
     /** Shows the label as a path. */
     mono?: boolean;
-    /** What sits at the right edge: a shortcut, a size, a check. */
-    children?: Snippet;
+    /** The current tab, in a list of them. */
+    on?: boolean;
+    tall?: boolean;
+    /** Leads with a check when true, or a blank when false, instead of an icon. */
+    marked?: boolean;
+    /** A keyboard shortcut at the right edge. */
+    shortcut?: string;
+    /** A small note at the right edge, such as a size. */
+    hint?: string;
+    /** A check at the right edge. */
+    checked?: boolean;
     [attr: string]: unknown;
   } = $props();
 </script>
 
-<button class="mi" data-act={act} {disabled} {...attrs}>
-  {#if icon}{@html ic[icon](15)}{:else}<span class="mi-icon"></span>{/if}
+<button class={["mi", on && "on", tall && "tall"]} data-act={act} {disabled} {...attrs}>
+  {#if marked !== undefined}
+    <span class="mi-icon">{#if marked}{@html ic.check(14)}{/if}</span>
+  {:else if icon}
+    {@html ic[icon](15)}
+  {:else}
+    <span class="mi-icon"></span>
+  {/if}
   <span>{#if mono}<span class="recent-path">{label}</span>{:else}{label}{/if}</span>
-  {@render children?.()}
+  {#if shortcut}<span class="kb">{shortcut}</span>{/if}
+  {#if hint}<span class="sm">{hint}</span>{/if}
+  {#if checked}<span class="ck">{@html ic.check(14)}</span>{/if}
 </button>
+
+<style src="./MenuItem.css"></style>

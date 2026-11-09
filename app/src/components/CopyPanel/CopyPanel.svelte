@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Button from "../Button/Button.svelte";
   import { ic } from "../../icons";
   import { copyState, rateText, rootFor } from "../../panelState";
   import { S, sep, totalBytes } from "../../state.svelte.ts";
@@ -36,7 +37,7 @@
   {:else if panel === "idle"}
     <h2>copy</h2>
     <div class="sub">Media files will be copied to:</div>
-    <button class="btn sm" data-act="dest" data-w="copy">{@html ic.folder(14)} Choose…</button>
+    <Button size="sm" data-act="dest" data-w="copy">{@html ic.folder(14)} Choose…</Button>
     {#if dest}<PathLine path={dest + (dest.endsWith(sep) ? "" : sep)} />{:else}<div class="path">No folder chosen</div>{/if}
     <TokenChips />
     <PreviewLine which="copy" />

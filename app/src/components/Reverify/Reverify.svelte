@@ -1,4 +1,6 @@
 <script lang="ts">
+  import IconButton from "../IconButton/IconButton.svelte";
+  import Button from "../Button/Button.svelte";
   import type { CheckStatus, ManifestSource } from "../../api";
   import { fmtSize } from "../../format";
   import { ic } from "../../icons";
@@ -34,26 +36,26 @@
 
 <LogBox fit>
   <header>
-    {@html ic.shield()}<b>Re-verify</b><span class="rvpath mono" title={R.path}>{R.path}</span>
-    <button class="iconbtn" data-act="closeov" aria-label="Close">{@html ic.x()}</button>
+    {@html ic.shield()}<b>Re-verify</b><span class="rvpath" title={R.path}>{R.path}</span>
+    <IconButton data-act="closeov" aria-label="Close">{@html ic.x()}</IconButton>
   </header>
   <div class="rvbody" id="rvbody">
     {#if R.error}
-      <div class="rvres bad">{@html ic.alert(18)}<span>{R.error}</span></div>
-      <div class="acts"><button class="btn" data-act="closeov">Close</button></div>
+      <div class="rvres failed">{@html ic.alert(18)}<span>{R.error}</span></div>
+      <div class="acts"><Button data-act="closeov">Close</Button></div>
     {:else if R.running || !report}
       <div class="rvbar"><ProgressFill {pct} /></div>
-      <div class="rvstat"><span class="pct-s">{Math.floor(pct)}%</span><span class="f mono">{R.current}</span></div>
+      <div class="rvstat"><span class="pct-s">{Math.floor(pct)}%</span><span class="f">{R.current}</span></div>
       <div class="rvnote">
         {#if R.files}{R.checked} of {R.files} files · {fmtSize(R.bytes)} · checking against {sourceText(R.source)}{:else}Reading the manifest…{/if}
-        {#if R.failed}· <span class="problem-text">{R.failed} not matching so far</span>{/if}
+        {#if R.failed}· <span class="problem">{R.failed} not matching so far</span>{/if}
       </div>
-      <div class="acts"><button class="btn" data-act="closeov">Stop</button></div>
+      <div class="acts"><Button data-act="closeov">Stop</Button></div>
     {:else}
       {#if report.outcome.kind === "verified"}
         <div class="rvres ok">{@html ic.check(18, 2.6)}<span>All {report.files.length} files match their recorded checksums.</span></div>
       {:else if report.outcome.kind === "failed"}
-        <div class="rvres bad">{@html ic.alert(18)}<span>{report.outcome.files === 1 ? "1 file doesn't" : `${report.outcome.files} files don't`} match their recorded checksums.</span></div>
+        <div class="rvres failed">{@html ic.alert(18)}<span>{report.outcome.files === 1 ? "1 file doesn't" : `${report.outcome.files} files don't`} match their recorded checksums.</span></div>
       {:else}
         <div class="rvres">{@html ic.info(18)}<span>Stopped after {R.checked} of {report.files.length} files.</span></div>
       {/if}
@@ -63,9 +65,9 @@
       {/if}
       <div class="rvnote">Checked against {sourceText(report.source)} · every file read from disk, bypassing the OS cache.</div>
       <div class="acts">
-        {#if report.logPath}<button class="btn" data-act="rvlog">{@html ic.file(13)} Show log</button>{/if}
-        <button class="btn" data-act="revealpath" data-path={report.root}>{@html ic.reveal(13)} Show in {fileManager}</button>
-        <button class="btn" data-act="closeov">Close</button>
+        {#if report.logPath}<Button data-act="rvlog">{@html ic.file(13)} Show log</Button>{/if}
+        <Button data-act="revealpath" data-path={report.root}>{@html ic.reveal(13)} Show in {fileManager}</Button>
+        <Button data-act="closeov">Close</Button>
       </div>
     {/if}
   </div>

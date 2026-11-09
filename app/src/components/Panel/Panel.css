@@ -221,12 +221,6 @@
   color: var(--color-text-on-status-2);
 }
 
-.panel.error :global(.btn) {
-  background: var(--color-overlay-on-status);
-  border-color: var(--color-border-on-status);
-  color: var(--color-text-on-status);
-}
-
 .panel :global(.vol) {
   display: inline-flex;
   align-items: center;
@@ -292,18 +286,15 @@
   font-size: var(--font-size-6xl);
 }
 
-.panel :global(.row.result-actions) {
-  margin-top: var(--space-4);
-}
-
-.panel :global(.row.in-progress) {
-  margin-top: var(--space-2);
-}
-
 .panel :global(.sub.strong) {
   color: var(--color-text);
 }
 
 .panel :global(.vol.static) {
   cursor: default;
+}
+
+.panel :global(.meta) {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
 }
