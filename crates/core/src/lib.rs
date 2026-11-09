@@ -19,6 +19,7 @@
 
 pub mod error;
 pub mod event;
+mod faults;
 pub mod format;
 pub mod hash;
 pub mod job;
