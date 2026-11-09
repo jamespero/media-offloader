@@ -16,11 +16,11 @@ It is built for shooters, camera assistants and DITs who want a single screen wi
 - **Resume after a crash or unplug.** Every offload keeps a journal; continue where it stopped, or retry only the files that failed.
 - **Folder naming.** Build the destination path from tokens such as Import #, Source Name, Date (Shot), Date (Now), Shoot Day #, Reel / Roll #, Project Name and Custom Text, and save patterns as presets.
 - **History.** Recent offloads stay as tabs you can reopen, with their logs.
-- **Finishing touches.** Thumbnails from the OS thumbnailers, a completion sound and notification, keep-awake during transfers, and eject when verified.
+- **Finishing touches.** Thumbnails from the OS thumbnailers, a completion sound and notification, and keep-awake during transfers.
 
 ## Status
 
-Early. The engine, CLI and app work on Windows; on macOS the tests pass and the app launches, but eject, keep-awake, notifications and QuickLook thumbnails haven't been tried with a real card yet. Still to come: a Camera Model naming token, real volume watching (sources are polled every 2 s today) and signed installers.
+Early. The engine, CLI and app work on Windows; on macOS the tests pass and the app launches, but keep-awake, notifications and QuickLook thumbnails haven't been tried with a real card yet. Still to come: a Camera Model naming token, ejecting a source from the app (hidden until it can tell which drives can be ejected and does it properly on Windows), real volume watching (sources are polled every 2 s today) and signed installers.
 
 ## Download
 

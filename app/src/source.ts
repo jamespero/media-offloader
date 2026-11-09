@@ -89,10 +89,17 @@ export async function resumeFrom(path: string) {
   thumbsForCurrent();
 }
 
+/**
+ * Eject is hidden for now. On Windows it only dismounts a USB drive rather than removing
+ * it the way Safely Remove does, and it's offered on drives that can't be ejected at
+ * all. It comes back once the app can tell which drives can be and ejects them properly.
+ */
+export const ejectEnabled = false;
+
 /** Ejects the card (not while it's being read). */
 export async function ejectSource() {
   const src = S.src;
-  if (!src || src.kind === "folder" || S.ejected) return;
+  if (!ejectEnabled || !src || src.kind === "folder" || S.ejected) return;
   if (S.phase === "copying" || (S.phase === "backing" && S.runFanOut)) return;
   try {
     await api.eject(src.path);

@@ -7,6 +7,7 @@
   import { api } from "../../api";
   import { ic, type IconName } from "../../icons";
   import { S, running } from "../../state.svelte.ts";
+  import { ejectEnabled } from "../../source";
   import NamingPane from "./NamingPane.svelte";
   import SettingRow from "./SettingRow.svelte";
   import { settingsTab } from "./settingsState.svelte.ts";
@@ -53,7 +54,9 @@
       <p class="intro">How Media Offloader reacts when media shows up.</p>
       <ToggleRow title="Auto-select inserted media" note="When a card or drive is connected, make it the source. Folders are never auto-selected." setting="autoSelect" />
       <ToggleRow title="Copy hidden system files" note="Include .Trashes, .Spotlight-V100, System Volume Information. Off still copies every camera file and folder." setting="includeSystemFiles" />
-      <ToggleRow title="Eject source when verified" note="Unmount the card as soon as its copy is verified, so it is safe to pull. The backup carries on from the copy." setting="ejectWhenVerified" />
+      {#if ejectEnabled}
+        <ToggleRow title="Eject source when verified" note="Unmount the card as soon as its copy is verified, so it is safe to pull. The backup carries on from the copy." setting="ejectWhenVerified" />
+      {/if}
       <ToggleRow title="Keep the computer awake" note="Prevent sleep while a transfer is running." setting="keepAwake" />
       <ToggleRow title="Install updates automatically" note="When a new version is out, install it as the app starts, before you begin. Off: the app asks first. Never during an offload." setting="autoUpdate" />
     {:else if tab === "verify"}

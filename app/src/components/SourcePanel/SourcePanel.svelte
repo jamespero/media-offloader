@@ -7,12 +7,13 @@
   import { resumeLabel } from "../../history";
   import { ic } from "../../icons";
   import { resuming } from "../../panelState";
+  import { ejectEnabled } from "../../source";
   import { S, running } from "../../state.svelte.ts";
   import Panel from "../Panel/Panel.svelte";
 
   /** Whether the card is being read right now (so it mustn't be ejected). */
   const cardBusy = $derived(S.phase === "copying" || (S.phase === "backing" && S.runFanOut));
-  const canEject = $derived(!!S.src && S.src.kind !== "folder" && !S.ejected && !cardBusy && !S.scanning);
+  const canEject = $derived(ejectEnabled && !!S.src && S.src.kind !== "folder" && !S.ejected && !cardBusy && !S.scanning);
   const res = $derived(resuming());
   const can = $derived((!!S.settings.copyDest || !!S.resumeJournal) && !S.scanning && !S.prepError);
   const why = $derived(S.prepError ? "Fix the destination first." : !S.settings.copyDest && !res ? "Choose where to copy first." : "");
