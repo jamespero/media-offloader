@@ -15,8 +15,4 @@ export function fmtDuration(s: number): string {
   return `${s}s`;
 }
 
-/** Escapes text for the parts of the UI still built from HTML strings. */
-export const esc = (s: unknown) =>
-  String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
-
 export const plural = (n: number, one: string, many = one + "s") => `${n} ${n === 1 ? one : many}`;

@@ -3,7 +3,9 @@
 
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { api, failureText, type JobReport, type Outcome } from "./api";
-import { closeOverlay, overlay, toast } from "./menus";
+import QuitDialog from "./components/Dialogs/QuitDialog.svelte";
+import { closeOverlay, overlay } from "./components/Overlay/overlayState.svelte.ts";
+import { toast } from "./components/Toast/toastState.svelte.ts";
 import { fmtSize } from "./format";
 import { prepare, schedulePrepare } from "./destinations";
 import { refreshHistory } from "./history";
@@ -112,14 +114,13 @@ export function guardWindowClose() {
   getCurrentWindow().onCloseRequested((event) => {
     if (!running()) return;
     event.preventDefault();
-    overlay(`<div class="dialog"><h3>Stop and quit?</h3>
-      <p>An offload is still running. Verified files are kept; the file in progress is removed.</p>
-      <div class="acts"><button class="btn" data-act="closeov">Keep going</button><button class="btn danger" id="quitBtn">Stop and quit</button></div></div>`);
-    document.getElementById("quitBtn")!.onclick = () => {
-      quitAfterStop = true;
-      closeOverlay();
-      api.cancel();
-      setTimeout(() => getCurrentWindow().destroy(), 5000); // in case the report never comes
-    };
+    overlay(QuitDialog, {
+      onQuit: () => {
+        quitAfterStop = true;
+        closeOverlay();
+        api.cancel();
+        setTimeout(() => getCurrentWindow().destroy(), 5000); // in case the report never comes
+      },
+    });
   });
 }

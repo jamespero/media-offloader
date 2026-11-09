@@ -2,26 +2,17 @@
 
 import { open } from "@tauri-apps/plugin-dialog";
 import { api, historyApi } from "./api";
-import {
-  about,
-  addTokenMenu,
-  chipMenu,
-  closeMenus,
-  closeOverlay,
-  confirmStop,
-  currentSettingsTab,
-  destMenu,
-  mainMenu,
-  settings,
-  showLog,
-  srcMenu,
-  toast,
-} from "./menus";
+import { closeMenus } from "./components/Menu/menuState.svelte.ts";
+import { closeOverlay } from "./components/Overlay/overlayState.svelte.ts";
+import { settings } from "./components/Settings/settingsState.svelte.ts";
+import { toast } from "./components/Toast/toastState.svelte.ts";
+import { about, confirmStop, reverifyIntro, savePresetDialog, showLog } from "./dialogs";
+import { addTokenMenu, chipMenu, destMenu, mainMenu, presetMenu, srcMenu } from "./menus";
 import { schedulePrepare, setDest, tokensChanged } from "./destinations";
 import { openHistory, refreshHistory } from "./history";
 import { newOffload, startOffload } from "./offload";
-import { applyPreset, deletePreset, presetMenu, saveCurrentAs, savePresetDialog } from "./presets";
-import { chooseAndReverify, reverifyIntro, reverifyLog } from "./reverify";
+import { applyPreset, deletePreset, saveCurrentAs } from "./presets";
+import { chooseAndReverify, reverifyLog } from "./reverify.svelte.ts";
 import { ejectSource, resumeFrom, selectSource } from "./source";
 import { S, running, saveSettings, type Settings } from "./state.svelte.ts";
 import { thumbsForCurrent, thumbsForHistory } from "./thumbRequests";
@@ -158,19 +149,16 @@ async function onClick(ev: MouseEvent) {
       const k = b.dataset.k as keyof Settings;
       if (typeof s[k] === "boolean") (s as unknown as Record<string, boolean>)[k] = !s[k];
       saveSettings();
-      settings(currentSettingsTab());
       if (k === "includeSystemFiles" && S.src && !running()) selectSource(S.src.path);
       break;
     }
     case "md5":
       s.md5 = b.dataset.v === "1";
       saveSettings();
-      settings("verify");
       break;
     case "fan":
       s.fanOut = b.dataset.v === "1";
       saveSettings();
-      settings("transfers");
       break;
     case "closeov":
       closeOverlay();
@@ -247,13 +235,11 @@ async function onClick(ev: MouseEvent) {
       break;
     case "delpreset":
       deletePreset(b.dataset.id!);
-      settings("naming");
       break;
     case "importinc":
     case "importdec":
       s.importNo = Math.max(1, s.importNo + (a === "importinc" ? 1 : -1));
       saveSettings();
-      settings("naming");
       tokensChanged();
       break;
     case "about":

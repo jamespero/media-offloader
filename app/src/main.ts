@@ -14,7 +14,7 @@ import { setDest } from "./destinations";
 import { onEngine } from "./engineEvents";
 import { refreshHistory } from "./history";
 import { guardWindowClose, onReport, startOffload } from "./offload";
-import { initReverify } from "./reverify";
+import { initReverify } from "./reverify.svelte.ts";
 import { clearSource, pollVolumes, selectSource } from "./source";
 import { S } from "./state.svelte.ts";
 import { initThumbInput } from "./thumbInput";
