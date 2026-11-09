@@ -1,5 +1,5 @@
-// Controller: source selection, destinations, starting/stopping, and mapping engine
-// events onto the panels and thumbnails.
+// Controller: starting and stopping, mapping engine events onto the panels and
+// thumbnails, and input wiring.
 
 // In `vite dev` outside Tauri, fake the backend so the UI can be previewed in a browser.
 // Must run before anything below talks to Tauri; compiled out of production builds.
@@ -9,7 +9,7 @@ if (import.meta.env.DEV && !("__TAURI_INTERNALS__" in window && "invoke" in (win
 
 import { open } from "@tauri-apps/plugin-dialog";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { api, failureText, type EngineEvent, type JobReport, type OffloadArgs, type Outcome, type VolumeEntry } from "./api";
+import { api, failureText, type EngineEvent, type JobReport, type Outcome } from "./api";
 import {
   about,
   addTokenMenu,
@@ -26,290 +26,23 @@ import {
   srcMenu,
   toast,
 } from "./menus";
-import { $, byGridKind, esc, fmtSize, flashThumb, render, renderBak, renderCopy, renderFoot, renderSrc, renderStrip, updateLive, updateThumb } from "./render";
-import { S, filesFromPlan, fileManager, hasBackup, running, saveSettings, sep, shownFiles, tokenContext, totalBytes, type Settings, type Source } from "./state";
-import { resolveRoot, type Token, type TokenType } from "./tokens";
+import { $, esc, fmtSize, flashThumb, render, renderBak, renderFoot, renderSrc, renderStrip, updateLive, updateThumb } from "./render";
+import { S, fileManager, hasBackup, running, saveSettings, sep, shownFiles, totalBytes, type Settings } from "./state";
+import type { Token, TokenType } from "./tokens";
 import { chooseAndReverify, initReverify, reverifyIntro, reverifyLog } from "./reverify";
-import { markEarlierRun, openHistory, refreshHistory } from "./history";
+import { openHistory, refreshHistory } from "./history";
 import { chime, notify } from "./notify";
 import { applyPreset, deletePreset, presetMenu, saveCurrentAs, savePresetDialog } from "./presets";
-import { initThumbs, requestThumbs, stopThumbs } from "./thumbs";
+import { initThumbs, stopThumbs } from "./thumbs";
 import { initUpdates } from "./updates";
 import { mountFooter } from "./components/Footer/footerState.svelte.ts";
-import { historyApi, type HistoryDetail } from "./api";
-
-/* ---------------------------------------------------------------- source */
-
-let selectSeq = 0;
-
-function resetRun() {
-  S.ejected = false;
-  S.copyP = S.bakP = 0;
-  S.cur = S.curB = null;
-  S.rate = 0;
-  S.eta = null;
-  S.released = false;
-  S.failCopy = S.failBak = 0;
-  S.abortReason = null;
-  S.stoppedKept = 0;
-  S.report = null;
-  S.startedAt = S.finishedAt = null;
-  samples = [];
-}
-
-function volumeMedia(v: VolumeEntry) {
-  return `${v.fsType || "Drive"} · ${fmtSize(v.total)}`;
-}
-
-async function selectSource(path: string, hint?: VolumeEntry) {
-  if (running()) return;
-  const seq = ++selectSeq;
-  S.resumeJournal = null;
-  S.currentJournal = null;
-  S.view = "";
-  S.kind = null;
-  S.src = null;
-  S.plan = null;
-  S.files = [];
-  S.dests = null;
-  S.prepError = null;
-  S.phase = "waiting";
-  S.scanning = true;
-  resetRun();
-  render();
-  try {
-    const plan = await api.previewSource(path, S.settings.includeSystemFiles);
-    if (seq !== selectSeq) return;
-    const vol = hint ?? S.volumes.find((v) => samePath(v.path, plan.source.root));
-    const kind: Source["kind"] = plan.source.kind === "folder" ? "folder" : vol?.removable ? "card" : "drive";
-    S.src = { path, kind, label: plan.source.label, media: kind === "folder" ? "Folder" : vol ? volumeMedia(vol) : "Drive" };
-    S.plan = plan;
-    S.files = filesFromPlan(plan);
-    S.phase = "ready";
-  } catch (e) {
-    if (seq !== selectSeq) return;
-    toast(false, "Couldn't read the source", String(e));
-  }
-  S.scanning = false;
-  render();
-  schedulePrepare();
-  thumbsForCurrent();
-}
-
-/** Thumbnails for the Current tab: from the card before a run, from the verified copy after. */
-function thumbsForCurrent() {
-  if (!S.src || running()) return;
-  const copy = S.dests?.[0]?.root;
-  if ((S.phase === "done" || S.phase === "error") && copy) requestThumbs(byGridKind(S.files), copy, true);
-  else if (S.phase === "ready") requestThumbs(byGridKind(S.files), S.src.path, false);
-}
-
-function thumbsForHistory() {
-  const d = S.detail;
-  if (!d) return;
-  requestThumbs(byGridKind(S.histFiles), d.item.roots[0] ?? d.item.source, !!d.item.roots[0]);
-}
-
-function samePath(a: string, b: string) {
-  const n = (p: string) => p.replace(/[\\/]+$/, "").toLowerCase();
-  return n(a) === n(b);
-}
-
-/* ---------------------------------------------------------------- resume */
-
-let resumeDetail: HistoryDetail | null = null;
-
-/** Sets up the Current tab to continue an earlier offload (or retry its failed files). */
-async function resumeFrom(path: string) {
-  if (running()) return;
-  closeOverlay();
-  const seq = ++selectSeq;
-  resumeDetail = null;
-  try {
-    resumeDetail = await historyApi.detail(path);
-  } catch (e) {
-    toast(false, "Couldn't read that offload", String(e));
-    return;
-  }
-  if (seq !== selectSeq) return;
-  const it = resumeDetail.item;
-  const vol = S.volumes.find((v) => samePath(v.path, it.source));
-  resetRun();
-  S.view = "";
-  S.resumeJournal = path;
-  S.src = {
-    path: it.source,
-    label: it.label,
-    kind: it.sourceKind === "folder" ? "folder" : vol?.removable === false ? "drive" : "card",
-    media: it.sourceKind === "folder" ? "Folder" : vol ? volumeMedia(vol) : "Drive",
-  };
-  S.plan = null;
-  S.files = [];
-  S.dests = null;
-  S.prepError = null;
-  S.phase = "ready";
-  S.scanning = true;
-  render();
-  await prepare();
-  S.scanning = false;
-  render();
-  thumbsForCurrent();
-}
-
-/** Ejects the card (not while it's being read). */
-async function ejectSource() {
-  const src = S.src;
-  if (!src || src.kind === "folder" || S.ejected) return;
-  if (S.phase === "copying" || (S.phase === "backing" && S.runFanOut)) return;
-  try {
-    await api.eject(src.path);
-    toast(true, `${src.label} ejected`, "Safe to remove.");
-    if (S.phase === "ready" || S.phase === "waiting") {
-      clearSource();
-      return;
-    }
-    S.ejected = true;
-  } catch (e) {
-    toast(false, `Couldn't eject ${src.label}`, String(e));
-  }
-  renderSrc();
-}
-
-function clearSource() {
-  selectSeq++;
-  S.resumeJournal = null;
-  S.currentJournal = null;
-  S.src = null;
-  S.plan = null;
-  S.files = [];
-  S.dests = null;
-  S.prepError = null;
-  S.phase = "waiting";
-  resetRun();
-  render();
-}
-
-/* ---------------------------------------------------------------- volumes */
-
-let knownVolumes: Set<string> | null = null;
-
-async function pollVolumes() {
-  try {
-    const vols = await api.listSources();
-    S.volumes = vols;
-    const paths = new Set(vols.map((v) => v.path));
-    const first = knownVolumes === null;
-    const added = vols.filter((v) => !first && !knownVolumes!.has(v.path));
-    knownVolumes = paths;
-
-    // The card went away. Before an offload: back to waiting. After
-    // one: keep showing the result, noting the card is gone.
-    const gone = S.src && S.src.kind !== "folder" && ![...paths].some((p) => samePath(p, S.src!.path));
-    if (gone && !S.scanning && !running()) {
-      if (S.phase === "ready" && !S.resumeJournal) clearSource();
-      else if ((S.phase === "done" || S.phase === "error") && !S.ejected) {
-        S.ejected = true;
-        renderSrc();
-      }
-    } else if (gone && S.released && !S.ejected) {
-      S.ejected = true; // pulled during the backup, which reads from the copy
-      renderSrc();
-    }
-    if (S.settings.autoSelect && !running() && !S.scanning) {
-      // A newly inserted card or drive becomes the source; at launch, only an obvious card.
-      const pick = first ? (S.src ? undefined : soleCard(vols)) : (added.find((v) => v.removable) ?? added[0]);
-      if (pick) selectSource(pick.path, pick);
-    }
-  } catch {
-    /* try again next tick */
-  }
-  setTimeout(pollVolumes, 2000);
-}
-
-function soleCard(vols: VolumeEntry[]) {
-  const cards = vols.filter((v) => v.removable);
-  return cards.length === 1 ? cards[0] : undefined;
-}
-
-/* ---------------------------------------------------------------- destinations */
-
-function offloadArgs(): OffloadArgs {
-  const ctx = tokenContext();
-  const { copyDest, bakDest, tokens } = S.settings;
-  return {
-    source: S.src!.path,
-    copyTo: resolveRoot(copyDest!, tokens, ctx, sep),
-    backupTo: bakDest ? resolveRoot(bakDest, tokens, ctx, sep) : null,
-    md5: S.settings.md5,
-    fanOut: S.settings.fanOut,
-    includeSystemFiles: S.settings.includeSystemFiles,
-    mhl: S.settings.mhl,
-    md5List: S.settings.md5List && S.settings.md5,
-    keepAwake: S.settings.keepAwake,
-  };
-}
-
-let prepTimer: number | undefined;
-let prepSeq = 0;
-
-function schedulePrepare() {
-  clearTimeout(prepTimer);
-  prepTimer = window.setTimeout(prepare, 250);
-}
-
-/** Plans against the real destinations: resolves copy-conflicted, checks space. */
-async function prepare(): Promise<boolean> {
-  clearTimeout(prepTimer);
-  if (!S.src || (!S.settings.copyDest && !S.resumeJournal) || running() || S.phase !== "ready") {
-    S.dests = null;
-    S.prepError = null;
-    if (S.phase === "ready") render();
-    return false;
-  }
-  const seq = ++prepSeq;
-  try {
-    const p = S.resumeJournal ? await historyApi.prepareResume(S.resumeJournal) : await api.prepare(offloadArgs());
-    S.currentJournal = p.journal;
-    if (seq !== prepSeq) return false;
-    S.dests = p.destinations;
-    S.prepError = null;
-    S.plan = p.plan;
-    S.files = filesFromPlan(p.plan);
-    if (S.resumeJournal && resumeDetail) markEarlierRun(S.files, resumeDetail);
-  } catch (e) {
-    if (seq !== prepSeq) return false;
-    S.dests = null;
-    S.prepError = String(e);
-  }
-  render();
-  return !S.prepError;
-}
-
-function setDest(w: "copy" | "bak", path: string) {
-  const s = S.settings;
-  if (w === "copy") s.copyDest = path;
-  else s.bakDest = path;
-  const key = w === "copy" ? "recentCopy" : "recentBak";
-  s[key] = [path, ...s[key].filter((p) => p !== path)].slice(0, 5);
-  saveSettings();
-  S.dests = null;
-  render();
-  schedulePrepare();
-}
-
-function tokensChanged() {
-  saveSettings();
-  S.dests = null;
-  renderCopy();
-  renderBak();
-  renderSrc();
-  renderStrip();
-  schedulePrepare();
-}
+import { historyApi } from "./api";
+import { prepare, schedulePrepare, setDest, tokensChanged } from "./destinations";
+import { resetRun, resetSamples, sample } from "./runState";
+import { clearSource, ejectSource, pollVolumes, resumeFrom, selectSource } from "./source";
+import { thumbsForCurrent, thumbsForHistory } from "./thumbRequests";
 
 /* ---------------------------------------------------------------- run */
-
-let samples: [number, number][] = [];
 
 async function startOffload() {
   if (!S.src || (!S.settings.copyDest && !S.resumeJournal) || running() || S.scanning) return;
@@ -339,23 +72,10 @@ async function startOffload() {
   }
 }
 
-function sample(done: number, total: number) {
-  const now = performance.now();
-  samples.push([now, done]);
-  while (samples.length > 2 && now - samples[0][0] > 4000) samples.shift();
-  const [t0, d0] = samples[0];
-  const dt = (now - t0) / 1000;
-  if (dt > 0.6 && done > d0) {
-    const work = (done - d0) / dt; // copy + verify bytes per second
-    S.rate = work / 2; // the effective offload speed
-    S.eta = (total - done) / work;
-  }
-}
-
 function onEngine(e: EngineEvent) {
   switch (e.type) {
     case "passStarted":
-      samples = [];
+      resetSamples();
       if (e.pass === "fanOut") S.runFanOut = true;
       S.rate = 0;
       S.eta = null;

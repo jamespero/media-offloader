@@ -152,6 +152,8 @@ export const S = {
   histFiles: [] as FileView[],
   /** Continuing this journal (resume / retry) rather than starting fresh. */
   resumeJournal: null as string | null,
+  /** The earlier offload that `resumeJournal` continues, for marking its finished files. */
+  resumeDetail: null as HistoryDetail | null,
   /** Kind of file the grid shows; null picks footage first (see `gridKind`). */
   kind: null as "video" | "stills" | "audio" | "other" | "all" | null,
   /** Journal of the offload on the Current tab. */
