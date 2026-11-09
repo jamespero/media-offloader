@@ -2,6 +2,9 @@
 //! file is re-read from disk with the OS cache bypassed and its checksums compared with
 //! what was recorded. Read-only: nothing in the folder is created or changed.
 
+mod log;
+mod types;
+
 use std::collections::BTreeMap;
 use std::fs;
 use std::io;
@@ -10,94 +13,16 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 
 use chrono::Local;
-use serde::Serialize;
 
-use crate::format;
+use log::write_log;
+pub use types::{
+    CheckStatus, CheckedFile, ManifestSource, ReverifyError, ReverifyEvent, ReverifyOutcome, ReverifyReport,
+};
+
 use crate::mhl::{self, Expected, HashFormat, History, MultiHasher};
 use crate::pipeline::{self, BufferPool, ChunkSink, PumpError};
 use crate::platform::UncachedReader;
 use crate::scan;
-use crate::{APP_NAME, VERSION};
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(tag = "kind", rename_all = "camelCase")]
-pub enum ManifestSource {
-    Mhl { generations: usize },
-    Md5List { file: String },
-}
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(tag = "state", rename_all = "camelCase")]
-pub enum CheckStatus {
-    Pending,
-    Verified,
-    Mismatch { format: HashFormat, expected: String, actual: String },
-    SizeDiffers { expected: u64, actual: u64 },
-    Missing,
-    ReadError { message: String },
-}
-
-impl CheckStatus {
-    pub fn is_ok(&self) -> bool {
-        matches!(self, CheckStatus::Verified)
-    }
-}
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CheckedFile {
-    /// `/`-separated, relative to the folder.
-    pub path: String,
-    pub size: Option<u64>,
-    pub formats: Vec<HashFormat>,
-    pub status: CheckStatus,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-#[serde(tag = "kind", rename_all = "camelCase")]
-pub enum ReverifyOutcome {
-    Verified,
-    Failed { files: usize },
-    Cancelled,
-}
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ReverifyReport {
-    pub root: PathBuf,
-    pub source: ManifestSource,
-    pub files: Vec<CheckedFile>,
-    /// Files in the folder that no manifest lists (not a failure, but worth knowing).
-    pub not_listed: Vec<String>,
-    /// Damaged or unlisted manifests, chain mismatches.
-    pub manifest_problems: Vec<String>,
-    pub outcome: ReverifyOutcome,
-    pub log_path: Option<PathBuf>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-#[serde(tag = "type", rename_all = "camelCase", rename_all_fields = "camelCase")]
-pub enum ReverifyEvent {
-    Started { source: ManifestSource, files: usize, bytes: u64 },
-    FileStarted { file: usize, path: String },
-    Progress { file: usize, file_bytes: u64, done: u64, total: u64 },
-    FileFinished { file: usize, status: CheckStatus },
-    Finished { outcome: ReverifyOutcome },
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum ReverifyError {
-    #[error("{0} has no ASC MHL history (an ascmhl folder) or .md5 list to check against")]
-    NoManifest(PathBuf),
-    #[error("{0} isn't a folder")]
-    NotAFolder(PathBuf),
-    #[error("couldn't read {path}: {source}")]
-    Io {
-        path: PathBuf,
-        #[source]
-        source: io::Error,
-    },
-}
 
 impl ChunkSink for MultiHasher {
     fn consume(&mut self, data: &[u8]) -> io::Result<()> {
@@ -283,65 +208,4 @@ fn unlisted(root: &Path, expected: &BTreeMap<String, Expected>, ignore: &[String
     }
     out.sort();
     out
-}
-
-fn write_log(
-    dir: &Path,
-    r: &ReverifyReport,
-    started: chrono::DateTime<Local>,
-    elapsed: std::time::Duration,
-) -> io::Result<PathBuf> {
-    use std::io::Write;
-    fs::create_dir_all(dir)?;
-    let name = r.root.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "folder".into());
-    let safe: String = name.chars().map(|c| if c.is_alphanumeric() || " -_.".contains(c) { c } else { '_' }).collect();
-    let mut path = dir.join(format!("{} re-verify {safe}.log", started.format("%Y-%m-%d %H%M%S")));
-    let mut n = 1;
-    while path.exists() {
-        n += 1;
-        path = dir.join(format!("{} re-verify {safe} ({n}).log", started.format("%Y-%m-%d %H%M%S")));
-    }
-    let mut f = io::BufWriter::new(fs::OpenOptions::new().write(true).create_new(true).open(&path)?);
-    writeln!(f, "{APP_NAME} {VERSION} — re-verify log")?;
-    writeln!(f, "Started      {}", started.format("%Y-%m-%d %H:%M:%S %:z"))?;
-    writeln!(f, "Folder       {}", r.root.display())?;
-    match &r.source {
-        ManifestSource::Mhl { generations } => {
-            writeln!(f, "Checked by   ASC MHL history ({generations} generation(s))")?
-        }
-        ManifestSource::Md5List { file } => writeln!(f, "Checked by   {file}")?,
-    }
-    writeln!(f, "Reads        bypass the OS cache")?;
-    for p in &r.manifest_problems {
-        writeln!(f, "MANIFEST     {p}")?;
-    }
-    writeln!(f)?;
-    for file in &r.files {
-        let size = file.size.map(format::size).unwrap_or_default();
-        match &file.status {
-            CheckStatus::Verified => writeln!(f, "OK    {}  {size}", file.path)?,
-            CheckStatus::Pending => writeln!(f, "--    {}  not checked", file.path)?,
-            CheckStatus::Missing => writeln!(f, "FAIL  {}  — missing", file.path)?,
-            CheckStatus::SizeDiffers { expected, actual } => {
-                writeln!(f, "FAIL  {}  — size is {actual} bytes, manifest says {expected}", file.path)?
-            }
-            CheckStatus::Mismatch { format, expected, actual } => {
-                writeln!(f, "FAIL  {}  — {} is {actual}, manifest says {expected}", file.path, format.name())?
-            }
-            CheckStatus::ReadError { message } => writeln!(f, "FAIL  {}  — couldn't read: {message}", file.path)?,
-        }
-    }
-    for p in &r.not_listed {
-        writeln!(f, "NEW   {p}  — not in any manifest")?;
-    }
-    writeln!(f)?;
-    writeln!(f, "Finished     {}  ({})", Local::now().format("%Y-%m-%d %H:%M:%S %:z"), format::duration(elapsed))?;
-    let result = match &r.outcome {
-        ReverifyOutcome::Verified => format!("All {} files match their recorded checksums.", r.files.len()),
-        ReverifyOutcome::Failed { files } => format!("{files} file(s) do NOT match their recorded checksums."),
-        ReverifyOutcome::Cancelled => "Stopped before every file was checked.".to_string(),
-    };
-    writeln!(f, "Result       {result}")?;
-    f.flush()?;
-    Ok(path)
 }
