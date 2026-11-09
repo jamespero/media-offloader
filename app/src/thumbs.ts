@@ -14,7 +14,9 @@ export const thumbUrl = (f: FileView) => urls.get(identity(f)) ?? null;
 /** Asks for thumbnails of `files` under `root`, replacing any earlier request. */
 export function requestThumbs(files: FileView[], root: string, useDest: boolean) {
   generation += 1;
-  const base = root.replace(/[\/]+$/, "");
+  // Trim either separator: a drive root like `H:\` would otherwise give `H:\\DCIM\…`,
+  // which the file system accepts but the Windows Shell doesn't.
+  const base = root.replace(/[\\/]+$/, "");
   const items = files
     .filter((f) => !urls.has(identity(f)))
     .map((f) => ({ key: identity(f), path: base + sep + (useDest ? f.destRel : f.srcRel).split("/").join(sep) }));
