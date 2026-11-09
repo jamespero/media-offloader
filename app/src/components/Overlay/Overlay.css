@@ -1,0 +1,16 @@
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-scrim);
+  background: var(--color-scrim);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  animation: fade var(--duration-fast);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}

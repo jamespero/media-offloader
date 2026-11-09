@@ -9,6 +9,8 @@
   import PreviewLine from "../Panel/PreviewLine.svelte";
   import ProblemStatus from "../Panel/ProblemStatus.svelte";
   import ResumeStatus from "../Panel/ResumeStatus.svelte";
+  import ProgressFill from "../ProgressFill/ProgressFill.svelte";
+  import TokenChips from "../TokenChips/TokenChips.svelte";
 
   const panel = $derived(bakState());
   const root = $derived(rootFor("bak") ?? "");
@@ -23,7 +25,7 @@
   {#if chosen && S.src}
     <button class="corner" data-act="rmbak" title="Remove backup destination">{@html ic.x(14)}</button>
   {:else if !resume && !unset && panel === "running"}
-    <div class="fill" style:--p="{S.bakP}%"></div>
+    <ProgressFill pct={S.bakP} />
     <span class="tagline">Backup</span>
     <button class="corner" data-act="cancel" title="Stop">{@html ic.x()}</button>
   {/if}
@@ -51,8 +53,7 @@
     <div class="sub">Media files will also be copied to:</div>
     <button class="btn sm" data-act="dest" data-w="bak">{@html ic.folder(14)} Choose…</button>
     <PathLine path={dest + (dest.endsWith(sep) ? "" : sep)} />
-    <div class="lbl">Subfolders</div>
-    <div class="chips"><span class="chip static">{@html ic.layers(13)} Same as copy</span></div>
+    <TokenChips sameAsCopy />
     <PreviewLine which="bak" />
   {:else if panel === "queued"}
     <h2>backup</h2>

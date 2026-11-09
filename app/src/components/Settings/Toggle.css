@@ -1,0 +1,36 @@
+.tog {
+  width: 36px;
+  height: 21px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-4);
+  position: relative;
+  border: 0;
+  flex: none;
+  transition: background var(--duration-base);
+}
+
+.tog::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 17px;
+  height: 17px;
+  border-radius: var(--radius-circle);
+  background: var(--color-toggle-knob);
+  transition: all var(--duration-base);
+}
+
+.tog.on {
+  background: var(--color-primary);
+}
+
+.tog.on::after {
+  left: 17px;
+  background: var(--color-text-on-light);
+}
+
+.tog.lock {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}

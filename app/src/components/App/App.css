@@ -1,0 +1,24 @@
+.band {
+  display: grid;
+  grid-template-columns: 236px 1fr 1fr;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-4) 0;
+  min-height: 0;
+}
+
+.gridwrap {
+  overflow: auto;
+  padding: var(--space-4);
+  position: relative;
+  min-height: 0;
+}
+
+.gridwrap::-webkit-scrollbar {
+  width: 10px;
+}
+
+.gridwrap::-webkit-scrollbar-thumb {
+  background: var(--color-surface-3);
+  border-radius: var(--radius-lg);
+  border: 3px solid var(--color-surface-app);
+}

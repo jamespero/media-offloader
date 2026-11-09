@@ -91,3 +91,5 @@
     {/if}
   </div>
 </div>
+
+<style src="./Settings.css"></style>

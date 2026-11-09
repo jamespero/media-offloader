@@ -1,0 +1,25 @@
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--color-text-tertiary);
+}
+
+.empty h3 {
+  font: var(--font-weight-medium) var(--font-size-5xl) var(--font-heading);
+  margin: var(--space-7) 0 var(--space-2);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-placeholder);
+}
+
+.empty-art {
+  display: grid;
+  place-items: center;
+}
+
+.empty.inline {
+  position: static;
+  padding: var(--space-30) 0;
+}

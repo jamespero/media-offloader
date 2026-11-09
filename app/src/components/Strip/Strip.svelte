@@ -54,3 +54,5 @@
   {/if}
   <button class="iconbtn" id="menuBtn" data-act="mainmenu" title="Menu" aria-label="Menu">{@html ic.menu()}</button>
 </div>
+
+<style src="./Strip.css"></style>

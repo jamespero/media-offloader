@@ -1,0 +1,107 @@
+.rvpath {
+  flex: 1;
+  min-width: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+}
+
+.rvbody {
+  padding: var(--space-9) var(--space-9) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.rvbar {
+  position: relative;
+  height: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  overflow: hidden;
+}
+
+.rvbar :global(.fill) {
+  border-radius: var(--radius-sm);
+}
+
+.rvstat {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.rvstat .pct-s {
+  font: var(--font-weight-semibold) var(--font-size-4xl)/var(--line-height-tight) var(--font-heading);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+.rvstat .f {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rvnote {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.rvres {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-7);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.rvres.ok {
+  background: var(--color-status-done);
+  border-color: var(--color-status-done);
+  color: var(--color-text-on-done);
+}
+
+.rvres.bad {
+  background: var(--color-status-problem);
+  border-color: var(--color-status-problem);
+  color: var(--color-text-on-status);
+}
+
+.rvlist {
+  margin: 0;
+  padding: var(--space-5) var(--space-6);
+  max-height: 220px;
+  overflow: auto;
+  background: var(--color-surface-well);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  font: var(--font-size-sm)/var(--line-height-code) var(--font-mono);
+  color: var(--color-text-secondary);
+  user-select: text;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.rvlist .er {
+  color: var(--color-status-problem);
+}
+
+.rvbody .acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+}

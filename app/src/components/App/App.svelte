@@ -4,6 +4,7 @@
   import CopyPanel from "../CopyPanel/CopyPanel.svelte";
   import Footer from "../Footer/Footer.svelte";
   import CurrentGrid from "../Grid/CurrentGrid.svelte";
+  import EmptyState from "../Grid/EmptyState.svelte";
   import HistoryDestPanel from "../History/HistoryDestPanel.svelte";
   import HistoryGrid from "../History/HistoryGrid.svelte";
   import HistorySourcePanel from "../History/HistorySourcePanel.svelte";
@@ -34,7 +35,7 @@
   {#if past}
     <HistoryGrid item={past} />
   {:else if S.view}
-    <div class="empty"><h3>Loading…</h3></div>
+    <EmptyState title="Loading…" />
   {:else}
     <CurrentGrid />
   {/if}
@@ -44,3 +45,5 @@
 <Toast />
 <Tooltip />
 <Menu />
+
+<style src="./App.css"></style>

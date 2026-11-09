@@ -19,7 +19,7 @@
     <button class="btn sm" data-act="delpreset" data-id={p.id} title="Delete preset">{@html ic.trash(13)}</button>
   </SettingRow>
 {:else}
-  <div class="set"><div class="l"><span>No presets yet. Use ★ Preset → Save Current as Preset….</span></div></div>
+  <SettingRow note="No presets yet. Use ★ Preset → Save Current as Preset…." />
 {/each}
 <SettingRow title="Import # counter" note="The next import number. Counts up after each completed offload.">
   <div class="row tight">
@@ -28,3 +28,5 @@
     <button class="btn sm" data-act="importinc" aria-label="Raise">+</button>
   </div>
 </SettingRow>
+
+<style src="./NamingPane.css"></style>

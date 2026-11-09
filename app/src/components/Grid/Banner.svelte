@@ -9,3 +9,5 @@
   <div class="tx">{@render children()}</div>
   {@render action?.()}
 </div>
+
+<style src="./Banner.css"></style>

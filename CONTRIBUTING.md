@@ -45,18 +45,20 @@ For the UI (the [design system](docs/design-system.md) has the details, includin
 
 ## UI components
 
-The UI is moving to [Svelte 5](https://svelte.dev), one component at a time. Parts not yet moved still render by hand.
-
-Each component has its own folder, with its CSS in a separate file that's scoped to it:
+The UI is built with [Svelte 5](https://svelte.dev). Each component has its own folder, with its CSS in a separate file that's scoped to it:
 
 ```text
-app/src/components/Footer/
-  Footer.svelte            markup and logic; ends with <style src="./Footer.css"></style>
-  Footer.css               the component's styles
-  footerState.svelte.ts    state shared with code outside the component, if it needs any
+app/src/components/Toast/
+  Toast.svelte             markup and logic; ends with <style src="./Toast.css"></style>
+  Toast.css                the component's styles
+  toastState.svelte.ts     state shared with code outside the component, if it needs any
 ```
 
-Name a state module differently from its component. `Footer.svelte` and `footer.svelte.ts` collide on the case-insensitive filesystems Windows and macOS use by default.
+Components read the app state from `S` in `state.svelte.ts` and update themselves when it changes. Buttons and menu items set `data-act`, and `input.ts` routes the click.
+
+Global CSS is limited to `styles/global.css` (fonts and resets), `styles/tokens.css` (design tokens) and `styles/controls.css` (buttons, rows, pills and fields used across many components). Everything else belongs to a component. To style markup a component doesn't render itself, such as a parent's content or an icon, use `:global()` under one of its own elements.
+
+Name a state module differently from its component. `Toast.svelte` and `toast.svelte.ts` collide on the case-insensitive filesystems Windows and macOS use by default.
 
 **Two TypeScript versions.** `svelte-check` doesn't support TypeScript 7 yet, so `app/package.json` installs both: `typescript7` checks `.ts` files, and `typescript` (version 6) is used only by `svelte-check`. Both install a `tsc` command, so the `typecheck` script calls version 7 by path. #43 removes this once `svelte-check` catches up, and until then Dependabot ignores major updates to `typescript`.
 

@@ -1,0 +1,49 @@
+.toast {
+  position: absolute;
+  right: 14px;
+  bottom: 42px;
+  z-index: var(--z-toast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-7) var(--space-6) var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-toast);
+  animation: up var(--duration-moderate) ease-out;
+  max-width: 380px;
+}
+
+@keyframes up {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+}
+
+.toast .ic {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--color-status-done);
+  color: var(--color-text-on-done);
+}
+
+.toast .ic.bad {
+  background: var(--color-status-problem);
+  color: var(--color-text-on-status);
+}
+
+.toast b {
+  display: block;
+  font-weight: var(--font-weight-semibold);
+}
+
+.toast span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
