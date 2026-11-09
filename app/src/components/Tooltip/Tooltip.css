@@ -1,0 +1,48 @@
+.tip {
+  position: fixed;
+  z-index: var(--z-tooltip);
+  pointer-events: none;
+  background: var(--color-surface-tooltip);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  box-shadow: var(--shadow-tooltip);
+  display: none;
+  max-width: 320px;
+  left: var(--x);
+  top: var(--y);
+}
+
+.tip b {
+  display: block;
+  font: var(--font-weight-medium) var(--font-size-sm) var(--font-mono);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+  word-break: break-all;
+}
+
+.tip .h {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-2);
+  word-break: break-all;
+}
+
+.tip.on {
+  display: block;
+}
+
+.tip .state {
+  margin-top: var(--space-3);
+}
+
+.tip .state.done {
+  color: var(--color-status-done);
+}
+
+.tip .state.problem {
+  color: var(--color-status-problem);
+}

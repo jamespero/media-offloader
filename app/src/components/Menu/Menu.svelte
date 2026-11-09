@@ -25,3 +25,5 @@
     </div>
   {/key}
 {/if}
+
+<style src="./Menu.css"></style>

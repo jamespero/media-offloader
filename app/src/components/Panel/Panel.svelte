@@ -24,3 +24,5 @@
   {@render behind?.()}
   <div class="content">{@render children()}</div>
 </section>
+
+<style src="./Panel.css"></style>

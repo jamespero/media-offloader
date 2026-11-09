@@ -9,6 +9,7 @@
   import PreviewLine from "../Panel/PreviewLine.svelte";
   import ProblemStatus from "../Panel/ProblemStatus.svelte";
   import ResumeStatus from "../Panel/ResumeStatus.svelte";
+  import ProgressFill from "../ProgressFill/ProgressFill.svelte";
   import TokenChips from "../TokenChips/TokenChips.svelte";
 
   const panel = $derived(copyState());
@@ -18,7 +19,7 @@
 
 {#snippet behind()}
   {#if panel === "running"}
-    <div class="fill" style:--p="{S.copyP}%"></div>
+    <ProgressFill pct={S.copyP} />
     <span class="tagline">{S.runFanOut ? "Fan-out" : "Copy"}</span>
     <button class="corner" data-act="cancel" title="Stop">{@html ic.x()}</button>
   {/if}

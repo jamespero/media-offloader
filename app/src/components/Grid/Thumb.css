@@ -1,0 +1,217 @@
+.thumb {
+  position: relative;
+  aspect-ratio: 16/9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface-thumb);
+  isolation: isolate;
+}
+
+.thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  z-index: 6;
+  pointer-events: none;
+  transition: border-color var(--duration-moderate);
+}
+
+.thumb .img {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--color-text-tertiary);
+  transition: filter var(--duration-slow), opacity var(--duration-slow);
+  background: radial-gradient(ellipse at 50% 35%, var(--color-surface-2), var(--color-surface-thumb) 70%);
+}
+
+.thumb .img :global(svg) {
+  opacity: .55;
+  margin-bottom: var(--space-7);
+}
+
+.thumb .nm {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  padding: var(--space-8) var(--space-4) var(--space-3);
+  font: var(--font-weight-medium) var(--font-size-xs) var(--font-mono);
+  color: var(--color-text-on-status);
+  text-align: center;
+  background: linear-gradient(transparent, var(--color-thumb-caption));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.thumb .ty {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 4;
+  font: var(--font-weight-semibold) var(--font-size-2xs) var(--font-ui);
+  letter-spacing: var(--tracking-caps);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-xs);
+  background: var(--color-thumb-badge);
+  color: var(--color-text-on-status);
+}
+
+.thumb .st {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 5;
+  height: 18px;
+  min-width: 18px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--font-weight-semibold) var(--font-size-2xs) var(--font-ui);
+}
+
+.thumb .shade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: var(--p, 0%);
+  z-index: 3;
+  background: var(--color-thumb-shade);
+  display: none;
+}
+
+.thumb .bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: var(--p, 0%);
+  z-index: 5;
+  background: var(--color-status-working);
+  display: none;
+}
+
+.thumb.pending .img {
+  filter: saturate(.25) brightness(.6);
+}
+
+.thumb.active::after {
+  border-color: var(--color-status-working);
+}
+
+.thumb.active .shade,
+.thumb.active .bar {
+  display: block;
+}
+
+.thumb.active .st {
+  display: flex;
+  background: var(--color-status-working);
+  color: var(--color-text-on-status);
+}
+
+.thumb.ok::after {
+  border-color: var(--color-status-done);
+}
+
+.thumb.ok .st {
+  display: flex;
+  background: var(--color-status-done);
+  color: var(--color-text-on-done);
+}
+
+.thumb.bk-active::after {
+  border-color: var(--color-status-done);
+}
+
+.thumb.bk-active .bar {
+  display: block;
+}
+
+.thumb.bk-active .st {
+  display: flex;
+  background: var(--color-status-working);
+  color: var(--color-text-on-status);
+}
+
+.thumb.fail::after {
+  border-color: var(--color-status-problem);
+}
+
+.thumb.fail .img {
+  filter: saturate(.3) brightness(.55);
+}
+
+.thumb.fail .st {
+  display: flex;
+  background: var(--color-status-problem);
+  color: var(--color-text-on-status);
+}
+
+.flash {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.flash div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  animation: flash 1s ease-out forwards;
+}
+
+.flash span {
+  font: var(--font-weight-semibold) var(--font-size-2xs) var(--font-ui);
+  color: var(--color-text-on-status);
+  text-shadow: 0 1px 4px rgba(0,0,0,.6);
+  letter-spacing: var(--tracking-wide);
+}
+
+.flash i {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-circle);
+  background: var(--color-status-done);
+  color: var(--color-text-on-done);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 18px rgba(0,0,0,.4);
+}
+
+@keyframes flash {
+  0% {
+    transform: scale(.6);
+    opacity: 0;
+  }
+  20% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+.thumb .img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

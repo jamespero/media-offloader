@@ -1,10 +1,11 @@
 <script lang="ts">
+  import Dialog from "./Dialog.svelte";
   import { S } from "../../state.svelte.ts";
 
   const done = $derived(S.files.filter((f) => f.state === "copied" || f.state === "backed").length);
 </script>
 
-<div class="dialog">
+<Dialog>
   <h3>Stop this offload?</h3>
   <p>{done} of {S.files.length} files are already copied and verified. Those stay where they are.</p>
   <p>The file in progress will be removed so nothing half-written is left behind.</p>
@@ -12,4 +13,4 @@
     <button class="btn" data-act="closeov">Keep going</button>
     <button class="btn danger" data-act="dostop">Stop</button>
   </div>
-</div>
+</Dialog>

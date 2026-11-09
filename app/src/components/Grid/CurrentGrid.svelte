@@ -5,6 +5,7 @@
   import { resuming } from "../../panelState";
   import { S, running } from "../../state.svelte.ts";
   import Banner from "./Banner.svelte";
+  import EmptyState from "./EmptyState.svelte";
   import Grid from "./Grid.svelte";
 
   const res = $derived(resuming());
@@ -33,13 +34,7 @@
       {/snippet}
     </Banner>
   {/if}
-  <div class="empty">
-    <div>
-      <div class="empty-art">{@html ic.cardInsert()}</div>
-      <h3>{S.scanning ? "Reading…" : "Waiting for media"}</h3>
-      <div>Insert a card or drive, or choose a folder to begin.</div>
-    </div>
-  </div>
+  <EmptyState art title={S.scanning ? "Reading…" : "Waiting for media"} note="Insert a card or drive, or choose a folder to begin." />
 {:else}
   {#if S.phase === "ready" && res}
     {@const when = new Date(res.started)}
@@ -71,12 +66,7 @@
     </Banner>
   {/if}
   {#if !S.files.length}
-    <div class="empty inline">
-      <div>
-        <h3>{S.scanning ? "Reading…" : "No files"}</h3>
-        <div>{S.scanning ? "" : "This source has no files to copy."}</div>
-      </div>
-    </div>
+    <EmptyState inline title={S.scanning ? "Reading…" : "No files"} note={S.scanning ? "" : "This source has no files to copy."} />
   {:else}
     <Grid files={S.files} />
   {/if}

@@ -13,3 +13,5 @@
     </div>
   {/key}
 {/if}
+
+<style src="./Toast.css"></style>

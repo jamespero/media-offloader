@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Dialog from "./Dialog.svelte";
   import { onMount } from "svelte";
   import { activePreset } from "../../presets";
   import { S } from "../../state.svelte.ts";
@@ -14,7 +15,7 @@
   });
 </script>
 
-<div class="dialog">
+<Dialog>
   <h3>Save preset</h3>
   <p>Saves the subfolder pattern, so the next card from this camera is one click. The destinations aren't saved: they stay as they are, set once per project.</p>
   <div class="field">
@@ -34,4 +35,4 @@
     <button class="btn" data-act="closeov">Cancel</button>
     <button class="btn primary compact" data-act="dosavepreset" bind:this={save}>Save</button>
   </div>
-</div>
+</Dialog>

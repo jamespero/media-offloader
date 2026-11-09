@@ -1,0 +1,5 @@
+.stepper-value {
+  color: var(--color-text);
+  min-width: 34px;
+  text-align: center;
+}

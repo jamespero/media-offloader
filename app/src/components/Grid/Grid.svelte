@@ -16,3 +16,5 @@
     {/if}
   {/each}
 </div>
+
+<style src="./Grid.css"></style>

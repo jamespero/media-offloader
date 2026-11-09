@@ -47,3 +47,5 @@
     <div class="h">Double-click to show in {fileManager}</div>
   {/if}
 </div>
+
+<style src="./Tooltip.css"></style>

@@ -87,3 +87,5 @@
 {#if index > 0}<MenuItem icon="chevL" label="Move Left" act="mvl" data-i={index} />{/if}
 {#if index < count - 1}<MenuItem icon="chevR" label="Move Right" act="mvr" data-i={index} />{/if}
 <MenuItem icon="trash" label="Remove" act="rmtok" data-i={index} />
+
+<style src="./ChipMenu.css"></style>

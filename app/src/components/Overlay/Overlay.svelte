@@ -20,3 +20,5 @@
     </div>
   {/key}
 {/if}
+
+<style src="./Overlay.css"></style>

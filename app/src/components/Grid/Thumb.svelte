@@ -32,3 +32,5 @@
     <div class="flash"><div><span>{file.flash}</span><i>{@html ic.check(18, 3)}</i></div></div>
   {/if}
 </div>
+
+<style src="./Thumb.css"></style>
