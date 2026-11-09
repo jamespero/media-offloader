@@ -1,10 +1,11 @@
 // Thumbnails: asked for in the background, cached by file identity (name, size, date) so
-// a card file and its verified copy share one image, and patched into tiles as they come.
+// a card file and its verified copy share one image. Tiles update as they come.
 
+import { SvelteMap } from "svelte/reactivity";
 import { thumbsApi } from "./api";
-import { sep, shownFiles, type FileView } from "./state";
+import { sep, type FileView } from "./state.svelte.ts";
 
-const urls = new Map<string, string | null>();
+const urls = new SvelteMap<string, string | null>();
 let generation = 0;
 
 export const identity = (f: FileView) => `${f.name}|${f.size}|${f.modified ?? 0}`;
@@ -30,11 +31,5 @@ export function initThumbs() {
   thumbsApi.onThumb((t) => {
     if (t.generation !== generation) return;
     urls.set(t.key, t.url);
-    if (!t.url) return;
-    shownFiles().forEach((f, i) => {
-      if (identity(f) !== t.key) return;
-      const img = document.querySelector(`.thumb[data-i="${i}"] .img`);
-      if (img) img.innerHTML = `<img src="${t.url}" alt="">`;
-    });
   });
 }

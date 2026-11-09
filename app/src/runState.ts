@@ -1,6 +1,6 @@
 // Per-run state: clearing it between offloads, and the speed and time-left estimate.
 
-import { S } from "./state";
+import { S } from "./state.svelte.ts";
 
 let samples: [number, number][] = [];
 

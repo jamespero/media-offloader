@@ -4,13 +4,13 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { api, failureText, type JobReport, type Outcome } from "./api";
 import { closeOverlay, overlay, toast } from "./menus";
-import { fmtSize, render, renderSrc } from "./render";
+import { fmtSize } from "./format";
 import { prepare, schedulePrepare } from "./destinations";
 import { refreshHistory } from "./history";
 import { chime, notify } from "./notify";
 import { resetRun } from "./runState";
 import { clearSource } from "./source";
-import { S, hasBackup, running, saveSettings, totalBytes } from "./state";
+import { S, hasBackup, running, saveSettings, totalBytes } from "./state.svelte.ts";
 import { thumbsForCurrent } from "./thumbRequests";
 import { stopThumbs } from "./thumbs";
 
@@ -19,11 +19,9 @@ let quitAfterStop = false;
 export async function startOffload() {
   if (!S.src || (!S.settings.copyDest && !S.resumeJournal) || running() || S.scanning) return;
   S.scanning = true;
-  renderSrc();
   const ok = await prepare(); // fresh plan, with "now" tokens resolved at start time
   S.scanning = false;
   if (!ok) {
-    render();
     return;
   }
   resetRun();
@@ -33,14 +31,12 @@ export async function startOffload() {
   S.startedAt = new Date();
   S.phase = "copying";
   S.files.forEach((f) => Object.assign(f, { state: "pending", p: 0, verify: false, failure: undefined }));
-  render();
   try {
     stopThumbs(); // the card is about to be read; thumbnails wait
     await api.start();
   } catch (e) {
     S.phase = "ready";
     toast(false, "Couldn't start", String(e));
-    render();
   }
 }
 
@@ -87,7 +83,6 @@ export function finish(outcome: Outcome) {
       notify("Offload stopped", outcome.reason);
       break;
   }
-  render();
   if (outcome.kind === "cancelled") schedulePrepare();
   thumbsForCurrent();
 }
@@ -102,8 +97,7 @@ export function onReport(r: JobReport) {
     const bad = fr.dests.find((d) => d.state === "failed");
     if (f && bad && bad.state === "failed") f.failure = failureText(bad.failure);
   });
-  render();
-  refreshHistory().then(render);
+  void refreshHistory();
   if (quitAfterStop) getCurrentWindow().destroy();
 }
 

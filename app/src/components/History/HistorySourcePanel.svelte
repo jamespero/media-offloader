@@ -1,0 +1,37 @@
+<script lang="ts">
+  import type { HistoryItem } from "../../api";
+  import { plural } from "../../format";
+  import { clock, day, resumeLabel } from "../../history";
+  import { ic } from "../../icons";
+  import { running } from "../../state.svelte.ts";
+  import Panel from "../Panel/Panel.svelte";
+
+  let { item }: { item: HistoryItem } = $props();
+
+  const outcome = $derived(item.outcome);
+</script>
+
+<Panel id="pSrc" source>
+  <div class="srcicon">{@html item.sourceKind === "folder" ? ic.folder() : ic.card()}</div>
+  <h2>source</h2>
+  <div class="vol static"><span>{item.label}</span></div>
+  <div class="meta">{day(item.started)} · {clock(item.started)}</div>
+  {#if !outcome}
+    <span class="bad">{@html ic.alert(13)} Didn't finish</span>
+  {:else if outcome.kind === "verified"}
+    <span class="safe">{@html ic.check(13)} Copied &amp; verified</span>
+  {:else if outcome.kind === "failed"}
+    <span class="bad">{@html ic.alert(13)} {plural(outcome.files, "file")} failed</span>
+  {:else if outcome.kind === "cancelled"}
+    <span class="qpill"><i></i>Stopped</span>
+  {:else}
+    <span class="bad">{@html ic.alert(13)} Stopped</span>
+  {/if}
+  {#if item.resumable}
+    {#if item.sourcePresent}
+      <button class="btn primary start" data-act="resume" data-path={item.path} disabled={running()}>{resumeLabel(item)}</button>
+    {:else}
+      <div class="sub">Connect {item.label} to {resumeLabel(item).toLowerCase()}.</div>
+    {/if}
+  {/if}
+</Panel>

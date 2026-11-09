@@ -6,32 +6,31 @@ if (import.meta.env.DEV && !("__TAURI_INTERNALS__" in window && "invoke" in (win
   await import("./preview");
 }
 
+import { mount } from "svelte";
 import { initInput } from "./input";
 import { api } from "./api";
-import { mountFooter } from "./components/Footer/footerState.svelte.ts";
+import App from "./components/App/App.svelte";
 import { setDest } from "./destinations";
 import { onEngine } from "./engineEvents";
 import { refreshHistory } from "./history";
 import { guardWindowClose, onReport, startOffload } from "./offload";
-import { $, render } from "./render";
 import { initReverify } from "./reverify";
 import { clearSource, pollVolumes, selectSource } from "./source";
-import { S } from "./state";
+import { S } from "./state.svelte.ts";
 import { initThumbInput } from "./thumbInput";
 import { initThumbs } from "./thumbs";
 import { initUpdates } from "./updates";
 
+mount(App, { target: document.getElementById("app")! });
 initInput();
 initThumbInput();
 guardWindowClose();
 api.onEngine(onEngine);
 api.onReport(onReport);
-mountFooter($("app"));
 initThumbs();
 initReverify();
 initUpdates();
-render();
-refreshHistory().then(render);
+void refreshHistory();
 pollVolumes();
 
 // Dev builds only: a handle for driving the app from automated end-to-end checks.

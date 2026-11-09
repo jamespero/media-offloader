@@ -2,7 +2,7 @@
 // notification. The chime is synthesized, so there's no audio file to bundle.
 
 import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
-import { S } from "./state";
+import { S } from "./state.svelte.ts";
 
 /** Two rising notes when everything verified; two falling, lower notes for a problem. */
 export function chime(ok: boolean) {

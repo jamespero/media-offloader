@@ -5,8 +5,8 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { reverifyApi, type CheckStatus, type ReverifyReport, type ManifestSource } from "./api";
 import { ic } from "./icons";
 import { closeOverlay, overlay, showLog, whenOverlayCloses } from "./menus";
-import { esc, fmtSize } from "./render";
-import { fileManager } from "./state";
+import { esc, fmtSize } from "./format";
+import { fileManager } from "./state.svelte.ts";
 
 const R = {
   path: "",

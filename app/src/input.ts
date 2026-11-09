@@ -17,14 +17,13 @@ import {
   srcMenu,
   toast,
 } from "./menus";
-import { $, render, renderBak, renderFoot, renderStrip } from "./render";
 import { schedulePrepare, setDest, tokensChanged } from "./destinations";
 import { openHistory, refreshHistory } from "./history";
 import { newOffload, startOffload } from "./offload";
 import { applyPreset, deletePreset, presetMenu, saveCurrentAs, savePresetDialog } from "./presets";
 import { chooseAndReverify, reverifyIntro, reverifyLog } from "./reverify";
 import { ejectSource, resumeFrom, selectSource } from "./source";
-import { S, running, saveSettings, type Settings } from "./state";
+import { S, running, saveSettings, type Settings } from "./state.svelte.ts";
 import { thumbsForCurrent, thumbsForHistory } from "./thumbRequests";
 import type { Token, TokenType } from "./tokens";
 
@@ -41,6 +40,9 @@ async function onClick(ev: MouseEvent) {
   if (a !== "tog" && !b.closest(".menu")) closeMenus();
   const s = S.settings;
   switch (a) {
+    case "mainmenu":
+      mainMenu(b);
+      break;
     case "srcmenu":
       srcMenu(b);
       break;
@@ -78,7 +80,6 @@ async function onClick(ev: MouseEvent) {
       s.bakDest = null;
       saveSettings();
       S.dests = null;
-      render();
       schedulePrepare();
       break;
     case "addtoken":
@@ -158,7 +159,6 @@ async function onClick(ev: MouseEvent) {
       if (typeof s[k] === "boolean") (s as unknown as Record<string, boolean>)[k] = !s[k];
       saveSettings();
       settings(currentSettingsTab());
-      renderFoot();
       if (k === "includeSystemFiles" && S.src && !running()) selectSource(S.src.path);
       break;
     }
@@ -166,14 +166,11 @@ async function onClick(ev: MouseEvent) {
       s.md5 = b.dataset.v === "1";
       saveSettings();
       settings("verify");
-      renderFoot();
       break;
     case "fan":
       s.fanOut = b.dataset.v === "1";
       saveSettings();
       settings("transfers");
-      renderFoot();
-      renderBak();
       break;
     case "closeov":
       closeOverlay();
@@ -188,13 +185,10 @@ async function onClick(ev: MouseEvent) {
         S.view = "";
         S.kind = null;
         S.detail = null;
-        render();
         thumbsForCurrent();
       } else {
         S.view = path;
-        render(); // shows "Loading…" until the journal is read
         await openHistory(path);
-        render();
         const d = S.detail;
         if (d && S.view === path) thumbsForHistory();
       }
@@ -209,7 +203,6 @@ async function onClick(ev: MouseEvent) {
       }
       if (S.view === path) S.view = "";
       await refreshHistory();
-      render();
       break;
     }
     case "resume":
@@ -224,7 +217,6 @@ async function onClick(ev: MouseEvent) {
       break;
     case "kind":
       S.kind = b.dataset.k as typeof S.kind;
-      render();
       // Thumbnails for what's now shown come first.
       if (S.view) thumbsForHistory();
       else thumbsForCurrent();
@@ -236,7 +228,6 @@ async function onClick(ev: MouseEvent) {
       closeMenus();
       applyPreset(b.dataset.id!);
       S.dests = null;
-      render();
       schedulePrepare();
       break;
     case "savepreset":
@@ -246,7 +237,6 @@ async function onClick(ev: MouseEvent) {
     case "dosavepreset": {
       const name = (document.getElementById("presetName") as HTMLInputElement | null)?.value ?? "";
       if (saveCurrentAs(name)) {
-        renderStrip();
         toast(true, "Preset saved", name.trim());
       }
       break;
@@ -258,7 +248,6 @@ async function onClick(ev: MouseEvent) {
     case "delpreset":
       deletePreset(b.dataset.id!);
       settings("naming");
-      renderStrip();
       break;
     case "importinc":
     case "importdec":
@@ -310,10 +299,6 @@ function onKeydown(e: KeyboardEvent) {
 
 export function initInput() {
   document.addEventListener("click", onClick);
-  $("menuBtn").addEventListener("click", (e) => {
-    e.stopPropagation();
-    mainMenu($("menuBtn"));
-  });
   document.addEventListener("keydown", onKeydown);
   window.addEventListener("resize", closeMenus);
 }

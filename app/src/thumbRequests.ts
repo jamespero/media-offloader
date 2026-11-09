@@ -1,7 +1,7 @@
 // Which thumbnails to ask for, given what's on screen.
 
-import { byGridKind } from "./render";
-import { S, running } from "./state";
+import { byGridKind } from "./fileKinds";
+import { S, running } from "./state.svelte.ts";
 import { requestThumbs } from "./thumbs";
 
 /** Thumbnails for the Current tab: from the card before a run, from the verified copy after. */
