@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.1](https://github.com/jamespero/media-offloader/compare/v0.4.0...v0.4.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **app:** hide Eject until it works on every drive ([#74](https://github.com/jamespero/media-offloader/issues/74)) ([24d7851](https://github.com/jamespero/media-offloader/commit/24d785168da68d7cfe5dcc74e6332903c3340769))
+* **app:** keep the backup panel message on one line ([#58](https://github.com/jamespero/media-offloader/issues/58)) ([b58bc6c](https://github.com/jamespero/media-offloader/commit/b58bc6c2a3f98727e45b4a888f534101169fff1e))
+* **app:** show thumbnails for drive-root sources, in full colour ([#73](https://github.com/jamespero/media-offloader/issues/73)) ([197c477](https://github.com/jamespero/media-offloader/commit/197c4779fc0ad8ede9c9046bedfbca33b8ad8a6c))
+
+
+### Dependencies
+
+* **app:** add Svelte 5 and svelte-check, and port the footer ([#51](https://github.com/jamespero/media-offloader/issues/51)) ([ca7c6be](https://github.com/jamespero/media-offloader/commit/ca7c6be1aea1fe81be3716687f510b0504e5cf57))
+
 ## [0.4.0](https://github.com/jamespero/media-offloader/compare/v0.3.1...v0.4.0) (2026-11-08)
 
 
