@@ -7,8 +7,8 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
 use std::time::SystemTime;
 
+use crate::faults::Faults;
 use crate::hash::{HashConfig, Hashes, Md5Sink, Xxh64Sink};
-use crate::job::Faults;
 use crate::pipeline::{self, BufferPool, ChunkSink, PumpError};
 use crate::platform::{self, UncachedReader};
 
