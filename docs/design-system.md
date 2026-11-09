@@ -232,7 +232,7 @@ These stay as literals in their component's CSS, because a token would add a nam
 - **Stacking inside a component:** `z-index` from 1 to 7 within a panel or thumbnail. Only window-wide layers are tokens.
 - **Keyframes and looping animations:** the pulse ring and progress sheen colors, flash and glow shadows, and the durations of `spin`, `pulse`, `sheen` and `flash`.
 - **One-off dimensions:** layout sizes such as the 260px top band, 236px source column and dialog widths, plus icon sizes, border widths, the offsets that position corner badges and buttons, and small nudges of 1–2px.
-- **One-off opacities and filters:** for example, dimming a thumbnail.
+- **One-off opacities and filters:** for example, the blur behind a menu.
 - **The thumbnail placeholder gradient.**
 
 ## Merges
