@@ -1,8 +1,7 @@
-// Mouse input on thumbnails: the tooltip, and double-click to show in the file manager.
+// Double-click a thumbnail to show it in the file manager.
 
 import { api } from "./api";
-import { esc, fmtSize } from "./format";
-import { S, fileManager, sep, shownFiles } from "./state.svelte.ts";
+import { S, sep, shownFiles } from "./state.svelte.ts";
 
 /** Double-click a thumbnail: show the verified copy (or the original) in the file manager. */
 function onDoubleClick(e: MouseEvent) {
@@ -23,36 +22,6 @@ function onDoubleClick(e: MouseEvent) {
   if (path) api.reveal(path).catch(() => {});
 }
 
-/** Tooltip on thumbnails. */
-function onMouseMove(e: MouseEvent, tip: HTMLElement) {
-  const t = (e.target as Element).closest<HTMLElement>(".thumb");
-  const f = t ? shownFiles()[+t.dataset.i!] : undefined;
-  if (!f) {
-    tip.classList.remove("on");
-    return;
-  }
-  const st = {
-    pending: "Not copied yet",
-    copying: f.verify ? "Verifying…" : "Copying…",
-    copied: "Copied & verified",
-    backing: f.verify ? "Verifying backup…" : "Backing up…",
-    backed: "Copied & backed up · verified",
-    failed: f.failure ?? "Not verified",
-  }[f.state];
-  const stateClass = f.state === "failed" ? " problem" : /backed|copied/.test(f.state) ? " done" : "";
-  const when = f.modified ? new Date(f.modified) : null;
-  tip.innerHTML = `<b>${esc(f.name)}</b>${fmtSize(f.size)}${when ? ` · ${when.toLocaleDateString(undefined, { month: "short", day: "numeric" })} ${when.toTimeString().slice(0, 8)}` : ""}
-    <div class="h">${esc(f.srcRel)}</div><div class="state${stateClass}">${esc(st)}</div>
-    <div class="h">Double-click to show in ${fileManager}</div>`;
-  tip.classList.add("on");
-  const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8);
-  const y = Math.min(e.clientY + 16, innerHeight - tip.offsetHeight - 8);
-  tip.style.setProperty("--x", x + "px");
-  tip.style.setProperty("--y", y + "px");
-}
-
 export function initThumbInput() {
-  const tip = document.getElementById("tip")!;
   document.addEventListener("dblclick", onDoubleClick);
-  document.addEventListener("mousemove", (e) => onMouseMove(e, tip));
 }

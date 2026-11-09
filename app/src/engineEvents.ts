@@ -1,7 +1,7 @@
 // Maps engine events onto the panels and thumbnails.
 
 import { failureText, type EngineEvent } from "./api";
-import { toast } from "./menus";
+import { toast } from "./components/Toast/toastState.svelte.ts";
 import { finish } from "./offload";
 import { resetSamples, sample } from "./runState";
 import { ejectSource } from "./source";

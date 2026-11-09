@@ -2,7 +2,8 @@
 // watching for cards coming and going.
 
 import { api, historyApi, type VolumeEntry } from "./api";
-import { closeOverlay, toast } from "./menus";
+import { closeOverlay } from "./components/Overlay/overlayState.svelte.ts";
+import { toast } from "./components/Toast/toastState.svelte.ts";
 import { fmtSize } from "./format";
 import { prepare, schedulePrepare } from "./destinations";
 import { resetRun } from "./runState";

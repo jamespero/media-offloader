@@ -1,0 +1,89 @@
+<script lang="ts">
+  import { onMount, untrack } from "svelte";
+  import { closeMenus } from "../Menu/menuState.svelte.ts";
+  import { ic } from "../../icons";
+  import { S, tokenContext } from "../../state.svelte.ts";
+  import { DATE_FMTS, DAY_FMTS, fmtDate, fmtDay, tokenInfo, tokenText } from "../../tokens";
+  import MenuItem from "../Menu/MenuItem.svelte";
+
+  let { index, onEdit }: { index: number; onEdit: () => void } = $props();
+
+  const token = untrack(() => S.settings.tokens[index]);
+  const ctx = tokenContext();
+  const count = $derived(S.settings.tokens.length);
+  const reel = $derived(token.v || "A");
+  const dateSample = token.t === "now" ? ctx.now : (ctx.shotDate ?? ctx.now);
+  const firstNumber = untrack(() => (token.t === "day" ? S.settings.shootDay : ctx.reelNo(token.v || "A")));
+  const firstText = untrack(() => token.v ?? "");
+
+  let textInput = $state<HTMLInputElement>();
+
+  onMount(() => {
+    textInput?.focus();
+    textInput?.select();
+  });
+
+  function closeOnEnter(e: KeyboardEvent) {
+    if (e.key === "Enter") closeMenus();
+  }
+
+  function setNumber(e: Event) {
+    const n = Math.trunc(Number((e.currentTarget as HTMLInputElement).value));
+    if (!Number.isFinite(n) || n < 1 || n > 999) return;
+    if (token.t === "day") S.settings.shootDay = n;
+    else S.settings.reels[token.v || "A"] = n;
+    onEdit();
+  }
+
+  function setText(e: Event) {
+    token.v = (e.currentTarget as HTMLInputElement).value;
+    onEdit();
+  }
+</script>
+
+<!-- A labelled number field: shoot day, next roll. -->
+{#snippet numberRow(label: string, note: string)}
+  <div class="row num-row">
+    <span class="label">{label}</span>
+    <input class="tin" id="numIn" type="number" min="1" max="999" value={firstNumber} oninput={setNumber} onkeydown={closeOnEnter} />
+  </div>
+  <div class="mnote">{note}</div>
+{/snippet}
+
+{#snippet format(f: string, sample: string, chosen: boolean)}
+  <button class="mi" data-act="fmt" data-i={index} data-f={f}>
+    <span class="mi-icon">{#if chosen}{@html ic.check(14)}{/if}</span><span>{f}</span><span class="sm">{sample}</span>
+  </button>
+{/snippet}
+
+{#if token.t === "now" || token.t === "shot"}
+  <div class="mh">{token.t === "now" ? "Now: current date/time" : "Shot: capture date/time"}</div>
+  {#each DATE_FMTS as f}{@render format(f, fmtDate(dateSample, f), (token.fmt ?? "YY-MM-DD") === f)}{/each}
+{:else if token.t === "day"}
+  <div class="mh">Shoot day</div>
+  {@render numberRow("Day", "Set by hand; it doesn't count up on its own.")}
+  <div class="sep"></div>
+  <div class="mh">Format</div>
+  {#each DAY_FMTS as f}{@render format(f, fmtDay(S.settings.shootDay, f, ctx.shotDate ?? ctx.now), (token.fmt ?? "Day01") === f)}{/each}
+{:else if token.t === "text" || token.t === "project"}
+  <div class="mh">{token.t === "text" ? "Custom text" : "Project name"}</div>
+  <div class="mi-field">
+    <input class="tin" id="txtIn" value={firstText} spellcheck="false" bind:this={textInput} oninput={setText} onkeydown={closeOnEnter} />
+  </div>
+{:else if token.t === "reel"}
+  <div class="mh">Reel letter</div>
+  {#each ["A", "B", "C", "D"] as l}
+    <MenuItem icon="tag" label="{l}{String(ctx.reelNo(l)).padStart(3, '0')}, {l}{String(ctx.reelNo(l) + 1).padStart(3, '0')}…" act="reel" data-i={index} data-v={l}>
+      {#if reel === l}<span class="ck">{@html ic.check(14)}</span>{/if}
+    </MenuItem>
+  {/each}
+  <div class="sep"></div>
+  {@render numberRow(`Next ${reel} roll`, "Counts up after each completed offload. Change it to match the card's label.")}
+{:else}
+  <div class="mh">{tokenInfo(token.t).label}</div>
+  <div class="mnote">Resolves to <span class="mono-value">{tokenText(token, ctx)}</span></div>
+{/if}
+<div class="sep"></div>
+{#if index > 0}<MenuItem icon="chevL" label="Move Left" act="mvl" data-i={index} />{/if}
+{#if index < count - 1}<MenuItem icon="chevR" label="Move Right" act="mvr" data-i={index} />{/if}
+<MenuItem icon="trash" label="Remove" act="rmtok" data-i={index} />

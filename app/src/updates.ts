@@ -10,12 +10,10 @@
 // waits for the next launch.
 
 import { check, type Update } from "@tauri-apps/plugin-updater";
-import { relaunch } from "@tauri-apps/plugin-process";
-import { api } from "./api";
-import { closeOverlay, overlay, whenOverlayCloses } from "./menus";
-import { esc } from "./format";
-import { reverifyRunning } from "./reverify";
-import { S, running, saveSettings } from "./state.svelte.ts";
+import { openedOverlay, overlay, whenOverlayCloses } from "./components/Overlay/overlayState.svelte.ts";
+import UpdateDialog from "./components/UpdateDialog/UpdateDialog.svelte";
+import { reverifyRunning } from "./reverify.svelte.ts";
+import { S, running } from "./state.svelte.ts";
 
 const FIRST_CHECK_MS = 5_000;
 const RECHECK_MS = 6 * 60 * 60 * 1000;
@@ -31,7 +29,7 @@ let busy = false;
 /** The version the user said "Not now" to; asked again at the next launch. */
 let declined: string | null = null;
 
-const idle = () => !running() && !reverifyRunning() && !document.getElementById("scrim");
+const idle = () => !running() && !reverifyRunning() && !openedOverlay();
 
 async function checkAndDownload() {
   if (busy || ready) return;
@@ -52,66 +50,15 @@ async function checkAndDownload() {
 
 function maybePrompt() {
   if (!ready || ready.version === declined || !idle()) return;
-  if (!S.settings.autoUpdate) prompt(ready);
-  else if (Date.now() - launchedAt < LAUNCH_WINDOW_MS) autoInstall(ready);
-}
-
-/** Automatic updates: say what's happening for a moment, then install and restart. */
-function autoInstall(u: Update) {
-  const o = overlay(`<div class="dialog"><h3>Updating</h3>
-    <p>Installing Media Offloader ${esc(u.version)}. The app restarts in a moment.</p>
-    <p id="updMsg" class="note">Automatic updates can be turned off in Settings → General.</p>
-    <div class="acts"><button class="btn" id="updLater">Not now</button><button class="btn primary" id="updGo" disabled>Installing…</button></div></div>`);
-  whenOverlayCloses(() => {
-    declined = u.version;
-  });
-  o.querySelector<HTMLButtonElement>("#updLater")!.onclick = closeOverlay;
-  setTimeout(() => {
-    if (declined !== u.version && o.isConnected) void install(u, o);
-  }, 2500);
-}
-
-function prompt(u: Update) {
-  const o = overlay(`<div class="dialog"><h3>Update ready</h3>
-    <p>Media Offloader ${esc(u.version)} has been downloaded. You have ${esc(u.currentVersion)}.</p>
-    <p id="updMsg">Installing takes a few seconds and restarts the app. Your settings and presets are kept.</p>
-    <div class="set updauto"><div class="l"><b>Install updates automatically from now on</b><span>As the app starts, before you begin. Never during an offload.</span></div><button class="tog" id="updAuto" aria-pressed="false"></button></div>
-    <div class="acts"><button class="btn" id="updNotes">What's new</button><button class="btn" id="updLater">Not now</button><button class="btn primary" id="updGo">Update and relaunch</button></div></div>`);
+  const auto = S.settings.autoUpdate;
+  if (auto && Date.now() - launchedAt >= LAUNCH_WINDOW_MS) return;
+  const update = ready;
+  overlay(UpdateDialog, { update, auto });
   // "Not now", Escape and clicking outside all close the dialog; the update stays
   // downloaded, but isn't offered again until the next launch.
   whenOverlayCloses(() => {
-    declined = u.version;
+    declined = update.version;
   });
-  const auto = o.querySelector<HTMLButtonElement>("#updAuto")!;
-  auto.onclick = () => {
-    S.settings.autoUpdate = !S.settings.autoUpdate;
-    saveSettings();
-    auto.classList.toggle("on", S.settings.autoUpdate);
-    auto.setAttribute("aria-pressed", String(S.settings.autoUpdate));
-  };
-  o.querySelector<HTMLButtonElement>("#updNotes")!.onclick = () => api.openRelease(u.version).catch(() => {});
-  o.querySelector<HTMLButtonElement>("#updLater")!.onclick = closeOverlay;
-  o.querySelector<HTMLButtonElement>("#updGo")!.onclick = () => install(u, o);
-}
-
-async function install(u: Update, o: HTMLElement) {
-  // The dialog only shows when idle and covers the window, but check once more:
-  // restarting mid-offload is the one thing this must never do.
-  if (running() || reverifyRunning()) return;
-  const msg = o.querySelector<HTMLElement>("#updMsg")!;
-  const go = o.querySelector<HTMLButtonElement>("#updGo")!;
-  const buttons = o.querySelectorAll<HTMLButtonElement>("button");
-  buttons.forEach((b) => (b.disabled = true));
-  go.textContent = "Installing…";
-  try {
-    await u.install(); // on Windows the installer closes the app and reopens it itself
-    await relaunch();
-  } catch (err) {
-    msg.textContent = `The update didn't install (${err}). Try again, or download it from the releases page.`;
-    msg.className = "problem-text";
-    buttons.forEach((b) => (b.disabled = false));
-    go.textContent = "Try again";
-  }
 }
 
 export function initUpdates() {

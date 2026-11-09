@@ -7,8 +7,12 @@
   import HistoryDestPanel from "../History/HistoryDestPanel.svelte";
   import HistoryGrid from "../History/HistoryGrid.svelte";
   import HistorySourcePanel from "../History/HistorySourcePanel.svelte";
+  import Menu from "../Menu/Menu.svelte";
+  import Overlay from "../Overlay/Overlay.svelte";
   import SourcePanel from "../SourcePanel/SourcePanel.svelte";
   import Strip from "../Strip/Strip.svelte";
+  import Toast from "../Toast/Toast.svelte";
+  import Tooltip from "../Tooltip/Tooltip.svelte";
 
   /** The past offload being shown, once its journal has been read. */
   const past = $derived(S.view ? (S.detail?.item ?? null) : null);
@@ -36,3 +40,7 @@
   {/if}
 </div>
 <Footer />
+<Overlay />
+<Toast />
+<Tooltip />
+<Menu />
