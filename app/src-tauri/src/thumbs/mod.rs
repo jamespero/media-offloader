@@ -32,6 +32,14 @@ fn extract(_path: &Path) -> Option<(&'static str, Vec<u8>)> {
     None
 }
 
+/// The thumbnail cache under the app's cache folder. Versioned so a fix can drop entries
+/// that were wrong: `thumbs` (up to 0.4.0) holds "no thumbnail" markers for every file
+/// on a drive-root source, from a path bug, so it's removed.
+pub fn cache_dir(app_cache: &Path) -> PathBuf {
+    let _ = fs::remove_dir_all(app_cache.join("thumbs"));
+    app_cache.join("thumbs-2")
+}
+
 /// Longest side of a generated thumbnail, in pixels (tiles are ~170 px wide at 2×).
 const SIZE: u32 = 320;
 
@@ -69,7 +77,7 @@ impl Thumbs {
                     if current.load(Ordering::Relaxed) != generation {
                         break; // superseded by a newer request
                     }
-                    let url = thumbnail(&cache, &item.path);
+                    let url = thumbnail(&cache, &normalize(&item.path));
                     let _ = app.emit("thumb", ThumbReady { generation, key: item.key, url });
                 }
             }
@@ -82,6 +90,13 @@ impl Thumbs {
         self.generation.store(generation, Ordering::SeqCst);
         let _ = self.tx.lock().unwrap().send((generation, items));
     }
+}
+
+/// Rebuilds `path` from its components, so stray `/` and doubled separators become
+/// single native ones. The file system accepts `H:\\DCIM` or `H:/DCIM`; the Windows
+/// Shell doesn't, and would report no thumbnail.
+fn normalize(path: &Path) -> PathBuf {
+    path.components().collect()
 }
 
 fn thumbnail(cache: &Path, path: &Path) -> Option<String> {
@@ -133,6 +148,15 @@ fn data_url(mime: &str, bytes: &[u8]) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(windows)]
+    #[test]
+    fn normalize_gives_single_native_separators() {
+        let n = |s: &str| super::normalize(std::path::Path::new(s));
+        assert_eq!(n(r"H:\\DCIM\100MEDIA\C0001.MP4"), std::path::Path::new(r"H:\DCIM\100MEDIA\C0001.MP4"));
+        assert_eq!(n("H:/DCIM/C0001.MP4"), std::path::Path::new(r"H:\DCIM\C0001.MP4"));
+        assert_eq!(n(r"\\server\share\\clip.mov"), std::path::Path::new(r"\\server\share\clip.mov"));
+    }
+
     #[test]
     fn base64_matches_known_vectors() {
         let enc = |s: &str| super::data_url("x", s.as_bytes()).trim_start_matches("data:x;base64,").to_string();

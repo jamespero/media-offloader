@@ -18,8 +18,8 @@ fn main() {
         .plugin(tauri_plugin_process::init())
         .manage(state::Engine::default())
         .setup(|app| {
-            let cache = app.path().app_cache_dir()?.join("thumbs");
-            app.manage(thumbs::Thumbs::start(app.handle().clone(), cache));
+            let dir = app.path().app_cache_dir()?;
+            app.manage(thumbs::Thumbs::start(app.handle().clone(), thumbs::cache_dir(&dir)));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

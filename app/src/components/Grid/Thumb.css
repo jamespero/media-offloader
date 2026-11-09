@@ -24,7 +24,6 @@
   display: grid;
   place-items: center;
   color: var(--color-text-tertiary);
-  transition: filter var(--duration-slow), opacity var(--duration-slow);
   background: radial-gradient(ellipse at 50% 35%, var(--color-surface-2), var(--color-surface-thumb) 70%);
 }
 
@@ -99,10 +98,6 @@
   display: none;
 }
 
-.thumb.pending .img {
-  filter: saturate(.25) brightness(.6);
-}
-
 .thumb.active::after {
   border-color: var(--color-status-working);
 }
@@ -144,10 +139,6 @@
 
 .thumb.fail::after {
   border-color: var(--color-status-problem);
-}
-
-.thumb.fail .img {
-  filter: saturate(.3) brightness(.55);
 }
 
 .thumb.fail .st {
