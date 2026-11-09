@@ -13,9 +13,9 @@ import { check, type Update } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { api } from "./api";
 import { closeOverlay, overlay, whenOverlayCloses } from "./menus";
-import { esc } from "./render";
+import { esc } from "./format";
 import { reverifyRunning } from "./reverify";
-import { S, running, saveSettings } from "./state";
+import { S, running, saveSettings } from "./state.svelte.ts";
 
 const FIRST_CHECK_MS = 5_000;
 const RECHECK_MS = 6 * 60 * 60 * 1000;

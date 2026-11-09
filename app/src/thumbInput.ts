@@ -1,8 +1,8 @@
 // Mouse input on thumbnails: the tooltip, and double-click to show in the file manager.
 
 import { api } from "./api";
-import { $, esc, fmtSize } from "./render";
-import { S, fileManager, sep, shownFiles } from "./state";
+import { esc, fmtSize } from "./format";
+import { S, fileManager, sep, shownFiles } from "./state.svelte.ts";
 
 /** Double-click a thumbnail: show the verified copy (or the original) in the file manager. */
 function onDoubleClick(e: MouseEvent) {
@@ -52,7 +52,7 @@ function onMouseMove(e: MouseEvent, tip: HTMLElement) {
 }
 
 export function initThumbInput() {
-  const tip = $("tip");
+  const tip = document.getElementById("tip")!;
   document.addEventListener("dblclick", onDoubleClick);
   document.addEventListener("mousemove", (e) => onMouseMove(e, tip));
 }

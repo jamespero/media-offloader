@@ -6,8 +6,8 @@
 
 import { ic } from "./icons";
 import { closeOverlay, mi, openMenu, overlay } from "./menus";
-import { esc } from "./render";
-import { S, running, saveSettings, sep, tokenContext } from "./state";
+import { esc } from "./format";
+import { S, plain, running, saveSettings, sep, tokenContext } from "./state.svelte.ts";
 import { tokenText, type Token } from "./tokens";
 
 export interface Preset {
@@ -21,10 +21,6 @@ const sameTokens = (a: Token[], b: Token[]) => JSON.stringify(a) === JSON.string
 export function activePreset(): Preset | undefined {
   const s = S.settings;
   return s.presets.find((p) => sameTokens(p.tokens, s.tokens));
-}
-
-export function presetButton() {
-  return `${ic.star(13)}<span>Preset</span><b>${esc(activePreset()?.name ?? "Custom")}</b>${ic.chev()}`;
 }
 
 export function presetMenu(anchor: Element) {
@@ -48,7 +44,7 @@ export function presetMenu(anchor: Element) {
 export function applyPreset(id: string) {
   const p = S.settings.presets.find((x) => x.id === id);
   if (!p || running()) return;
-  S.settings.tokens = structuredClone(p.tokens);
+  S.settings.tokens = plain(p.tokens);
   saveSettings();
 }
 
@@ -71,7 +67,7 @@ export function saveCurrentAs(name: string) {
   name = name.trim();
   if (!name) return false;
   const s = S.settings;
-  const preset: Preset = { id: crypto.randomUUID(), name, tokens: structuredClone(s.tokens) };
+  const preset: Preset = { id: crypto.randomUUID(), name, tokens: plain(s.tokens) };
   const i = s.presets.findIndex((p) => p.name.toLowerCase() === name.toLowerCase());
   if (i >= 0) s.presets[i] = { ...preset, id: s.presets[i].id };
   else s.presets.push(preset);

@@ -3,10 +3,19 @@
 import { failureText, type EngineEvent } from "./api";
 import { toast } from "./menus";
 import { finish } from "./offload";
-import { flashThumb, render, renderSrc, updateLive, updateThumb } from "./render";
 import { resetSamples, sample } from "./runState";
 import { ejectSource } from "./source";
-import { S, totalBytes } from "./state";
+import { S, totalBytes } from "./state.svelte.ts";
+
+/** Plays the check-mark flash on a tile that just verified. */
+function flashThumb(i: number, label: string) {
+  const f = S.files[i];
+  if (!f || S.view) return;
+  f.flash = label;
+  setTimeout(() => {
+    if (f.flash === label) f.flash = undefined;
+  }, 1000);
+}
 
 export function onEngine(e: EngineEvent) {
   switch (e.type) {
@@ -21,7 +30,6 @@ export function onEngine(e: EngineEvent) {
       } else {
         S.phase = "copying";
       }
-      render();
       break;
     case "fileStarted": {
       const f = S.files[e.file];
@@ -31,8 +39,6 @@ export function onEngine(e: EngineEvent) {
       f.verify = false;
       if (e.pass === "backup") S.curB = { name: f.name, verify: false };
       else S.cur = { name: f.name, verify: false };
-      updateThumb(e.file);
-      updateLive();
       break;
     }
     case "progress": {
@@ -51,8 +57,6 @@ export function onEngine(e: EngineEvent) {
         if (e.pass === "fanOut") S.bakP = pct;
       }
       sample(e.done, e.total);
-      updateThumb(e.file);
-      updateLive();
       break;
     }
     case "fileFinished": {
@@ -82,14 +86,10 @@ export function onEngine(e: EngineEvent) {
         S.copyP = Math.max(S.copyP, pct);
         if (e.pass === "fanOut") S.bakP = S.copyP;
       }
-      updateThumb(e.file);
-      updateLive();
-      if (failed.length) renderSrc();
       break;
     }
     case "sourceReleased":
       S.released = true;
-      renderSrc();
       if (S.settings.ejectWhenVerified) ejectSource();
       break;
     case "warning":

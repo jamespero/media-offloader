@@ -3,8 +3,8 @@
 import { getVersion } from "@tauri-apps/api/app";
 import { api } from "./api";
 import { ic, type IconName } from "./icons";
-import { $, esc, fmtSize } from "./render";
-import { S, fileManager, running, tokenContext } from "./state";
+import { esc, fmtSize } from "./format";
+import { S, fileManager, running, tokenContext } from "./state.svelte.ts";
 import { DATE_FMTS, DAY_FMTS, TOKEN_TYPES, fmtDate, fmtDay, tokenInfo, tokenText } from "./tokens";
 import { namingPane } from "./presets";
 
@@ -167,7 +167,7 @@ export function overlay(html: string) {
   o.className = "scrim";
   o.id = "scrim";
   o.innerHTML = html;
-  $("app").appendChild(o);
+  document.getElementById("app")!.appendChild(o);
   o.addEventListener("mousedown", (e) => {
     if (e.target === o) closeOverlay();
   });
@@ -277,6 +277,6 @@ export function toast(ok: boolean, title: string, body: string) {
   const t = document.createElement("div");
   t.className = "toast";
   t.innerHTML = `<div class="ic ${ok ? "" : "bad"}">${ok ? ic.check(18, 2.6) : ic.alert(18)}</div><div><b>${esc(title)}</b><span>${esc(body)}</span></div>`;
-  $("app").appendChild(t);
+  document.getElementById("app")!.appendChild(t);
   setTimeout(() => t.remove(), 5000);
 }

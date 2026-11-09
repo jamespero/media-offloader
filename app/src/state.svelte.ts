@@ -1,4 +1,4 @@
-// App state. One offload at a time.
+// App state, reactive so Svelte components update themselves. One offload at a time.
 
 import type { Destination, HistoryDetail, HistoryItem, JobReport, Plan, VolumeEntry } from "./api";
 import type { Preset } from "./presets";
@@ -19,6 +19,8 @@ export interface FileView {
   p: number;
   verify: boolean;
   failure?: string;
+  /** Label of the check-mark flash playing on this tile, if any. */
+  flash?: string;
 }
 
 export interface Source {
@@ -109,56 +111,61 @@ export interface Live {
   verify: boolean;
 }
 
-export const S = {
-  settings: load(),
-  volumes: [] as VolumeEntry[],
-  src: null as Source | null,
-  plan: null as Plan | null,
-  files: [] as FileView[],
-  phase: "waiting" as Phase,
-  scanning: false,
+class AppState {
+  settings = $state(load());
+  volumes = $state.raw<VolumeEntry[]>([]);
+  src = $state.raw<Source | null>(null);
+  plan = $state.raw<Plan | null>(null);
+  files = $state<FileView[]>([]);
+  phase = $state<Phase>("waiting");
+  scanning = $state(false);
   /** Result of the latest `prepare`: resolved folders (copy-conflicted), space. */
-  dests: null as Destination[] | null,
-  prepError: null as string | null,
-  copyP: 0,
-  bakP: 0,
-  cur: null as Live | null,
-  curB: null as Live | null,
+  dests = $state.raw<Destination[] | null>(null);
+  prepError = $state<string | null>(null);
+  copyP = $state(0);
+  bakP = $state(0);
+  cur = $state.raw<Live | null>(null);
+  curB = $state.raw<Live | null>(null);
   /** Effective offload speed in bytes/s, and seconds left. */
-  rate: 0,
-  eta: null as number | null,
-  released: false,
+  rate = $state(0);
+  eta = $state<number | null>(null);
+  released = $state(false);
   /** The source was ejected (or unplugged) after its copy verified. */
-  ejected: false,
+  ejected = $state(false);
   /** Files that failed on the copy drive / on the backup drive in the last run. */
-  failCopy: 0,
-  failBak: 0,
+  failCopy = $state(0);
+  failBak = $state(0);
   /** Whether the current (or last) run included a backup. */
-  runHadBackup: false,
+  runHadBackup = $state(false);
   /** Whether the current (or last) run is fan-out (a resumed run uses its own mode). */
-  runFanOut: false,
-  abortReason: null as string | null,
+  runFanOut = $state(false);
+  abortReason = $state<string | null>(null);
   /** After a Stop: how many verified files were kept. */
-  stoppedKept: 0,
-  report: null as JobReport | null,
-  startedAt: null as Date | null,
-  finishedAt: null as Date | null,
+  stoppedKept = $state(0);
+  report = $state.raw<JobReport | null>(null);
+  startedAt = $state.raw<Date | null>(null);
+  finishedAt = $state.raw<Date | null>(null);
   /** Past offloads, newest first. */
-  history: [] as HistoryItem[],
+  history = $state.raw<HistoryItem[]>([]);
   /** Which tab is showing: "" for Current, else a journal path. */
-  view: "",
-  detail: null as HistoryDetail | null,
+  view = $state("");
+  detail = $state.raw<HistoryDetail | null>(null);
   /** Files of the history tab being shown. */
-  histFiles: [] as FileView[],
+  histFiles = $state<FileView[]>([]);
   /** Continuing this journal (resume / retry) rather than starting fresh. */
-  resumeJournal: null as string | null,
+  resumeJournal = $state<string | null>(null);
   /** The earlier offload that `resumeJournal` continues, for marking its finished files. */
-  resumeDetail: null as HistoryDetail | null,
+  resumeDetail = $state.raw<HistoryDetail | null>(null);
   /** Kind of file the grid shows; null picks footage first (see `gridKind`). */
-  kind: null as "video" | "stills" | "audio" | "other" | "all" | null,
+  kind = $state<"video" | "stills" | "audio" | "other" | "all" | null>(null);
   /** Journal of the offload on the Current tab. */
-  currentJournal: null as string | null,
-};
+  currentJournal = $state<string | null>(null);
+}
+
+export const S = new AppState();
+
+/** A plain copy of reactive data; `structuredClone` can't copy Svelte's state proxies. */
+export const plain = <T>(value: T): T => $state.snapshot(value) as T;
 
 export function tokenContext(now = new Date()): TokenContext {
   const shot = S.files.reduce<number | null>((min, f) => (f.modified != null && (min == null || f.modified < min) ? f.modified : min), null);

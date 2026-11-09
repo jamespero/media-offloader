@@ -2,8 +2,7 @@
 
 import { api, historyApi, type OffloadArgs } from "./api";
 import { markEarlierRun } from "./history";
-import { render, renderBak, renderCopy, renderSrc, renderStrip } from "./render";
-import { S, filesFromPlan, running, saveSettings, sep, tokenContext } from "./state";
+import { S, filesFromPlan, running, saveSettings, sep, tokenContext } from "./state.svelte.ts";
 import { resolveRoot } from "./tokens";
 
 function offloadArgs(): OffloadArgs {
@@ -36,7 +35,6 @@ export async function prepare(): Promise<boolean> {
   if (!S.src || (!S.settings.copyDest && !S.resumeJournal) || running() || S.phase !== "ready") {
     S.dests = null;
     S.prepError = null;
-    if (S.phase === "ready") render();
     return false;
   }
   const seq = ++prepSeq;
@@ -54,7 +52,6 @@ export async function prepare(): Promise<boolean> {
     S.dests = null;
     S.prepError = String(e);
   }
-  render();
   return !S.prepError;
 }
 
@@ -66,16 +63,11 @@ export function setDest(w: "copy" | "bak", path: string) {
   s[key] = [path, ...s[key].filter((p) => p !== path)].slice(0, 5);
   saveSettings();
   S.dests = null;
-  render();
   schedulePrepare();
 }
 
 export function tokensChanged() {
   saveSettings();
   S.dests = null;
-  renderCopy();
-  renderBak();
-  renderSrc();
-  renderStrip();
   schedulePrepare();
 }

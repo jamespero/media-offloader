@@ -3,10 +3,10 @@
 
 import { api, historyApi, type VolumeEntry } from "./api";
 import { closeOverlay, toast } from "./menus";
-import { fmtSize, render, renderSrc } from "./render";
+import { fmtSize } from "./format";
 import { prepare, schedulePrepare } from "./destinations";
 import { resetRun } from "./runState";
-import { S, filesFromPlan, running, type Source } from "./state";
+import { S, filesFromPlan, running, type Source } from "./state.svelte.ts";
 import { thumbsForCurrent } from "./thumbRequests";
 
 let selectSeq = 0;
@@ -30,7 +30,6 @@ export async function selectSource(path: string, hint?: VolumeEntry) {
   S.phase = "waiting";
   S.scanning = true;
   resetRun();
-  render();
   try {
     const plan = await api.previewSource(path, S.settings.includeSystemFiles);
     if (seq !== selectSeq) return;
@@ -45,7 +44,6 @@ export async function selectSource(path: string, hint?: VolumeEntry) {
     toast(false, "Couldn't read the source", String(e));
   }
   S.scanning = false;
-  render();
   schedulePrepare();
   thumbsForCurrent();
 }
@@ -85,10 +83,8 @@ export async function resumeFrom(path: string) {
   S.prepError = null;
   S.phase = "ready";
   S.scanning = true;
-  render();
   await prepare();
   S.scanning = false;
-  render();
   thumbsForCurrent();
 }
 
@@ -108,7 +104,6 @@ export async function ejectSource() {
   } catch (e) {
     toast(false, `Couldn't eject ${src.label}`, String(e));
   }
-  renderSrc();
 }
 
 export function clearSource() {
@@ -122,7 +117,6 @@ export function clearSource() {
   S.prepError = null;
   S.phase = "waiting";
   resetRun();
-  render();
 }
 
 let knownVolumes: Set<string> | null = null;
@@ -143,11 +137,9 @@ export async function pollVolumes() {
       if (S.phase === "ready" && !S.resumeJournal) clearSource();
       else if ((S.phase === "done" || S.phase === "error") && !S.ejected) {
         S.ejected = true;
-        renderSrc();
       }
     } else if (gone && S.released && !S.ejected) {
       S.ejected = true; // pulled during the backup, which reads from the copy
-      renderSrc();
     }
     if (S.settings.autoSelect && !running() && !S.scanning) {
       // A newly inserted card or drive becomes the source; at launch, only an obvious card.
