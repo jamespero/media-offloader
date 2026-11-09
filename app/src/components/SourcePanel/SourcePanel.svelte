@@ -1,4 +1,8 @@
 <script lang="ts">
+  import Row from "../Row/Row.svelte";
+  import StatusPill from "../StatusPill/StatusPill.svelte";
+  import IconButton from "../IconButton/IconButton.svelte";
+  import Button from "../Button/Button.svelte";
   import { plural } from "../../format";
   import { resumeLabel } from "../../history";
   import { ic } from "../../icons";
@@ -19,13 +23,13 @@
   {@const src = S.src!}
   <div class="srcicon">{@html src.kind === "card" ? ic.card() : src.kind === "drive" ? ic.drive() : ic.folder()}</div>
   <h2>source</h2>
-  <div class="row tighter">
+  <Row gap="tighter">
     <button class="vol" data-act={running() ? undefined : "srcmenu"} title={src.path}>
       <span>{src.label}</span>
       {#if !running()}{@html ic.chev()}{/if}
     </button>
-    {#if canEject}<button class="iconbtn sm" title="Eject" data-act="eject">{@html ic.eject(14)}</button>{/if}
-  </div>
+    {#if canEject}<IconButton small title="Eject" data-act="eject">{@html ic.eject(14)}</IconButton>{/if}
+  </Row>
   <div class="meta">{src.media}</div>
 {/snippet}
 
@@ -35,7 +39,7 @@
     <div class="sub">Ejected — safe to remove. {rest}</div>
   {:else}
     <div class="sub">Safe to remove. {rest}</div>
-    {#if canEject}<button class="btn sm" data-act="eject">{@html ic.eject(13)} Eject</button>{/if}
+    {#if canEject}<Button size="sm" data-act="eject">{@html ic.eject(13)} Eject</Button>{/if}
   {/if}
 {/snippet}
 
@@ -46,24 +50,24 @@
     </div>
     <h2>source</h2>
     <div class="sub">{S.scanning ? "Reading the source…" : "Waiting for media"}</div>
-    <button class="btn sm" data-act="srcmenu">Select a source {@html ic.chev()}</button>
+    <Button size="sm" data-act="srcmenu">Select a source {@html ic.chev()}</Button>
   {:else if S.phase === "ready" || S.phase === "waiting"}
     {@render head()}
     <div class="sub">
       {#if S.scanning}Reading the source…{:else if res}Picks up where it stopped. Files already verified aren't copied again.{:else}Media files have not been copied from this source.{/if}
     </div>
-    <button class="btn primary start" data-act="start" disabled={!can} title={why}>{startLabel}</button>
+    <Button variant="primary" start data-act="start" disabled={!can} title={why}>{startLabel}</Button>
   {:else if cardBusy}
     {@render head()}
-    <div class="row in-progress"><span class="pulse"></span><span class="sub strong">Copying from this source</span></div>
+    <Row above="sm"><span class="pulse"></span><span class="sub strong">Copying from this source</span></Row>
     <div class="sub">Keep it connected until the copy is verified.</div>
   {:else if S.phase === "backing"}
     {@render head()}
-    <span class="safe">{@html ic.check(13)} Copy verified</span>
+    <StatusPill tone="done">{@html ic.check(13)} Copy verified</StatusPill>
     {@render ejectRow("The backup continues from the copy.")}
   {:else if S.phase === "done"}
     {@render head()}
-    <span class="safe">{@html ic.check(13)} Copied &amp; verified</span>
+    <StatusPill tone="done">{@html ic.check(13)} Copied &amp; verified</StatusPill>
     {#if S.src.kind === "folder"}
       <div class="sub">Media files have been copied and verified.</div>
     {:else}
@@ -71,11 +75,11 @@
     {/if}
   {:else if S.released}
     {@render head()}
-    <span class="safe">{@html ic.check(13)} Copy verified</span>
+    <StatusPill tone="done">{@html ic.check(13)} Copy verified</StatusPill>
     {@render ejectRow("The backup didn't finish.")}
   {:else}
     {@render head()}
-    <span class="bad">{@html ic.alert(13)} {S.failCopy > 0 ? `${plural(S.failCopy, "file")} failed` : "Stopped"}</span>
+    <StatusPill tone="problem">{@html ic.alert(13)} {S.failCopy > 0 ? `${plural(S.failCopy, "file")} failed` : "Stopped"}</StatusPill>
     <div class="sub">Keep this card. {S.failCopy > 0 ? "Some files didn't verify." : "The copy isn't complete."}</div>
   {/if}
 </Panel>

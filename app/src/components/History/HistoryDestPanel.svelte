@@ -1,4 +1,5 @@
 <script lang="ts">
+  import StatusPill from "../StatusPill/StatusPill.svelte";
   import type { HistoryItem } from "../../api";
   import DoneStatus from "../Panel/DoneStatus.svelte";
   import Panel from "../Panel/Panel.svelte";
@@ -26,7 +27,7 @@
     <h2>{backup ? "backup" : "copy"}</h2>
     <PathLine path={root} />
     <div class="pct result">{pct}%<small>{done} of {item.files} files verified</small></div>
-    <span class="qpill"><i class={[!item.outcome && "problem"]}></i>{item.outcome ? "Stopped" : "Didn't finish"}</span>
+    <StatusPill tone={item.outcome ? "queued" : "held"}>{item.outcome ? "Stopped" : "Didn't finish"}</StatusPill>
   {:else}
     <ProblemStatus
       heading={backup ? "backup incomplete" : "copy incomplete"}

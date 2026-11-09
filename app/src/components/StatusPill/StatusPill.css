@@ -1,0 +1,42 @@
+.dotted {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-strong);
+}
+
+.dotted i {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-circle);
+  background: var(--color-text-tertiary);
+}
+
+.dotted i.held {
+  background: var(--color-status-problem);
+}
+
+.done,
+.problem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.done {
+  background: var(--color-status-done-soft);
+  color: var(--color-status-done);
+}
+
+.problem {
+  background: var(--color-status-problem-soft);
+  color: var(--color-status-problem);
+}

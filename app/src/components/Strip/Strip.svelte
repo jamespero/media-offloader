@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Segmented from "../Segmented/Segmented.svelte";
+  import IconButton from "../IconButton/IconButton.svelte";
   import { KINDS, gridKind, kindOf } from "../../fileKinds";
   import { clock, day, itemState } from "../../history";
   import { ic } from "../../icons";
@@ -15,6 +17,9 @@
   const files = $derived(shownFiles());
   const kinds = $derived(KINDS.map(([k, label]) => [k, label, files.filter((f) => kindOf(f.ext) === k).length] as const).filter(([, , n]) => n > 0));
   const shownKind = $derived(gridKind(files));
+  const kindItems = $derived(
+    [...kinds, ["all", "All", files.length] as const].map(([k, label, count]) => ({ label, count, on: shownKind === k, "data-act": "kind", "data-k": k })),
+  );
 
   let tabs: HTMLElement;
 
@@ -24,10 +29,6 @@
     tabs.scrollLeft = tabs.scrollWidth;
   });
 </script>
-
-{#snippet kindButton(k: string, label: string, n: number)}
-  <button class={[shownKind === k && "on"]} data-act="kind" data-k={k}>{label} <span class="n">{n}</span></button>
-{/snippet}
 
 <div class="strip">
   <div class="tabs" id="tabs" bind:this={tabs}>
@@ -42,9 +43,8 @@
     </button>
   </div>
   {#if kinds.length >= 2}
-    <div class="seg kinds" id="kinds">
-      {#each kinds as [k, label, n] (k)}{@render kindButton(k, label, n)}{/each}
-      {@render kindButton("all", "All", files.length)}
+    <div class="kinds" id="kinds">
+      <Segmented compact items={kindItems} />
     </div>
   {/if}
   {#if !S.view}
@@ -52,7 +52,7 @@
       {@html ic.star(13)}<span>Preset</span><b>{activePreset()?.name ?? "Custom"}</b>{@html ic.chev()}
     </button>
   {/if}
-  <button class="iconbtn" id="menuBtn" data-act="mainmenu" title="Menu" aria-label="Menu">{@html ic.menu()}</button>
+  <IconButton id="menuBtn" data-act="mainmenu" title="Menu" aria-label="Menu">{@html ic.menu()}</IconButton>
 </div>
 
 <style src="./Strip.css"></style>

@@ -44,11 +44,3 @@
   margin: var(--space-3) var(--space-2);
 }
 
-.menu :global(.mi-icon) {
-  width: 15px;
-}
-
-.menu :global(.mi) :global(.recent-path) {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-}

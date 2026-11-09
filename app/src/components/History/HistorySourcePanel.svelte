@@ -1,4 +1,6 @@
 <script lang="ts">
+  import StatusPill from "../StatusPill/StatusPill.svelte";
+  import Button from "../Button/Button.svelte";
   import type { HistoryItem } from "../../api";
   import { plural } from "../../format";
   import { clock, day, resumeLabel } from "../../history";
@@ -17,19 +19,19 @@
   <div class="vol static"><span>{item.label}</span></div>
   <div class="meta">{day(item.started)} · {clock(item.started)}</div>
   {#if !outcome}
-    <span class="bad">{@html ic.alert(13)} Didn't finish</span>
+    <StatusPill tone="problem">{@html ic.alert(13)} Didn't finish</StatusPill>
   {:else if outcome.kind === "verified"}
-    <span class="safe">{@html ic.check(13)} Copied &amp; verified</span>
+    <StatusPill tone="done">{@html ic.check(13)} Copied &amp; verified</StatusPill>
   {:else if outcome.kind === "failed"}
-    <span class="bad">{@html ic.alert(13)} {plural(outcome.files, "file")} failed</span>
+    <StatusPill tone="problem">{@html ic.alert(13)} {plural(outcome.files, "file")} failed</StatusPill>
   {:else if outcome.kind === "cancelled"}
-    <span class="qpill"><i></i>Stopped</span>
+    <StatusPill tone="queued">Stopped</StatusPill>
   {:else}
-    <span class="bad">{@html ic.alert(13)} Stopped</span>
+    <StatusPill tone="problem">{@html ic.alert(13)} Stopped</StatusPill>
   {/if}
   {#if item.resumable}
     {#if item.sourcePresent}
-      <button class="btn primary start" data-act="resume" data-path={item.path} disabled={running()}>{resumeLabel(item)}</button>
+      <Button variant="primary" start data-act="resume" data-path={item.path} disabled={running()}>{resumeLabel(item)}</Button>
     {:else}
       <div class="sub">Connect {item.label} to {resumeLabel(item).toLowerCase()}.</div>
     {/if}

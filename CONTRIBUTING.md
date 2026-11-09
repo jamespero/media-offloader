@@ -56,7 +56,7 @@ app/src/components/Toast/
 
 Components read the app state from `S` in `state.svelte.ts` and update themselves when it changes. Buttons and menu items set `data-act`, and `input.ts` routes the click.
 
-Global CSS is limited to `styles/global.css` (fonts and resets), `styles/tokens.css` (design tokens) and `styles/controls.css` (buttons, rows, pills and fields used across many components). Everything else belongs to a component. To style markup a component doesn't render itself, such as a parent's content or an icon, use `:global()` under one of its own elements.
+Global CSS is limited to `styles/global.css` (fonts and resets) and `styles/tokens.css` (design tokens). Everything else belongs to a component, including shared controls such as `Button`, `IconButton`, `MenuItem`, `Segmented`, `StatusPill` and `TextInput`. Use those rather than restyling their class names from outside. To style markup a component doesn't render itself, such as a parent's content or an icon, use `:global()` under one of its own elements.
 
 Name a state module differently from its component. `Toast.svelte` and `toast.svelte.ts` collide on the case-insensitive filesystems Windows and macOS use by default.
 

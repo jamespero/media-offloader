@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Button from "../Button/Button.svelte";
   import { relaunch } from "@tauri-apps/plugin-process";
   import type { Update } from "@tauri-apps/plugin-updater";
   import { onMount } from "svelte";
@@ -60,11 +61,11 @@
   {/if}
   <div class="acts">
     {#if !auto}
-      <button class="btn" id="updNotes" disabled={installing} onclick={() => api.openRelease(update.version).catch(() => {})}>What's new</button>
+      <Button id="updNotes" disabled={installing} onclick={() => api.openRelease(update.version).catch(() => {})}>What's new</Button>
     {/if}
-    <button class="btn" id="updLater" disabled={installing} onclick={closeOverlay}>Not now</button>
-    <button class="btn primary" id="updGo" disabled={installing || (auto && !error)} onclick={install}>
+    <Button id="updLater" disabled={installing} onclick={closeOverlay}>Not now</Button>
+    <Button variant="primary" id="updGo" disabled={installing || (auto && !error)} onclick={install}>
       {#if error}Try again{:else if installing || auto}Installing…{:else}Update and relaunch{/if}
-    </button>
+    </Button>
   </div>
 </Dialog>

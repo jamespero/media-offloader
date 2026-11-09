@@ -1,0 +1,20 @@
+.iconbtn {
+  width: 32px;
+  height: var(--control-height-md);
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--color-text-secondary);
+}
+
+.iconbtn:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.iconbtn.sm {
+  width: 24px;
+  height: 24px;
+}

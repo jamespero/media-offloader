@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Mono from "../Mono/Mono.svelte";
+  import Button from "../Button/Button.svelte";
   import { plural } from "../../format";
   import { clock, day } from "../../history";
   import { ic } from "../../icons";
@@ -27,9 +29,9 @@
       {last.sourcePresent ? "Resume picks up where it stopped." : `Connect ${last.label} to resume it.`}
       {#snippet action()}
         {#if last.sourcePresent}
-          <button class="btn sm" data-act="resume" data-path={last.path}>Resume</button>
+          <Button size="sm" data-act="resume" data-path={last.path}>Resume</Button>
         {:else}
-          <button class="btn sm" data-act="tab" data-path={last.path}>View</button>
+          <Button size="sm" data-act="tab" data-path={last.path}>View</Button>
         {/if}
       {/snippet}
     </Banner>
@@ -44,7 +46,7 @@
   {/if}
   {#if S.phase === "ready" && conflict?.conflict != null}
     <Banner icon={ic.shield()}>
-      <b>{S.src.label} was already offloaded</b> to <span class="mono">{conflict.requested}</span>. Offloading again copies into a new <span class="mono">{conflict.root.split(/[\\/]/).pop()}</span> folder — nothing is overwritten.
+      <b>{S.src.label} was already offloaded</b> to <Mono>{conflict.requested}</Mono>. Offloading again copies into a new <Mono>{conflict.root.split(/[\\/]/).pop()}</Mono> folder — nothing is overwritten.
     </Banner>
   {/if}
   {#if S.phase === "ready" && S.stoppedKept > 0}
@@ -62,7 +64,7 @@
   {/if}
   {#if renamed.length && S.phase === "ready"}
     <Banner icon={ic.info()} tone="info">
-      <b>{plural(renamed.length, "name")} will change</b> to fit the destination (e.g. <span class="mono">{renamed[0].from}</span> → <span class="mono">{renamed[0].to}</span>). The log lists every one.
+      <b>{plural(renamed.length, "name")} will change</b> to fit the destination (e.g. <Mono>{renamed[0].from}</Mono> → <Mono>{renamed[0].to}</Mono>). The log lists every one.
     </Banner>
   {/if}
   {#if !S.files.length}

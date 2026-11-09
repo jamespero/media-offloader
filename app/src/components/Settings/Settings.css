@@ -25,10 +25,6 @@
   text-transform: lowercase;
 }
 
-.nav .mi {
-  height: 32px;
-}
-
 .pane {
   padding: var(--space-9) var(--space-12);
   overflow: auto;
@@ -51,4 +47,9 @@
   position: absolute;
   top: 12px;
   right: 12px;
+}
+
+.always {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
 }

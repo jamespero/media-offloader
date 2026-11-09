@@ -7,8 +7,6 @@
   {#if "sep" in t}
     <div class="sep"></div>
   {:else}
-    <MenuItem icon={t.icon} label={t.label} act="addtok" data-t={t.t}>
-      {#if t.isNew}<span class="sm">new</span>{/if}
-    </MenuItem>
+    <MenuItem icon={t.icon} label={t.label} act="addtok" data-t={t.t} hint={t.isNew ? "new" : undefined} />
   {/if}
 {/each}
