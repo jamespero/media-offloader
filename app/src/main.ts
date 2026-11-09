@@ -1,5 +1,4 @@
-// Controller: starting and stopping, mapping engine events onto the panels and
-// thumbnails, and input wiring.
+// Controller: startup and input wiring.
 
 // In `vite dev` outside Tauri, fake the backend so the UI can be previewed in a browser.
 // Must run before anything below talks to Tauri; compiled out of production builds.
@@ -8,8 +7,7 @@ if (import.meta.env.DEV && !("__TAURI_INTERNALS__" in window && "invoke" in (win
 }
 
 import { open } from "@tauri-apps/plugin-dialog";
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import { api, failureText, type EngineEvent, type JobReport, type Outcome } from "./api";
+import { api } from "./api";
 import {
   about,
   addTokenMenu,
@@ -20,221 +18,26 @@ import {
   currentSettingsTab,
   destMenu,
   mainMenu,
-  overlay,
   settings,
   showLog,
   srcMenu,
   toast,
 } from "./menus";
-import { $, esc, fmtSize, flashThumb, render, renderBak, renderFoot, renderSrc, renderStrip, updateLive, updateThumb } from "./render";
-import { S, fileManager, hasBackup, running, saveSettings, sep, shownFiles, totalBytes, type Settings } from "./state";
+import { $, esc, fmtSize, render, renderBak, renderFoot, renderStrip } from "./render";
+import { S, fileManager, running, saveSettings, sep, shownFiles, type Settings } from "./state";
 import type { Token, TokenType } from "./tokens";
 import { chooseAndReverify, initReverify, reverifyIntro, reverifyLog } from "./reverify";
 import { openHistory, refreshHistory } from "./history";
-import { chime, notify } from "./notify";
 import { applyPreset, deletePreset, presetMenu, saveCurrentAs, savePresetDialog } from "./presets";
-import { initThumbs, stopThumbs } from "./thumbs";
+import { initThumbs } from "./thumbs";
 import { initUpdates } from "./updates";
 import { mountFooter } from "./components/Footer/footerState.svelte.ts";
 import { historyApi } from "./api";
-import { prepare, schedulePrepare, setDest, tokensChanged } from "./destinations";
-import { resetRun, resetSamples, sample } from "./runState";
+import { schedulePrepare, setDest, tokensChanged } from "./destinations";
+import { onEngine } from "./engineEvents";
+import { guardWindowClose, newOffload, onReport, startOffload } from "./offload";
 import { clearSource, ejectSource, pollVolumes, resumeFrom, selectSource } from "./source";
 import { thumbsForCurrent, thumbsForHistory } from "./thumbRequests";
-
-/* ---------------------------------------------------------------- run */
-
-async function startOffload() {
-  if (!S.src || (!S.settings.copyDest && !S.resumeJournal) || running() || S.scanning) return;
-  S.scanning = true;
-  renderSrc();
-  const ok = await prepare(); // fresh plan, with "now" tokens resolved at start time
-  S.scanning = false;
-  if (!ok) {
-    render();
-    return;
-  }
-  resetRun();
-  S.runHadBackup = hasBackup();
-  S.runFanOut = !S.resumeJournal && S.settings.fanOut; // a resumed run reports its own mode
-  S.view = "";
-  S.startedAt = new Date();
-  S.phase = "copying";
-  S.files.forEach((f) => Object.assign(f, { state: "pending", p: 0, verify: false, failure: undefined }));
-  render();
-  try {
-    stopThumbs(); // the card is about to be read; thumbnails wait
-    await api.start();
-  } catch (e) {
-    S.phase = "ready";
-    toast(false, "Couldn't start", String(e));
-    render();
-  }
-}
-
-function onEngine(e: EngineEvent) {
-  switch (e.type) {
-    case "passStarted":
-      resetSamples();
-      if (e.pass === "fanOut") S.runFanOut = true;
-      S.rate = 0;
-      S.eta = null;
-      if (e.pass === "backup") {
-        S.phase = "backing";
-        S.cur = null;
-      } else {
-        S.phase = "copying";
-      }
-      render();
-      break;
-    case "fileStarted": {
-      const f = S.files[e.file];
-      if (!f) break;
-      f.state = e.pass === "backup" ? "backing" : "copying";
-      f.p = 0;
-      f.verify = false;
-      if (e.pass === "backup") S.curB = { name: f.name, verify: false };
-      else S.cur = { name: f.name, verify: false };
-      updateThumb(e.file);
-      updateLive();
-      break;
-    }
-    case "progress": {
-      const f = S.files[e.file];
-      if (!f) break;
-      f.verify = e.stage === "verify";
-      f.p = f.verify ? 100 : f.size ? Math.min(100, (e.fileBytes / f.size) * 100) : 100;
-      const pct = e.total ? (e.done / e.total) * 100 : 100;
-      const live = { name: f.name, verify: f.verify };
-      if (e.pass === "backup") {
-        S.bakP = pct;
-        S.curB = live;
-      } else {
-        S.copyP = pct;
-        S.cur = live;
-        if (e.pass === "fanOut") S.bakP = pct;
-      }
-      sample(e.done, e.total);
-      updateThumb(e.file);
-      updateLive();
-      break;
-    }
-    case "fileFinished": {
-      const f = S.files[e.file];
-      if (!f) break;
-      const failed = e.results.filter(([, s]) => s.state === "failed");
-      if (failed.length) {
-        f.state = "failed";
-        f.p = 0;
-        const first = failed[0][1];
-        if (first.state === "failed") f.failure = failureText(first.failure);
-        for (const [dest] of failed) {
-          if (dest === 0) S.failCopy++;
-          else S.failBak++;
-        }
-      } else if (e.results.length && e.results.every(([, s]) => s.state === "verified")) {
-        f.state = e.pass === "copy" || !S.runHadBackup ? "copied" : "backed";
-        f.p = 100;
-        f.failure = undefined;
-        setTimeout(() => flashThumb(e.file, e.pass === "copy" ? "copy" : e.pass === "backup" ? "backup" : S.runHadBackup ? "copy · backup" : "copy"), 0);
-      }
-      // Catch the panel up: progress events are throttled and can skip a file's end.
-      const doneBytes = S.files.slice(0, e.file + 1).reduce((a, x) => a + x.size, 0);
-      const pct = totalBytes() ? (doneBytes / totalBytes()) * 100 : 100;
-      if (e.pass === "backup") S.bakP = Math.max(S.bakP, pct);
-      else {
-        S.copyP = Math.max(S.copyP, pct);
-        if (e.pass === "fanOut") S.bakP = S.copyP;
-      }
-      updateThumb(e.file);
-      updateLive();
-      if (failed.length) renderSrc();
-      break;
-    }
-    case "sourceReleased":
-      S.released = true;
-      renderSrc();
-      if (S.settings.ejectWhenVerified) ejectSource();
-      break;
-    case "warning":
-      toast(false, "Heads up", e.message);
-      break;
-    case "passFinished":
-      break;
-    case "finished":
-      finish(e.outcome);
-      break;
-  }
-}
-
-function finish(outcome: Outcome) {
-  S.finishedAt = new Date();
-  S.cur = S.curB = null;
-  S.rate = 0;
-  S.eta = null;
-  const drives = S.runHadBackup ? "2 drives" : "1 drive";
-  switch (outcome.kind) {
-    case "verified": {
-      S.phase = "done";
-      S.copyP = S.bakP = 100;
-      S.files.forEach((f) => {
-        f.state = S.runHadBackup ? "backed" : "copied";
-        f.p = 100;
-      });
-      // Counters move on after every completed offload.
-      const s = S.settings;
-      s.importNo += 1;
-      for (const t of s.tokens) if (t.t === "reel") s.reels[t.v || "A"] = (s.reels[t.v || "A"] ?? 1) + 1;
-      saveSettings();
-      toast(true, "Offload complete", `${fmtSize(totalBytes())} verified on ${drives}`);
-      chime(true);
-      notify("Offload complete", `${S.src?.label ?? "Media"}: ${fmtSize(totalBytes())} verified on ${drives}.`);
-      break;
-    }
-    case "failed":
-      S.phase = "error";
-      if (S.failCopy + S.failBak === 0) S.failCopy = outcome.files;
-      toast(false, "Offload not complete", `${outcome.files} file${outcome.files === 1 ? "" : "s"} didn't verify. Keep the card.`);
-      chime(false);
-      notify("Offload not complete", `${outcome.files} file${outcome.files === 1 ? "" : "s"} didn't verify. Keep the card.`);
-      break;
-    case "cancelled":
-      S.phase = "ready";
-      S.stoppedKept = S.files.filter((f) => f.state === "copied" || f.state === "backed").length;
-      break;
-    case "aborted":
-      S.phase = "error";
-      S.abortReason = outcome.reason;
-      toast(false, "Offload stopped", outcome.reason);
-      chime(false);
-      notify("Offload stopped", outcome.reason);
-      break;
-  }
-  render();
-  if (outcome.kind === "cancelled") schedulePrepare();
-  thumbsForCurrent();
-}
-
-function onReport(r: JobReport) {
-  S.report = r;
-  S.failCopy = r.files.filter((f) => f.dests[0]?.state === "failed").length + (S.plan?.problems.length ?? 0);
-  S.failBak = r.files.filter((f) => f.dests.slice(1).some((d) => d.state === "failed")).length;
-  if (S.phase === "error" && S.failCopy + S.failBak === 0 && r.outcome.kind === "failed") S.failCopy = r.outcome.files;
-  r.files.forEach((fr, i) => {
-    const f = S.files[i];
-    const bad = fr.dests.find((d) => d.state === "failed");
-    if (f && bad && bad.state === "failed") f.failure = failureText(bad.failure);
-  });
-  render();
-  refreshHistory().then(render);
-  if (quitAfterStop) getCurrentWindow().destroy();
-}
-
-function newOffload() {
-  if (running()) return;
-  closeOverlay();
-  clearSource();
-}
 
 /* ---------------------------------------------------------------- input */
 
@@ -572,21 +375,7 @@ document.addEventListener("mousemove", (e) => {
   tip.style.setProperty("--y", y + "px");
 });
 
-/* Closing the window mid-offload asks first, then stops cleanly. */
-let quitAfterStop = false;
-getCurrentWindow().onCloseRequested((event) => {
-  if (!running()) return;
-  event.preventDefault();
-  overlay(`<div class="dialog"><h3>Stop and quit?</h3>
-    <p>An offload is still running. Verified files are kept; the file in progress is removed.</p>
-    <div class="acts"><button class="btn" data-act="closeov">Keep going</button><button class="btn danger" id="quitBtn">Stop and quit</button></div></div>`);
-  document.getElementById("quitBtn")!.onclick = () => {
-    quitAfterStop = true;
-    closeOverlay();
-    api.cancel();
-    setTimeout(() => getCurrentWindow().destroy(), 5000); // in case the report never comes
-  };
-});
+guardWindowClose();
 
 /* ---------------------------------------------------------------- boot */
 
