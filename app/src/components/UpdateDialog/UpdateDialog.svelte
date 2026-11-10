@@ -5,7 +5,7 @@
   import { onMount } from "svelte";
   import { api } from "../../api";
   import { reverifyRunning } from "../../reverify.svelte.ts";
-  import { S, running, saveSettings } from "../../state.svelte.ts";
+  import { S, running } from "../../state.svelte.ts";
   import Dialog from "../Dialogs/Dialog.svelte";
   import { closeOverlay } from "../Overlay/overlayState.svelte.ts";
   import SettingRow from "../Settings/SettingRow.svelte";
@@ -34,11 +34,6 @@
     }
   }
 
-  function toggleAuto() {
-    S.settings.autoUpdate = !S.settings.autoUpdate;
-    saveSettings();
-  }
-
   onMount(() => {
     if (!auto) return;
     const timer = setTimeout(install, AUTO_DELAY_MS);
@@ -56,7 +51,7 @@
     <p>Media Offloader {update.version} has been downloaded. You have {update.currentVersion}.</p>
     {#if error}<p id="updMsg" class="problem-text">{error}</p>{:else}<p id="updMsg">Installing takes a few seconds and restarts the app. Your settings and presets are kept.</p>{/if}
     <SettingRow title="Install updates automatically from now on" note="As the app starts, before you begin. Never during an offload." boxed>
-      <Toggle id="updAuto" on={S.settings.autoUpdate} label="Install updates automatically from now on" disabled={installing} onclick={toggleAuto} />
+      <Toggle on={S.settings.autoUpdate} setting="autoUpdate" label="Install updates automatically from now on" disabled={installing} />
     </SettingRow>
   {/if}
   <div class="acts">

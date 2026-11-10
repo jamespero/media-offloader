@@ -1,11 +1,13 @@
 <script lang="ts">
-  interface SegmentItem {
+  import type { HTMLButtonAttributes } from "svelte/elements";
+
+  /** One choice: its label, whether it's the current one, and its button's attributes (onclick, disabled). */
+  type SegmentItem = Omit<HTMLButtonAttributes, "class" | "children"> & {
     label: string;
     on: boolean;
     /** A small count after the label. */
     count?: number;
-    [attr: string]: unknown;
-  }
+  };
 
   let { items, compact = false }: { items: SegmentItem[]; compact?: boolean } = $props();
 </script>

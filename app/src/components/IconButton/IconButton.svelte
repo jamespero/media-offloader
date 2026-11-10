@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import type { HTMLButtonAttributes } from "svelte/elements";
 
-  let { small = false, children, ...attrs }: { small?: boolean; children: Snippet; [attr: string]: unknown } = $props();
+  let { small = false, children, ...attrs }: Omit<HTMLButtonAttributes, "class" | "children"> & { small?: boolean; children: Snippet } = $props();
 </script>
 
 <button class={["iconbtn", small && "sm"]} {...attrs}>{@render children()}</button>

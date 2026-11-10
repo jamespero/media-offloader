@@ -6,14 +6,15 @@
     setting,
     label,
     lock = false,
-    ...attrs
+    disabled = false,
   }: {
     on: boolean;
     /** The setting it flips. */
     setting?: BoolSetting;
     label: string;
     lock?: boolean;
-    [attr: string]: unknown;
+    /** Shown but not changeable for now, e.g. while an update installs. */
+    disabled?: boolean;
   } = $props();
 
 </script>
@@ -23,9 +24,9 @@
   onclick={() => {
     if (setting && !lock) toggleSetting(setting);
   }}
+  {disabled}
   aria-pressed={on}
   aria-label={label}
-  {...attrs}
 ></button>
 
 <style src="./Toggle.css"></style>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import type { HTMLButtonAttributes } from "svelte/elements";
 
   let {
     variant = "default",
@@ -8,7 +9,7 @@
     element = $bindable(),
     children,
     ...attrs
-  }: {
+  }: Omit<HTMLButtonAttributes, "class" | "children"> & {
     /** `onStatus` sits on a panel colored by status, such as a problem panel. */
     variant?: "default" | "primary" | "danger" | "onStatus";
     /** `compact` keeps a primary button to the regular height. */
@@ -17,7 +18,6 @@
     start?: boolean;
     element?: HTMLButtonElement;
     children: Snippet;
-    [attr: string]: unknown;
   } = $props();
 </script>
 
