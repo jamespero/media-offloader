@@ -63,7 +63,22 @@ app/src/components/Toast/
 
 Components read the app state from `S` in `state.svelte.ts` and update themselves when it changes. Each button handles its own click with `onclick`, calling a function from the module that owns that piece of the app (`source.ts`, `destinations.ts`, `history.ts` and so on); a menu item runs its action and then closes the menu. Keyboard shortcuts are in `shortcuts.ts`. Settings in `S.settings` are saved automatically whenever they change, so code just changes them, and a toggle binds to its setting: `<Toggle bind:on={S.settings.sound} label="…" />`.
 
-Global CSS is limited to `styles/global.css` (fonts and resets) and `styles/tokens.css` (design tokens). Everything else belongs to a component, including shared controls such as `Button`, `Icon`, `IconButton`, `MenuItem`, `Segmented`, `StatusPill` and `TextInput`. Icons are drawn with `<Icon name="check" size={13} />`; a new icon goes in `icons.ts` as the shapes it's made of, on the same 24×24 grid. Use those rather than restyling their class names from outside. To style markup a component doesn't render itself, such as a parent's content or an icon, use `:global()` under one of its own elements.
+Shared controls are components too: `Button`, `Icon`, `IconButton`, `MenuItem`, `Segmented`, `StatusPill`, `TextInput` and others. Use them rather than writing a new button or input. Icons are drawn with `<Icon name="check" size={13} />`; a new icon goes in `icons.ts` as the shapes it's made of, on the same 24×24 grid.
+
+### Styling rules
+
+Keep it simple. Every rule here exists so that changing one component can't quietly change another.
+
+1. **A component styles only the markup it renders itself.** Never use `:global()`, and never style another component's elements or class names from outside.
+2. **The global stylesheet holds only what no component can own.** That's the design tokens (custom properties on `:root`, in `styles/tokens.css`), the `@font-face` rules, and a reset of browser defaults: box sizing, page margins, form controls inheriting the font, and the reduced-motion preference (`styles/global.css`). No layout and no component styles go there.
+3. **Layout belongs to the parent; appearance belongs to the child.** A parent arranges its children through its own element: `display: grid` or `flex`, `gap`, grid tracks, alignment and its own padding. It never selects a child's element to do it. The child fills the space it's given and owns everything about how it looks: font, color, background, border, padding and truncation.
+4. **Pass layout values down through custom properties or props, not selectors.** When a child needs a size from a particular parent, the parent sets a custom property on its own element (`.panel { --path-max-width: 92%; }`) and the child uses it with a fallback (`max-width: var(--path-max-width, 100%)`), or the child takes a prop. A state that changes the look of what's inside, such as a panel turning violet while it runs, reaches the children the same way: the parent sets `color` or a custom property on its own element and the children inherit it, or the state is passed as a prop. Prefer setting a custom property on the parent's own element over passing one to a component (`<PathLine --max-width="92%" />`), which makes Svelte add a wrapper element.
+5. **Fonts.** The base text font (Inter, its size and line height) is set once, as high up as possible: on the root element of the `App` component. Everything inherits it. A component whose text is different, such as a heading in Outfit, a path in JetBrains Mono, or a different size or weight, sets those font properties in its own styles. A component never sets the font of text another component renders.
+6. **Minimal markup.** Don't add a `div` or `span` only to hang a style on. Add an element when the content needs one (a list, a label, a region), or when the layout can't be done on an element that's already there.
+
+Some existing components still use `:global()`, and the base font and page layout are still set in `global.css`. They're being moved over to these rules; new code follows them from the start.
+
+Name a state module differently from its component. `Toast.svelte` and `toast.svelte.ts` collide on the case-insensitive filesystems Windows and macOS use by default.
 
 Name a state module differently from its component. `Toast.svelte` and `toast.svelte.ts` collide on the case-insensitive filesystems Windows and macOS use by default.
 
