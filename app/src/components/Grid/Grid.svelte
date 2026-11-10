@@ -10,9 +10,9 @@
 
 <!-- The tiles of the shown kind, plus any that failed. -->
 <div class="grid">
-  {#each files as file, i}
+  {#each files as file}
     {#if shown === "all" || kindOf(file.ext) === shown || file.state === "failed"}
-      <Thumb {file} index={i} />
+      <Thumb {file} />
     {/if}
   {/each}
 </div>
