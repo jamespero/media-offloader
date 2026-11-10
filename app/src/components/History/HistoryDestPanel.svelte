@@ -1,6 +1,7 @@
 <script lang="ts">
   import StatusPill from "../StatusPill/StatusPill.svelte";
   import type { HistoryItem } from "../../api";
+  import { openPastLog } from "../../dialogs";
   import DoneStatus from "../Panel/DoneStatus.svelte";
   import Panel from "../Panel/Panel.svelte";
   import PathLine from "../Panel/PathLine.svelte";
@@ -22,7 +23,7 @@
     <h2>backup</h2>
     <div class="sub">No backup in this offload.</div>
   {:else if finished}
-    <DoneStatus heading={backup ? "backed up to" : "copied to"} {root} bytes={item.bytes} files={item.files} verb={backup ? "backed up" : "copied"} logAct="histlog" />
+    <DoneStatus heading={backup ? "backed up to" : "copied to"} {root} bytes={item.bytes} files={item.files} verb={backup ? "backed up" : "copied"} onlog={openPastLog} />
   {:else if stopped}
     <h2>{backup ? "backup" : "copy"}</h2>
     <PathLine path={root} />
@@ -35,7 +36,7 @@
       failed={item.failed[dest] ?? 0}
       fallback="{pct}%"
       fallbackNote="{done} of {item.files} files verified"
-      logAct="histlog"
+      onlog={openPastLog}
     />
   {/if}
 </Panel>

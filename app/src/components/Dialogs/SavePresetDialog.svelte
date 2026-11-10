@@ -3,13 +3,18 @@
   import Button from "../Button/Button.svelte";
   import Dialog from "./Dialog.svelte";
   import { onMount } from "svelte";
-  import { activePreset } from "../../presets";
+  import { closeOverlay } from "../Overlay/overlayState.svelte.ts";
+  import { toast } from "../Toast/toastState.svelte.ts";
+  import { activePreset, saveCurrentAs } from "../../presets";
   import { S } from "../../state.svelte.ts";
 
-  const suggestion = activePreset()?.name ?? S.src?.label ?? "";
+  let name = $state(activePreset()?.name ?? S.src?.label ?? "");
 
   let input = $state<HTMLInputElement>();
-  let save = $state<HTMLButtonElement>();
+
+  function save() {
+    if (saveCurrentAs(name)) toast(true, "Preset saved", name.trim());
+  }
 
   onMount(() => {
     input?.focus();
@@ -24,16 +29,16 @@
     <TextInput
       id="presetName"
       placeholder="e.g. Nikon ZR"
-      value={suggestion}
+      bind:value={name}
       spellcheck="false"
       bind:element={input}
       onkeydown={(e: KeyboardEvent) => {
-        if (e.key === "Enter") save?.click();
+        if (e.key === "Enter") save();
       }}
     />
   </div>
   <div class="acts">
-    <Button data-act="closeov">Cancel</Button>
-    <Button variant="primary" size="compact" data-act="dosavepreset" bind:element={save}>Save</Button>
+    <Button onclick={closeOverlay}>Cancel</Button>
+    <Button variant="primary" size="compact" onclick={save}>Save</Button>
   </div>
 </Dialog>

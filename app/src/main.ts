@@ -7,7 +7,6 @@ if (import.meta.env.DEV && !("__TAURI_INTERNALS__" in window && "invoke" in (win
 }
 
 import { mount } from "svelte";
-import { initInput } from "./input";
 import { api } from "./api";
 import App from "./components/App/App.svelte";
 import { setDest } from "./destinations";
@@ -17,13 +16,10 @@ import { guardWindowClose, onReport, startOffload } from "./offload";
 import { initReverify } from "./reverify.svelte.ts";
 import { clearSource, pollVolumes, selectSource } from "./source";
 import { S } from "./state.svelte.ts";
-import { initThumbInput } from "./thumbInput";
 import { initThumbs } from "./thumbs";
 import { initUpdates } from "./updates";
 
 mount(App, { target: document.getElementById("app")! });
-initInput();
-initThumbInput();
 guardWindowClose();
 api.onEngine(onEngine);
 api.onReport(onReport);

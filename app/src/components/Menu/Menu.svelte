@@ -1,10 +1,16 @@
 <script lang="ts">
-  import { openedMenu, type OpenMenu } from "./menuState.svelte.ts";
+  import { closeMenus, openedMenu, type OpenMenu } from "./menuState.svelte.ts";
 
   const GAP = 6;
   const MARGIN = 8;
 
   const open = $derived(openedMenu());
+  let menu = $state<HTMLElement>();
+
+  /** A click anywhere outside the menu closes it, before that click does anything else. */
+  function onclickcapture(e: MouseEvent) {
+    if (menu && !menu.contains(e.target as Node)) closeMenus();
+  }
 
   /** Places the menu under its anchor, or above it when there's no room below. */
   function place(el: HTMLElement, m: OpenMenu) {
@@ -18,9 +24,11 @@
   }
 </script>
 
+<svelte:window {onclickcapture} onresize={closeMenus} />
+
 {#if open}
   {#key open}
-    <div class="menu" use:place={open}>
+    <div class="menu" use:place={open} bind:this={menu}>
       <open.component {...open.props} />
     </div>
   {/key}

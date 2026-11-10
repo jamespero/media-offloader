@@ -2,9 +2,10 @@
   import Mono from "../Mono/Mono.svelte";
   import Button from "../Button/Button.svelte";
   import { plural } from "../../format";
-  import { clock, day } from "../../history";
+  import { clock, day, showTab } from "../../history";
   import { ic } from "../../icons";
   import { resuming } from "../../panelState";
+  import { resumeFrom } from "../../source";
   import { S, running } from "../../state.svelte.ts";
   import Banner from "./Banner.svelte";
   import EmptyState from "./EmptyState.svelte";
@@ -29,9 +30,9 @@
       {last.sourcePresent ? "Resume picks up where it stopped." : `Connect ${last.label} to resume it.`}
       {#snippet action()}
         {#if last.sourcePresent}
-          <Button size="sm" data-act="resume" data-path={last.path}>Resume</Button>
+          <Button size="sm" onclick={() => resumeFrom(last.path)}>Resume</Button>
         {:else}
-          <Button size="sm" data-act="tab" data-path={last.path}>View</Button>
+          <Button size="sm" onclick={() => showTab(last.path)}>View</Button>
         {/if}
       {/snippet}
     </Banner>

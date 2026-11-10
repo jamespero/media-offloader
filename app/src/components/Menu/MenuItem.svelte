@@ -1,10 +1,11 @@
 <script lang="ts">
   import { ic, type IconName } from "../../icons";
+  import { closeMenus } from "./menuState.svelte.ts";
 
   let {
     icon = null,
     label,
-    act,
+    onclick,
     disabled = false,
     mono = false,
     on = false,
@@ -17,7 +18,8 @@
   }: {
     icon?: IconName | null;
     label: string;
-    act: string;
+    /** Runs, then the menu it's in closes. (Closing first would take away the menu's props.) */
+    onclick: () => void;
     disabled?: boolean;
     /** Shows the label as a path. */
     mono?: boolean;
@@ -36,7 +38,15 @@
   } = $props();
 </script>
 
-<button class={["mi", on && "on", tall && "tall"]} data-act={act} {disabled} {...attrs}>
+<button
+  class={["mi", on && "on", tall && "tall"]}
+  {disabled}
+  {...attrs}
+  onclick={() => {
+    onclick();
+    closeMenus();
+  }}
+>
   {#if marked !== undefined}
     <span class="mi-icon">{#if marked}{@html ic.check(14)}{/if}</span>
   {:else if icon}

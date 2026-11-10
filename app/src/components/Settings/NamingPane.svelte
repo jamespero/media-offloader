@@ -2,6 +2,8 @@
   import Row from "../Row/Row.svelte";
   import Button from "../Button/Button.svelte";
   import { ic } from "../../icons";
+  import { deletePreset } from "../../presets";
+  import { stepImportNo } from "../../tokenEdits";
   import { S, sep, tokenContext } from "../../state.svelte.ts";
   import { tokenText } from "../../tokens";
   import SettingRow from "./SettingRow.svelte";
@@ -18,16 +20,16 @@
 <p class="intro">A preset saves a subfolder pattern, e.g. one per camera. It goes under the copy and backup destinations, which you set once per project. Pick a preset from the ★ Preset button above the thumbnails.</p>
 {#each S.settings.presets as p (p.id)}
   <SettingRow title={p.name} note={folders(p.tokens)} mono>
-    <Button size="sm" data-act="delpreset" data-id={p.id} title="Delete preset">{@html ic.trash(13)}</Button>
+    <Button size="sm" onclick={() => deletePreset(p.id)} title="Delete preset">{@html ic.trash(13)}</Button>
   </SettingRow>
 {:else}
   <SettingRow note="No presets yet. Use ★ Preset → Save Current as Preset…." />
 {/each}
 <SettingRow title="Import # counter" note="The next import number. Counts up after each completed offload.">
   <Row gap="tight">
-    <Button size="sm" data-act="importdec" aria-label="Lower">−</Button>
+    <Button size="sm" onclick={() => stepImportNo(-1)} aria-label="Lower">−</Button>
     <span class="stepper-value">{String(S.settings.importNo).padStart(3, "0")}</span>
-    <Button size="sm" data-act="importinc" aria-label="Raise">+</Button>
+    <Button size="sm" onclick={() => stepImportNo(1)} aria-label="Raise">+</Button>
   </Row>
 </SettingRow>
 

@@ -2,8 +2,9 @@
   import Segmented from "../Segmented/Segmented.svelte";
   import IconButton from "../IconButton/IconButton.svelte";
   import { KINDS, gridKind, kindOf } from "../../fileKinds";
-  import { clock, day, itemState } from "../../history";
+  import { clock, day, forgetOffload, itemState, showKind, showTab } from "../../history";
   import { ic } from "../../icons";
+  import { mainMenu, presetMenu } from "../../menus";
   import { activePreset } from "../../presets";
   import { S, running, shownFiles } from "../../state.svelte.ts";
 
@@ -18,7 +19,7 @@
   const kinds = $derived(KINDS.map(([k, label]) => [k, label, files.filter((f) => kindOf(f.ext) === k).length] as const).filter(([, , n]) => n > 0));
   const shownKind = $derived(gridKind(files));
   const kindItems = $derived(
-    [...kinds, ["all", "All", files.length] as const].map(([k, label, count]) => ({ label, count, on: shownKind === k, "data-act": "kind", "data-k": k })),
+    [...kinds, ["all", "All", files.length] as const].map(([k, label, count]) => ({ label, count, on: shownKind === k, onclick: () => showKind(k) })),
   );
 
   let tabs: HTMLElement;
@@ -33,12 +34,21 @@
 <div class="strip">
   <div class="tabs" id="tabs" bind:this={tabs}>
     {#each past as h (h.path)}
-      <button class={["tab", S.view === h.path && "active"]} data-act="tab" data-path={h.path} title={h.label}>
+      <button class={["tab", S.view === h.path && "active"]} onclick={() => showTab(h.path)} title={h.label}>
         <span class={["dot", itemState(h)]}></span><span class="t">{clock(h.started)}</span><span class="d">{day(h.started)}</span>
-        <span class="x" data-act="forget" data-path={h.path} title="Remove from history">{@html ic.x(11)}</span>
+        <!-- Inside the tab's button, so it can't be a button itself; a click here doesn't also open the tab. -->
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+        <span
+          class="x"
+          title="Remove from history"
+          onclick={(e) => {
+            e.stopPropagation();
+            forgetOffload(h.path);
+          }}
+        >{@html ic.x(11)}</span>
       </button>
     {/each}
-    <button class={["tab", !S.view && "active"]} data-act="tab" data-path="">
+    <button class={["tab", !S.view && "active"]} onclick={() => showTab("")}>
       <span class={["dot", dot]}></span><span class="t">{S.finishedAt ? when.toTimeString().slice(0, 8) : "Current"}</span><span class="d">{when.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
     </button>
   </div>
@@ -48,11 +58,11 @@
     </div>
   {/if}
   {#if !S.view}
-    <button class="preset" id="presetBtn" data-act="presets" title="Preset: subfolder pattern">
+    <button class="preset" id="presetBtn" onclick={(e) => presetMenu(e.currentTarget)} title="Preset: subfolder pattern">
       {@html ic.star(13)}<span>Preset</span><b>{activePreset()?.name ?? "Custom"}</b>{@html ic.chev()}
     </button>
   {/if}
-  <IconButton id="menuBtn" data-act="mainmenu" title="Menu" aria-label="Menu">{@html ic.menu()}</IconButton>
+  <IconButton id="menuBtn" onclick={(e: MouseEvent) => mainMenu(e.currentTarget as Element)} title="Menu" aria-label="Menu">{@html ic.menu()}</IconButton>
 </div>
 
 <style src="./Strip.css"></style>

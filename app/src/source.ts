@@ -1,6 +1,7 @@
 // The source: selecting a card or folder, resuming an earlier offload, ejecting, and
 // watching for cards coming and going.
 
+import { open } from "@tauri-apps/plugin-dialog";
 import { api, historyApi, type VolumeEntry } from "./api";
 import { closeOverlay } from "./components/Overlay/overlayState.svelte.ts";
 import { toast } from "./components/Toast/toastState.svelte.ts";
@@ -47,6 +48,17 @@ export async function selectSource(path: string, hint?: VolumeEntry) {
   S.scanning = false;
   schedulePrepare();
   thumbsForCurrent();
+}
+
+/** Selects a connected card or drive from the source menu. */
+export function pickVolume(path: string) {
+  selectSource(path, S.volumes.find((v) => v.path === path));
+}
+
+/** Selects a folder as the source, chosen with the system dialog. */
+export async function pickFolder() {
+  const p = await open({ directory: true, title: "Choose a folder to offload" });
+  if (typeof p === "string") selectSource(p);
 }
 
 function samePath(a: string, b: string) {

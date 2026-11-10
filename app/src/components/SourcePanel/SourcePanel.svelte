@@ -7,7 +7,9 @@
   import { resumeLabel } from "../../history";
   import { ic } from "../../icons";
   import { resuming } from "../../panelState";
-  import { ejectEnabled } from "../../source";
+  import { srcMenu } from "../../menus";
+  import { startOffload } from "../../offload";
+  import { ejectEnabled, ejectSource } from "../../source";
   import { S, running } from "../../state.svelte.ts";
   import Panel from "../Panel/Panel.svelte";
 
@@ -25,11 +27,11 @@
   <div class="srcicon">{@html src.kind === "card" ? ic.card() : src.kind === "drive" ? ic.drive() : ic.folder()}</div>
   <h2>source</h2>
   <Row gap="tighter">
-    <button class="vol" data-act={running() ? undefined : "srcmenu"} title={src.path}>
+    <button class="vol" onclick={running() ? undefined : (e) => srcMenu(e.currentTarget)} title={src.path}>
       <span>{src.label}</span>
       {#if !running()}{@html ic.chev()}{/if}
     </button>
-    {#if canEject}<IconButton small title="Eject" data-act="eject">{@html ic.eject(14)}</IconButton>{/if}
+    {#if canEject}<IconButton small title="Eject" onclick={ejectSource}>{@html ic.eject(14)}</IconButton>{/if}
   </Row>
   <div class="meta">{src.media}</div>
 {/snippet}
@@ -40,7 +42,7 @@
     <div class="sub">Ejected — safe to remove. {rest}</div>
   {:else}
     <div class="sub">Safe to remove. {rest}</div>
-    {#if canEject}<Button size="sm" data-act="eject">{@html ic.eject(13)} Eject</Button>{/if}
+    {#if canEject}<Button size="sm" onclick={ejectSource}>{@html ic.eject(13)} Eject</Button>{/if}
   {/if}
 {/snippet}
 
@@ -51,13 +53,13 @@
     </div>
     <h2>source</h2>
     <div class="sub">{S.scanning ? "Reading the source…" : "Waiting for media"}</div>
-    <Button size="sm" data-act="srcmenu">Select a source {@html ic.chev()}</Button>
+    <Button size="sm" onclick={(e: MouseEvent) => srcMenu(e.currentTarget as Element)}>Select a source {@html ic.chev()}</Button>
   {:else if S.phase === "ready" || S.phase === "waiting"}
     {@render head()}
     <div class="sub">
       {#if S.scanning}Reading the source…{:else if res}Picks up where it stopped. Files already verified aren't copied again.{:else}Media files have not been copied from this source.{/if}
     </div>
-    <Button variant="primary" start data-act="start" disabled={!can} title={why}>{startLabel}</Button>
+    <Button variant="primary" start onclick={startOffload} disabled={!can} title={why}>{startLabel}</Button>
   {:else if cardBusy}
     {@render head()}
     <Row above="sm"><span class="pulse"></span><span class="sub strong">Copying from this source</span></Row>

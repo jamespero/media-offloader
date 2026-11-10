@@ -2,7 +2,9 @@
 // didn't finish. The views are in components/History and components/Strip.
 
 import { historyApi, type HistoryDetail, type HistoryItem } from "./api";
+import { toast } from "./components/Toast/toastState.svelte.ts";
 import { S, fileView, type FileView } from "./state.svelte.ts";
+import { thumbsForCurrent, thumbsForHistory } from "./thumbRequests";
 
 export async function refreshHistory() {
   try {
@@ -39,6 +41,38 @@ export async function openHistory(path: string) {
   }
   if (S.view !== path) return;
   S.histFiles = filesOf(S.detail);
+}
+
+/** Shows a past offload, or the current one when `path` is empty. */
+export async function showTab(path: string) {
+  if (!path) {
+    S.view = "";
+    S.kind = null;
+    S.detail = null;
+    thumbsForCurrent();
+    return;
+  }
+  S.view = path;
+  await openHistory(path);
+  if (S.detail && S.view === path) thumbsForHistory();
+}
+
+/** Removes an offload from the history (its journal), leaving its files alone. */
+export async function forgetOffload(path: string) {
+  try {
+    await historyApi.forget(path);
+  } catch (e) {
+    toast(false, "Couldn't remove it from the history", String(e));
+  }
+  if (S.view === path) S.view = "";
+  await refreshHistory();
+}
+
+/** Shows one kind of file in the grid, asking for its thumbnails first. */
+export function showKind(kind: typeof S.kind) {
+  S.kind = kind;
+  if (S.view) thumbsForHistory();
+  else thumbsForCurrent();
 }
 
 function filesOf(d: HistoryDetail): FileView[] {

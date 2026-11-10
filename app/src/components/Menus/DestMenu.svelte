@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { browseDest, setDest } from "../../destinations";
   import { S } from "../../state.svelte.ts";
   import MenuItem from "../Menu/MenuItem.svelte";
 
@@ -10,8 +11,8 @@
 {#if recent.length}
   <div class="mh">Recent</div>
   {#each recent as path (path)}
-    <MenuItem icon="folder" label={path} mono act="setdest" data-w={which} data-v={path} />
+    <MenuItem icon="folder" label={path} mono onclick={() => setDest(which, path)} />
   {/each}
   <div class="sep"></div>
 {/if}
-<MenuItem icon="reveal" label="Browse…" act="browsedest" data-w={which} />
+<MenuItem icon="reveal" label="Browse…" onclick={() => browseDest(which)} />
