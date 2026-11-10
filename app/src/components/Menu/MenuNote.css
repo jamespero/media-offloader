@@ -1,0 +1,5 @@
+.mnote {
+  padding: var(--space-2) var(--space-5) var(--space-4);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}

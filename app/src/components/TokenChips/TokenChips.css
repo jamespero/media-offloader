@@ -38,8 +38,8 @@
   font-size: var(--font-size-sm);
 }
 
-.chip :global(svg) {
-  color: var(--color-text-tertiary);
+.chip {
+  --icon-color: var(--color-text-tertiary);
 }
 
 .addchip {

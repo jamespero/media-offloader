@@ -22,31 +22,33 @@
 
 <svelte:window onkeydown={onShortcut} />
 
-<div class="band">
-  {#if past}
-    <HistorySourcePanel item={past} />
-    <HistoryDestPanel id="pCopy" item={past} dest={0} />
-    <HistoryDestPanel id="pBak" item={past} dest={1} />
-  {:else}
-    <SourcePanel />
-    <CopyPanel />
-    <BackupPanel />
-  {/if}
+<div class="app">
+  <div class="band">
+    {#if past}
+      <HistorySourcePanel item={past} />
+      <HistoryDestPanel id="pCopy" item={past} dest={0} />
+      <HistoryDestPanel id="pBak" item={past} dest={1} />
+    {:else}
+      <SourcePanel />
+      <CopyPanel />
+      <BackupPanel />
+    {/if}
+  </div>
+  <Strip />
+  <div class="gridwrap" id="gridwrap">
+    {#if past}
+      <HistoryGrid item={past} />
+    {:else if S.view}
+      <EmptyState title="Loading…" />
+    {:else}
+      <CurrentGrid />
+    {/if}
+  </div>
+  <Footer />
+  <Overlay />
+  <Toast />
+  <Tooltip />
+  <Menu />
 </div>
-<Strip />
-<div class="gridwrap" id="gridwrap">
-  {#if past}
-    <HistoryGrid item={past} />
-  {:else if S.view}
-    <EmptyState title="Loading…" />
-  {:else}
-    <CurrentGrid />
-  {/if}
-</div>
-<Footer />
-<Overlay />
-<Toast />
-<Tooltip />
-<Menu />
 
 <style src="./App.css"></style>

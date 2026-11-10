@@ -17,17 +17,19 @@
   import Toggle from "./Toggle.svelte";
   import ToggleRow from "./ToggleRow.svelte";
 
-  const TABS: [string, string, IconName][] = [
-    ["general", "General", "gear"],
-    ["verify", "Verification", "shield"],
-    ["transfers", "Transfers", "layers"],
-    ["naming", "Naming & Presets", "star"],
-    ["notify", "Notifications", "bell"],
-    ["logs", "Logs", "file"],
+  /** Each tab: its key, its label in the list, its icon, and the heading and introduction over it. */
+  const TABS: [string, string, IconName, string, string][] = [
+    ["general", "General", "gear", "general", "How Media Offloader reacts when media shows up."],
+    ["verify", "Verification", "shield", "verification", "Every file is read back from the destination and compared to the source."],
+    ["transfers", "Transfers", "layers", "transfers", "How copy and backup are scheduled."],
+    ["naming", "Naming & Presets", "star", "naming & presets", "A preset saves a subfolder pattern, e.g. one per camera. It goes under the copy and backup destinations, which you set once per project. Pick a preset from the ★ Preset button above the thumbnails."],
+    ["notify", "Notifications", "bell", "notifications", "Know it's done without watching the screen."],
+    ["logs", "Logs", "file", "logs", "A plain-text log is kept for every offload: each file's checksums, what was skipped or renamed, and how it ended."],
   ];
 
   const s = S.settings;
   const tab = $derived(settingsTab());
+  const current = $derived(TABS.find(([key]) => key === tab) ?? TABS[0]);
   const busy = $derived(running());
 
   /** The items of a setting with two choices; the second is `on`. */
@@ -52,9 +54,9 @@
   </div>
   <div class="pane">
     <div class="closex"><IconButton onclick={closeOverlay} aria-label="Close"><Icon name="x" /></IconButton></div>
+    <h5>{current[3]}</h5>
+    <p class="intro">{current[4]}</p>
     {#if tab === "general"}
-      <h5>general</h5>
-      <p class="intro">How Media Offloader reacts when media shows up.</p>
       <ToggleRow title="Auto-select inserted media" note="When a card or drive is connected, make it the source. Folders are never auto-selected." bind:on={s.autoSelect} />
       <ToggleRow title="Copy hidden system files" note="Include .Trashes, .Spotlight-V100, System Volume Information. Off still copies every camera file and folder." bind:on={s.includeSystemFiles} onchange={rereadSource} />
       {#if ejectEnabled}
@@ -63,8 +65,6 @@
       <ToggleRow title="Keep the computer awake" note="Prevent sleep while a transfer is running." bind:on={s.keepAwake} />
       <ToggleRow title="Install updates automatically" note="When a new version is out, install it as the app starts, before you begin. Off: the app asks first. Never during an offload." bind:on={s.autoUpdate} />
     {:else if tab === "verify"}
-      <h5>verification</h5>
-      <p class="intro">Every file is read back from the destination and compared to the source.</p>
       <SettingRow title="Checksum" note="xxHash64 is fast and is what ASC MHL uses. Add MD5 when production or insurance asks for it.">
         <Segmented items={choices((on) => (s.md5 = on), s.md5, "xxHash64", "xxHash64 + MD5")} />
       </SettingRow>
@@ -80,8 +80,6 @@
         <Toggle on label="Verify from disk, not cache" lock />
       </SettingRow>
     {:else if tab === "transfers"}
-      <h5>transfers</h5>
-      <p class="intro">How copy and backup are scheduled.</p>
       <SettingRow title="Copy mode" note="Sequential: copy, verify, free the card, then back up from the copy (classic). Fan-out: read the card once and write every drive at the same time.">
         <Segmented items={choices((on) => (s.fanOut = on), s.fanOut, "Sequential", "Fan-out")} />
       </SettingRow>
@@ -91,13 +89,9 @@
     {:else if tab === "naming"}
       <NamingPane />
     {:else if tab === "notify"}
-      <h5>notifications</h5>
-      <p class="intro">Know it's done without watching the screen.</p>
       <ToggleRow title="Play a sound when finished" note="A rising chime when everything verified, a lower one when something needs attention." bind:on={s.sound} />
       <ToggleRow title="System notification" note="Shows in Notification Center / the Windows notification area when the app isn't in front." bind:on={s.notify} />
     {:else}
-      <h5>logs</h5>
-      <p class="intro">A plain-text log is kept for every offload: each file's checksums, what was skipped or renamed, and how it ended.</p>
       <SettingRow title="Log location" note={logDir} mono>
         <Button size="sm" onclick={showLogsFolder}><Icon name="reveal" size={13} /> Show</Button>
       </SettingRow>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Note from "../Panel/Note.svelte";
+  import SourceHead from "../Panel/SourceHead.svelte";
   import Icon from "../Icon/Icon.svelte";
   import StatusPill from "../StatusPill/StatusPill.svelte";
   import Button from "../Button/Button.svelte";
@@ -15,10 +17,7 @@
 </script>
 
 <Panel id="pSrc" source>
-  <div class="srcicon"><Icon name={item.sourceKind === "folder" ? "folder" : "card"} /></div>
-  <h2>source</h2>
-  <div class="vol static"><span>{item.label}</span></div>
-  <div class="meta">{day(item.started)} · {clock(item.started)}</div>
+  <SourceHead still icon={item.sourceKind === "folder" ? "folder" : "card"} label={item.label} meta="{day(item.started)} · {clock(item.started)}" />
   {#if !outcome}
     <StatusPill tone="problem"><Icon name="alert" size={13} /> Didn't finish</StatusPill>
   {:else if outcome.kind === "verified"}
@@ -34,7 +33,7 @@
     {#if item.sourcePresent}
       <Button variant="primary" start onclick={() => resumeFrom(item.path)} disabled={running()}>{resumeLabel(item)}</Button>
     {:else}
-      <div class="sub">Connect {item.label} to {resumeLabel(item).toLowerCase()}.</div>
+      <Note>Connect {item.label} to {resumeLabel(item).toLowerCase()}.</Note>
     {/if}
   {/if}
 </Panel>

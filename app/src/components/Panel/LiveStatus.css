@@ -1,0 +1,23 @@
+.status {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-on-status-2);
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  max-width: 94%;
+  min-height: 17px;
+}
+
+.f {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rate {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-on-status-3);
+  font-variant-numeric: tabular-nums;
+  min-height: 16px;
+}

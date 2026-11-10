@@ -21,6 +21,7 @@
 }
 
 .rvbar {
+  --fill-radius: var(--radius-sm);
   position: relative;
   height: 10px;
   border-radius: var(--radius-sm);
@@ -28,9 +29,7 @@
   overflow: hidden;
 }
 
-.rvbar :global(.fill) {
-  border-radius: var(--radius-sm);
-}
+
 
 .rvstat {
   display: flex;

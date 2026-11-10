@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Heading from "../Panel/Heading.svelte";
+  import Note from "../Panel/Note.svelte";
   import Icon from "../Icon/Icon.svelte";
   import Button from "../Button/Button.svelte";
   import { confirmStop, openRunLog } from "../../dialogs";
@@ -12,7 +14,6 @@
   import PreviewLine from "../Panel/PreviewLine.svelte";
   import ProblemStatus from "../Panel/ProblemStatus.svelte";
   import ResumeStatus from "../Panel/ResumeStatus.svelte";
-  import ProgressFill from "../ProgressFill/ProgressFill.svelte";
   import TokenChips from "../TokenChips/TokenChips.svelte";
 
   const panel = $derived(copyState());
@@ -20,27 +21,21 @@
   const dest = $derived(S.settings.copyDest);
 </script>
 
-{#snippet behind()}
-  {#if panel === "running"}
-    <ProgressFill pct={S.copyP} />
-    <span class="tagline">{S.runFanOut ? "Fan-out" : "Copy"}</span>
-    <button class="corner" onclick={confirmStop} title="Stop"><Icon name="x" /></button>
-  {/if}
-{/snippet}
-
 <Panel
   id="pCopy"
   dim={panel === "idle" && !S.resumeJournal && !S.src}
   status={panel === "running" || panel === "error" || panel === "done" ? panel : ""}
-  {behind}
+  progress={panel === "running" ? S.copyP : undefined}
+  tagline={panel === "running" ? (S.runFanOut ? "Fan-out" : "Copy") : undefined}
+  corner={panel === "running" ? { title: "Stop", onclick: confirmStop } : undefined}
 >
   {#if panel === "idle" && S.resumeJournal}
     <ResumeStatus name="copy" dest={0} />
   {:else if panel === "idle"}
-    <h2>copy</h2>
-    <div class="sub">Media files will be copied to:</div>
+    <Heading text="copy" />
+    <Note>Media files will be copied to:</Note>
     <Button size="sm" onclick={(e: MouseEvent) => destMenu(e.currentTarget as Element, "copy")}><Icon name="folder" size={14} /> Choose…</Button>
-    {#if dest}<PathLine path={dest + (dest.endsWith(sep) ? "" : sep)} />{:else}<div class="path">No folder chosen</div>{/if}
+    {#if dest}<PathLine path={dest + (dest.endsWith(sep) ? "" : sep)} />{:else}<PathLine path="No folder chosen" />{/if}
     <TokenChips />
     <PreviewLine which="copy" />
   {:else if panel === "running"}

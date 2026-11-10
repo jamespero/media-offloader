@@ -1,4 +1,7 @@
 <script lang="ts">
+  import Heading from "../Panel/Heading.svelte";
+  import Note from "../Panel/Note.svelte";
+  import Percent from "../Panel/Percent.svelte";
   import StatusPill from "../StatusPill/StatusPill.svelte";
   import type { HistoryItem } from "../../api";
   import { openPastLog } from "../../dialogs";
@@ -20,14 +23,14 @@
 
 <Panel {id} dim={root === undefined} status={root === undefined ? "" : finished ? "done" : stopped ? "" : "error"}>
   {#if root === undefined}
-    <h2>backup</h2>
-    <div class="sub">No backup in this offload.</div>
+    <Heading text="backup" />
+    <Note>No backup in this offload.</Note>
   {:else if finished}
     <DoneStatus heading={backup ? "backed up to" : "copied to"} {root} bytes={item.bytes} files={item.files} verb={backup ? "backed up" : "copied"} onlog={openPastLog} />
   {:else if stopped}
-    <h2>{backup ? "backup" : "copy"}</h2>
+    <Heading text={backup ? "backup" : "copy"} />
     <PathLine path={root} />
-    <div class="pct result">{pct}%<small>{done} of {item.files} files verified</small></div>
+    <Percent result value="{pct}%" note="{done} of {item.files} files verified" />
     <StatusPill tone={item.outcome ? "queued" : "held"}>{item.outcome ? "Stopped" : "Didn't finish"}</StatusPill>
   {:else}
     <ProblemStatus

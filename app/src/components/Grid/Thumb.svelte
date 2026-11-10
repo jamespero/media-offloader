@@ -40,7 +40,7 @@
     clearHover();
   }}
 >
-  <div class="img">
+  <div class={["img", !url && "art"]}>
     {#if url}<img src={url} alt="" />{:else}{@const [art, size] = ART[kindOf(file.ext)]}<Icon name={art} {size} />{/if}
   </div>
   <div class="shade"></div>

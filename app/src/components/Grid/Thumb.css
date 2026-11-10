@@ -27,9 +27,10 @@
   background: radial-gradient(ellipse at 50% 35%, var(--color-surface-2), var(--color-surface-thumb) 70%);
 }
 
-.thumb .img :global(svg) {
-  opacity: .55;
-  margin-bottom: var(--space-7);
+/* The kind-of-file icon shown until there's a thumbnail: faded, and a little above center. */
+.thumb .img.art {
+  --icon-opacity: .55;
+  padding-bottom: var(--space-7);
 }
 
 .thumb .nm {

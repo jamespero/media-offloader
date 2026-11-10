@@ -22,3 +22,5 @@
     {#if tag === "path"}<path {...attrs} />{:else if tag === "rect"}<rect {...attrs} />{:else}<circle {...attrs} />{/if}
   {/each}
 </svg>
+
+<style src="./Icon.css"></style>

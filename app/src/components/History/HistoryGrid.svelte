@@ -14,6 +14,7 @@
 </script>
 
 <Banner icon={verified ? "shield" : "info"} tone={verified ? "" : item.outcome?.kind === "cancelled" ? "info" : "bad"}>
-  <b>{item.label}</b>, offloaded {when}{item.runs > 1 ? ` in ${item.runs} runs` : ""} · {item.files} files, {fmtSize(item.bytes)}.{note}
-</Banner>
+      {#snippet lead()}{item.label}{/snippet}
+      , offloaded {when}{item.runs > 1 ? ` in ${item.runs} runs` : ""} · {item.files} files, {fmtSize(item.bytes)}.{note}
+    </Banner>
 <Grid files={S.histFiles} />

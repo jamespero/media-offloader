@@ -1,4 +1,7 @@
 <script lang="ts">
+  import MenuHeading from "../Menu/MenuHeading.svelte";
+  import MenuNote from "../Menu/MenuNote.svelte";
+  import MenuSeparator from "../Menu/MenuSeparator.svelte";
   import TextInput from "../TextInput/TextInput.svelte";
   import { onMount, untrack } from "svelte";
   import { closeMenus } from "../Menu/menuState.svelte.ts";
@@ -48,7 +51,7 @@
     <span class="label">{label}</span>
     <TextInput narrow id="numIn" type="number" min="1" max="999" value={firstNumber} oninput={setNumber} onkeydown={closeOnEnter} />
   </div>
-  <div class="mnote">{note}</div>
+  <MenuNote>{note}</MenuNote>
 {/snippet}
 
 {#snippet format(f: string, sample: string, chosen: boolean)}
@@ -56,31 +59,31 @@
 {/snippet}
 
 {#if token.t === "now" || token.t === "shot"}
-  <div class="mh">{token.t === "now" ? "Now: current date/time" : "Shot: capture date/time"}</div>
+  <MenuHeading text={token.t === "now" ? "Now: current date/time" : "Shot: capture date/time"} />
   {#each DATE_FMTS as f}{@render format(f, fmtDate(dateSample, f), (token.fmt ?? "YY-MM-DD") === f)}{/each}
 {:else if token.t === "day"}
-  <div class="mh">Shoot day</div>
+  <MenuHeading text={"Shoot day"} />
   {@render numberRow("Day", "Set by hand; it doesn't count up on its own.")}
-  <div class="sep"></div>
-  <div class="mh">Format</div>
+  <MenuSeparator />
+  <MenuHeading text={"Format"} />
   {#each DAY_FMTS as f}{@render format(f, fmtDay(S.settings.shootDay, f, ctx.shotDate ?? ctx.now), (token.fmt ?? "Day01") === f)}{/each}
 {:else if token.t === "text" || token.t === "project"}
-  <div class="mh">{token.t === "text" ? "Custom text" : "Project name"}</div>
+  <MenuHeading text={token.t === "text" ? "Custom text" : "Project name"} />
   <div class="mi-field">
     <TextInput id="txtIn" value={firstText} spellcheck="false" bind:element={textInput} oninput={setText} onkeydown={closeOnEnter} />
   </div>
 {:else if token.t === "reel"}
-  <div class="mh">Reel letter</div>
+  <MenuHeading text={"Reel letter"} />
   {#each ["A", "B", "C", "D"] as l}
     <MenuItem icon="tag" label="{l}{String(ctx.reelNo(l)).padStart(3, '0')}, {l}{String(ctx.reelNo(l) + 1).padStart(3, '0')}…" onclick={() => setReel(index, l)} checked={reel === l} />
   {/each}
-  <div class="sep"></div>
+  <MenuSeparator />
   {@render numberRow(`Next ${reel} roll`, "Counts up after each completed offload. Change it to match the card's label.")}
 {:else}
-  <div class="mh">{tokenInfo(token.t).label}</div>
-  <div class="mnote">Resolves to <span class="mono-value">{tokenText(token, ctx)}</span></div>
+  <MenuHeading text={tokenInfo(token.t).label} />
+  <MenuNote>Resolves to <span class="mono-value">{tokenText(token, ctx)}</span></MenuNote>
 {/if}
-<div class="sep"></div>
+<MenuSeparator />
 {#if index > 0}<MenuItem icon="chevL" label="Move Left" onclick={() => moveToken(index, -1)} />{/if}
 {#if index < count - 1}<MenuItem icon="chevR" label="Move Right" onclick={() => moveToken(index, 1)} />{/if}
 <MenuItem icon="trash" label="Remove" onclick={() => removeToken(index)} />

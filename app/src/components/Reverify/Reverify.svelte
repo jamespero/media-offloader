@@ -1,6 +1,5 @@
 <script lang="ts">
   import Icon from "../Icon/Icon.svelte";
-  import IconButton from "../IconButton/IconButton.svelte";
   import Button from "../Button/Button.svelte";
   import type { CheckStatus, ManifestSource } from "../../api";
   import { fmtSize } from "../../format";
@@ -36,11 +35,8 @@
   const bad = $derived(report ? report.files.filter((f) => f.status.state !== "verified" && f.status.state !== "pending") : []);
 </script>
 
-<LogBox fit>
-  <header>
-    <Icon name="shield" /><b>Re-verify</b><span class="rvpath" title={R.path}>{R.path}</span>
-    <IconButton onclick={closeOverlay} aria-label="Close"><Icon name="x" /></IconButton>
-  </header>
+<LogBox fit icon="shield" title="Re-verify" onclose={closeOverlay}>
+  {#snippet extra()}<span class="rvpath" title={R.path}>{R.path}</span>{/snippet}
   <div class="rvbody" id="rvbody">
     {#if R.error}
       <div class="rvres failed"><Icon name="alert" size={18} /><span>{R.error}</span></div>

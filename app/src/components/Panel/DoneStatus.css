@@ -1,0 +1,27 @@
+.okring {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-circle);
+  border: 2px solid currentColor;
+  display: grid;
+  place-items: center;
+  margin-top: var(--space-2);
+}
+
+.summary {
+  margin-top: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-full);
+  background: var(--color-overlay-on-done);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border: 0;
+  color: inherit;
+}
+
+.summary:hover {
+  background: var(--color-overlay-on-done-hover);
+}

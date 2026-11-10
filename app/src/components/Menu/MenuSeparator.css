@@ -1,0 +1,5 @@
+.sep {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-3) var(--space-2);
+}
