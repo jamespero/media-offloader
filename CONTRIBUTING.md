@@ -7,7 +7,7 @@ Thanks for helping out. Media Offloader moves people's footage, so the bar is si
 You need:
 
 - Rust stable, 1.90 or newer ([rustup](https://rustup.rs)), with `rustfmt` and `clippy`.
-- Node 20 or newer, for the desktop app's UI.
+- Node 24 or newer, for the desktop app's UI and its tests.
 - Windows: WebView2 (built into Windows 11) and the MSVC build tools.
 - macOS: the Xcode command-line tools (`xcode-select --install`).
 
