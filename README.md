@@ -57,7 +57,7 @@ xcode-select --install
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-Then install Node 20+ (e.g. from nodejs.org or `brew install node`) and follow the build steps below. On first run macOS asks for permission to access removable volumes and to show notifications; allow both. The macOS code paths (cache bypass with `F_NOCACHE`, `renamex_np`, `diskutil eject`, `caffeinate`, QuickLook thumbnails via `qlmanage`) build and the test suite passes on a Mac.
+Then install Node 24 or newer (e.g. from nodejs.org or `brew install node`) and follow the build steps below. On first run macOS asks for permission to access removable volumes and to show notifications; allow both. The macOS code paths (cache bypass with `F_NOCACHE`, `renamex_np`, `diskutil eject`, `caffeinate`, QuickLook thumbnails via `qlmanage`) build and the test suite passes on a Mac.
 
 ## Build and test
 
@@ -96,7 +96,7 @@ offload hash D:\Jobs\Day1\DCIM\100NCZ_R\DSC_0001.NEF --md5
 
 ## App
 
-The desktop app lives in `app/` (Tauri 2, Svelte 5, Vite + TypeScript). Needs Node 20+ and the Rust toolchain; on Windows, WebView2 (built into Windows 11). From `app/`:
+The desktop app lives in `app/` (Tauri 2, Svelte 5, Vite + TypeScript). Needs Node 24 or newer and the Rust toolchain; on Windows, WebView2 (built into Windows 11). From `app/`:
 
 ```bash
 npm install

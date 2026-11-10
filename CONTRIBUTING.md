@@ -7,7 +7,7 @@ Thanks for helping out. Media Offloader moves people's footage, so the bar is si
 You need:
 
 - Rust stable, 1.90 or newer ([rustup](https://rustup.rs)), with `rustfmt` and `clippy`.
-- Node 20 or newer, for the desktop app's UI.
+- Node 24 or newer, for the desktop app's UI and its tests.
 - Windows: WebView2 (built into Windows 11) and the MSVC build tools.
 - macOS: the Xcode command-line tools (`xcode-select --install`).
 
@@ -25,6 +25,13 @@ The desktop app lives in `app/`; run `npm install` there once, then `npm run tau
 - **Never eject or dismount a real drive in a test**, not even to check that a refusal path works.
 - New engine behavior comes with a test. Fault cases (corruption, a file changing mid-copy, read errors, unplugging, a full disk) are tested by injecting the fault, not by hoping for it.
 - Changes that only matter on one platform still have to build and pass on both; CI runs Windows and macOS.
+
+The app's UI has its own tests, run from `app/` with `npm test` ([Vitest](https://vitest.dev) and [Testing Library](https://testing-library.com/docs/svelte-testing-library/intro), in a simulated browser):
+
+- **Component and module tests** sit next to what they test, as `Icon.test.ts` beside `Icon.svelte` or `presets.test.ts` beside `presets.ts`.
+- **Whole-app tests** in `src/test/` start the real app with the same simulated backend as the browser preview (`src/preview.ts`), click through it the way a person would, and check what reaches the backend. `startApp()` in `src/test/app.ts` gives each test a fresh app, fake timers so a simulated offload finishes instantly, and a record of every backend call.
+- Find things the way a person would: by role and visible name (`getByRole("button", { name: "Start" })`), not by class names.
+- A UI change comes with a test, and a bug fix with a test that fails without the fix.
 
 ## Rules the code follows
 
@@ -87,6 +94,10 @@ Name a state module differently from its component. `Toast.svelte` and `toast.sv
    npm run build
    ```
 
+   ```bash
+   npm test
+   ```
+
 3. Open a pull request against `main` and fill in the template.
 
 Every pull request is checked when it's opened and again on every push:
@@ -94,7 +105,7 @@ Every pull request is checked when it's opened and again on every push:
 | Check | What it does |
 |---|---|
 | **PR title** | The title follows Conventional Commits (below). Editing the title re-runs it. |
-| **Build and test (Windows / macOS)** | Formatting, clippy with warnings as errors, the full test suite, and the app's typecheck and build. |
+| **Build and test (Windows / macOS)** | Formatting, clippy with warnings as errors, the full test suite, and the app's typecheck, build and UI tests. |
 | **Version consistency** | Every version number in the repo is valid semver and they all match. |
 
 All checks must pass, and the branch must be up to date with `main`, before a pull request can be merged. Pull requests are squash-merged, so the title becomes the commit on `main`.
