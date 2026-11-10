@@ -50,6 +50,11 @@ export async function selectSource(path: string, hint?: VolumeEntry) {
   thumbsForCurrent();
 }
 
+/** Reads the source again, e.g. after the hidden-files setting changes what's on it. */
+export function rereadSource() {
+  if (S.src && !running()) selectSource(S.src.path);
+}
+
 /** Selects a connected card or drive from the source menu. */
 export function pickVolume(path: string) {
   selectSource(path, S.volumes.find((v) => v.path === path));

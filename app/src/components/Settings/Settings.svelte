@@ -10,8 +10,7 @@
   import type { IconName } from "../../icons";
   import { S, running } from "../../state.svelte.ts";
   import { showLogsFolder } from "../../places";
-  import { setFanOut, setMd5 } from "../../settingEdits";
-  import { ejectEnabled } from "../../source";
+  import { ejectEnabled, rereadSource } from "../../source";
   import NamingPane from "./NamingPane.svelte";
   import SettingRow from "./SettingRow.svelte";
   import { settings, settingsTab } from "./settingsState.svelte.ts";
@@ -56,22 +55,26 @@
     {#if tab === "general"}
       <h5>general</h5>
       <p class="intro">How Media Offloader reacts when media shows up.</p>
-      <ToggleRow title="Auto-select inserted media" note="When a card or drive is connected, make it the source. Folders are never auto-selected." setting="autoSelect" />
-      <ToggleRow title="Copy hidden system files" note="Include .Trashes, .Spotlight-V100, System Volume Information. Off still copies every camera file and folder." setting="includeSystemFiles" />
+      <ToggleRow title="Auto-select inserted media" note="When a card or drive is connected, make it the source. Folders are never auto-selected." bind:on={s.autoSelect} />
+      <ToggleRow title="Copy hidden system files" note="Include .Trashes, .Spotlight-V100, System Volume Information. Off still copies every camera file and folder." bind:on={s.includeSystemFiles} onchange={rereadSource} />
       {#if ejectEnabled}
-        <ToggleRow title="Eject source when verified" note="Unmount the card as soon as its copy is verified, so it is safe to pull. The backup carries on from the copy." setting="ejectWhenVerified" />
+        <ToggleRow title="Eject source when verified" note="Unmount the card as soon as its copy is verified, so it is safe to pull. The backup carries on from the copy." bind:on={s.ejectWhenVerified} />
       {/if}
-      <ToggleRow title="Keep the computer awake" note="Prevent sleep while a transfer is running." setting="keepAwake" />
-      <ToggleRow title="Install updates automatically" note="When a new version is out, install it as the app starts, before you begin. Off: the app asks first. Never during an offload." setting="autoUpdate" />
+      <ToggleRow title="Keep the computer awake" note="Prevent sleep while a transfer is running." bind:on={s.keepAwake} />
+      <ToggleRow title="Install updates automatically" note="When a new version is out, install it as the app starts, before you begin. Off: the app asks first. Never during an offload." bind:on={s.autoUpdate} />
     {:else if tab === "verify"}
       <h5>verification</h5>
       <p class="intro">Every file is read back from the destination and compared to the source.</p>
       <SettingRow title="Checksum" note="xxHash64 is fast and is what ASC MHL uses. Add MD5 when production or insurance asks for it.">
-        <Segmented items={choices(setMd5, s.md5, "xxHash64", "xxHash64 + MD5")} />
+        <Segmented items={choices((on) => (s.md5 = on), s.md5, "xxHash64", "xxHash64 + MD5")} />
       </SettingRow>
-      <ToggleRow title="Write ASC MHL manifest" note="Saves an ascmhl folder next to the footage so any copy can be re-verified later, here or in any MHL tool." setting="mhl" />
+      <ToggleRow title="Write ASC MHL manifest" note="Saves an ascmhl folder next to the footage so any copy can be re-verified later, here or in any MHL tool." bind:on={s.mhl} />
       <SettingRow title="Write .md5 checksum list" note={'Classic "hash  path" file (checksums.md5) next to the footage. Requires MD5.'}>
-        <Toggle on={s.md5List && s.md5} setting="md5List" label="Write .md5 checksum list" lock={!s.md5} />
+        {#if s.md5}
+          <Toggle bind:on={s.md5List} label="Write .md5 checksum list" />
+        {:else}
+          <Toggle label="Write .md5 checksum list" lock />
+        {/if}
       </SettingRow>
       <SettingRow title="Verify from disk, not cache" note="Reads bypass the OS cache so verification checks what is actually on the drive. Always on.">
         <Toggle on label="Verify from disk, not cache" lock />
@@ -80,7 +83,7 @@
       <h5>transfers</h5>
       <p class="intro">How copy and backup are scheduled.</p>
       <SettingRow title="Copy mode" note="Sequential: copy, verify, free the card, then back up from the copy (classic). Fan-out: read the card once and write every drive at the same time.">
-        <Segmented items={choices(setFanOut, s.fanOut, "Sequential", "Fan-out")} />
+        <Segmented items={choices((on) => (s.fanOut = on), s.fanOut, "Sequential", "Fan-out")} />
       </SettingRow>
       <SettingRow title="When the destination already exists" note="Never overwrite. Repeat offloads go into copy-conflicted, copy-conflicted-1, …">
         <span class="always">Always on</span>
@@ -90,8 +93,8 @@
     {:else if tab === "notify"}
       <h5>notifications</h5>
       <p class="intro">Know it's done without watching the screen.</p>
-      <ToggleRow title="Play a sound when finished" note="A rising chime when everything verified, a lower one when something needs attention." setting="sound" />
-      <ToggleRow title="System notification" note="Shows in Notification Center / the Windows notification area when the app isn't in front." setting="notify" />
+      <ToggleRow title="Play a sound when finished" note="A rising chime when everything verified, a lower one when something needs attention." bind:on={s.sound} />
+      <ToggleRow title="System notification" note="Shows in Notification Center / the Windows notification area when the app isn't in front." bind:on={s.notify} />
     {:else}
       <h5>logs</h5>
       <p class="intro">A plain-text log is kept for every offload: each file's checksums, what was skipped or renamed, and how it ended.</p>

@@ -12,7 +12,7 @@ import { refreshHistory } from "./history";
 import { chime, notify } from "./notify";
 import { resetRun } from "./runState";
 import { clearSource } from "./source";
-import { S, hasBackup, running, saveSettings, totalBytes } from "./state.svelte.ts";
+import { S, hasBackup, running, totalBytes } from "./state.svelte.ts";
 import { thumbsForCurrent } from "./thumbRequests";
 import { stopThumbs } from "./thumbs";
 
@@ -60,7 +60,6 @@ export function finish(outcome: Outcome) {
       const s = S.settings;
       s.importNo += 1;
       for (const t of s.tokens) if (t.t === "reel") s.reels[t.v || "A"] = (s.reels[t.v || "A"] ?? 1) + 1;
-      saveSettings();
       toast(true, "Offload complete", `${fmtSize(totalBytes())} verified on ${drives}`);
       chime(true);
       notify("Offload complete", `${S.src?.label ?? "Media"}: ${fmtSize(totalBytes())} verified on ${drives}.`);
