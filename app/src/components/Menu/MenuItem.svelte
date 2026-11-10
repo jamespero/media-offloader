@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { ic, type IconName } from "../../icons";
+  import Icon from "../Icon/Icon.svelte";
+  import type { IconName } from "../../icons";
   import { closeMenus } from "./menuState.svelte.ts";
 
   let {
@@ -48,16 +49,16 @@
   }}
 >
   {#if marked !== undefined}
-    <span class="mi-icon">{#if marked}{@html ic.check(14)}{/if}</span>
+    <span class="mi-icon">{#if marked}<Icon name="check" size={14} />{/if}</span>
   {:else if icon}
-    {@html ic[icon](15)}
+    <Icon name={icon} size={15} />
   {:else}
     <span class="mi-icon"></span>
   {/if}
   <span>{#if mono}<span class="recent-path">{label}</span>{:else}{label}{/if}</span>
   {#if shortcut}<span class="kb">{shortcut}</span>{/if}
   {#if hint}<span class="sm">{hint}</span>{/if}
-  {#if checked}<span class="ck">{@html ic.check(14)}</span>{/if}
+  {#if checked}<span class="ck"><Icon name="check" size={14} /></span>{/if}
 </button>
 
 <style src="./MenuItem.css"></style>

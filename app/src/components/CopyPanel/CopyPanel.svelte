@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Icon from "../Icon/Icon.svelte";
   import Button from "../Button/Button.svelte";
   import { confirmStop, openRunLog } from "../../dialogs";
-  import { ic } from "../../icons";
   import { destMenu } from "../../menus";
   import { copyState, rateText, rootFor } from "../../panelState";
   import { S, sep, totalBytes } from "../../state.svelte.ts";
@@ -24,7 +24,7 @@
   {#if panel === "running"}
     <ProgressFill pct={S.copyP} />
     <span class="tagline">{S.runFanOut ? "Fan-out" : "Copy"}</span>
-    <button class="corner" onclick={confirmStop} title="Stop">{@html ic.x()}</button>
+    <button class="corner" onclick={confirmStop} title="Stop"><Icon name="x" /></button>
   {/if}
 {/snippet}
 
@@ -39,7 +39,7 @@
   {:else if panel === "idle"}
     <h2>copy</h2>
     <div class="sub">Media files will be copied to:</div>
-    <Button size="sm" onclick={(e: MouseEvent) => destMenu(e.currentTarget as Element, "copy")}>{@html ic.folder(14)} Choose…</Button>
+    <Button size="sm" onclick={(e: MouseEvent) => destMenu(e.currentTarget as Element, "copy")}><Icon name="folder" size={14} /> Choose…</Button>
     {#if dest}<PathLine path={dest + (dest.endsWith(sep) ? "" : sep)} />{:else}<div class="path">No folder chosen</div>{/if}
     <TokenChips />
     <PreviewLine which="copy" />

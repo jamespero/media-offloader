@@ -2,7 +2,6 @@
   import type { HistoryItem } from "../../api";
   import { fmtSize } from "../../format";
   import { clock, resumeLabel } from "../../history";
-  import { ic } from "../../icons";
   import { S } from "../../state.svelte.ts";
   import Banner from "../Grid/Banner.svelte";
   import Grid from "../Grid/Grid.svelte";
@@ -14,7 +13,7 @@
   const verified = $derived(item.outcome?.kind === "verified");
 </script>
 
-<Banner icon={verified ? ic.shield() : ic.info()} tone={verified ? "" : item.outcome?.kind === "cancelled" ? "info" : "bad"}>
+<Banner icon={verified ? "shield" : "info"} tone={verified ? "" : item.outcome?.kind === "cancelled" ? "info" : "bad"}>
   <b>{item.label}</b>, offloaded {when}{item.runs > 1 ? ` in ${item.runs} runs` : ""} · {item.files} files, {fmtSize(item.bytes)}.{note}
 </Banner>
 <Grid files={S.histFiles} />

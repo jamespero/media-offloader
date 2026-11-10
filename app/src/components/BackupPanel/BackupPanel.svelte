@@ -1,9 +1,9 @@
 <script lang="ts">
+  import Icon from "../Icon/Icon.svelte";
   import StatusPill from "../StatusPill/StatusPill.svelte";
   import Button from "../Button/Button.svelte";
   import { removeBackup } from "../../destinations";
   import { confirmStop, openRunLog } from "../../dialogs";
-  import { ic } from "../../icons";
   import { destMenu } from "../../menus";
   import { bakState, rootFor } from "../../panelState";
   import { S, hasBackup, running, sep, totalBytes } from "../../state.svelte.ts";
@@ -30,11 +30,11 @@
 
 {#snippet behind()}
   {#if chosen && S.src}
-    <button class="corner" onclick={removeBackup} title="Remove backup destination">{@html ic.x(14)}</button>
+    <button class="corner" onclick={removeBackup} title="Remove backup destination"><Icon name="x" size={14} /></button>
   {:else if !resume && !unset && panel === "running"}
     <ProgressFill pct={S.bakP} />
     <span class="tagline">Backup</span>
-    <button class="corner" onclick={confirmStop} title="Stop">{@html ic.x()}</button>
+    <button class="corner" onclick={confirmStop} title="Stop"><Icon name="x" /></button>
   {/if}
 {/snippet}
 
@@ -54,11 +54,11 @@
   {:else if unset}
     <h2>backup</h2>
     <div class="sub">Select a location to save a second copy of all media files.</div>
-    <Button size="sm" onclick={chooseDest}>{@html ic.folder(14)} Choose…</Button>
+    <Button size="sm" onclick={chooseDest}><Icon name="folder" size={14} /> Choose…</Button>
   {:else if panel === "idle"}
     <h2>backup</h2>
     <div class="sub">Media files will also be copied to:</div>
-    <Button size="sm" onclick={chooseDest}>{@html ic.folder(14)} Choose…</Button>
+    <Button size="sm" onclick={chooseDest}><Icon name="folder" size={14} /> Choose…</Button>
     <PathLine path={dest + (dest.endsWith(sep) ? "" : sep)} />
     <TokenChips sameAsCopy />
     <PreviewLine which="bak" />

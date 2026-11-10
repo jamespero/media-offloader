@@ -1,9 +1,9 @@
 <script lang="ts">
+  import Icon from "../Icon/Icon.svelte";
   import Segmented from "../Segmented/Segmented.svelte";
   import IconButton from "../IconButton/IconButton.svelte";
   import { KINDS, gridKind, kindOf } from "../../fileKinds";
   import { clock, day, forgetOffload, itemState, showKind, showTab } from "../../history";
-  import { ic } from "../../icons";
   import { mainMenu, presetMenu } from "../../menus";
   import { activePreset } from "../../presets";
   import { S, running, shownFiles } from "../../state.svelte.ts";
@@ -45,7 +45,7 @@
             e.stopPropagation();
             forgetOffload(h.path);
           }}
-        >{@html ic.x(11)}</span>
+        ><Icon name="x" size={11} /></span>
       </button>
     {/each}
     <button class={["tab", !S.view && "active"]} onclick={() => showTab("")}>
@@ -59,10 +59,10 @@
   {/if}
   {#if !S.view}
     <button class="preset" id="presetBtn" onclick={(e) => presetMenu(e.currentTarget)} title="Preset: subfolder pattern">
-      {@html ic.star(13)}<span>Preset</span><b>{activePreset()?.name ?? "Custom"}</b>{@html ic.chev()}
+      <Icon name="star" size={13} /><span>Preset</span><b>{activePreset()?.name ?? "Custom"}</b><Icon name="chev" />
     </button>
   {/if}
-  <IconButton id="menuBtn" onclick={(e: MouseEvent) => mainMenu(e.currentTarget as Element)} title="Menu" aria-label="Menu">{@html ic.menu()}</IconButton>
+  <IconButton id="menuBtn" onclick={(e: MouseEvent) => mainMenu(e.currentTarget as Element)} title="Menu" aria-label="Menu"><Icon name="menu" /></IconButton>
 </div>
 
 <style src="./Strip.css"></style>

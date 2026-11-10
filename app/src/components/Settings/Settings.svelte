@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from "../Icon/Icon.svelte";
   import Segmented from "../Segmented/Segmented.svelte";
   import MenuItem from "../Menu/MenuItem.svelte";
   import IconButton from "../IconButton/IconButton.svelte";
@@ -6,7 +7,7 @@
   import { onMount } from "svelte";
   import { api } from "../../api";
   import { closeOverlay } from "../Overlay/overlayState.svelte.ts";
-  import { ic, type IconName } from "../../icons";
+  import type { IconName } from "../../icons";
   import { S, running } from "../../state.svelte.ts";
   import { showLogsFolder } from "../../places";
   import { setFanOut, setMd5 } from "../../settingEdits";
@@ -51,7 +52,7 @@
     {/each}
   </div>
   <div class="pane">
-    <div class="closex"><IconButton onclick={closeOverlay} aria-label="Close">{@html ic.x()}</IconButton></div>
+    <div class="closex"><IconButton onclick={closeOverlay} aria-label="Close"><Icon name="x" /></IconButton></div>
     {#if tab === "general"}
       <h5>general</h5>
       <p class="intro">How Media Offloader reacts when media shows up.</p>
@@ -95,7 +96,7 @@
       <h5>logs</h5>
       <p class="intro">A plain-text log is kept for every offload: each file's checksums, what was skipped or renamed, and how it ended.</p>
       <SettingRow title="Log location" note={logDir} mono>
-        <Button size="sm" onclick={showLogsFolder}>{@html ic.reveal(13)} Show</Button>
+        <Button size="sm" onclick={showLogsFolder}><Icon name="reveal" size={13} /> Show</Button>
       </SettingRow>
     {/if}
   </div>
