@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { HTMLButtonAttributes } from "svelte/elements";
   import Icon from "../Icon/Icon.svelte";
   import type { IconName } from "../../icons";
   import { closeMenus } from "./menuState.svelte.ts";
@@ -16,7 +17,7 @@
     hint,
     checked = false,
     ...attrs
-  }: {
+  }: Omit<HTMLButtonAttributes, "class" | "children" | "onclick"> & {
     icon?: IconName | null;
     label: string;
     /** Runs, then the menu it's in closes. (Closing first would take away the menu's props.) */
@@ -35,7 +36,6 @@
     hint?: string;
     /** A check at the right edge. */
     checked?: boolean;
-    [attr: string]: unknown;
   } = $props();
 </script>
 
