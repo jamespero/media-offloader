@@ -98,13 +98,6 @@ function load(): Settings {
   return structuredClone(DEFAULTS);
 }
 
-export function saveSettings() {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(S.settings));
-  } catch {
-    /* storage unavailable: settings last for this session only */
-  }
-}
 
 export interface Live {
   name: string;
@@ -163,6 +156,22 @@ class AppState {
 }
 
 export const S = new AppState();
+
+// Settings are saved whenever any of them changes, wherever the change is made. Settings as
+// loaded aren't written back, so one nobody has changed keeps following the app's default.
+let lastSaved = JSON.stringify(S.settings);
+$effect.root(() => {
+  $effect(() => {
+    const json = JSON.stringify(S.settings);
+    if (json === lastSaved) return;
+    lastSaved = json;
+    try {
+      localStorage.setItem(KEY, json);
+    } catch {
+      /* storage unavailable: settings last for this session only */
+    }
+  });
+});
 
 /** A plain copy of reactive data; `structuredClone` can't copy Svelte's state proxies. */
 export const plain = <T>(value: T): T => $state.snapshot(value) as T;

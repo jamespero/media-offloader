@@ -6,7 +6,7 @@
 
 import { closeOverlay } from "./components/Overlay/overlayState.svelte.ts";
 import { schedulePrepare } from "./destinations";
-import { S, plain, running, saveSettings } from "./state.svelte.ts";
+import { S, plain, running } from "./state.svelte.ts";
 import type { Token } from "./tokens";
 
 export interface Preset {
@@ -26,7 +26,6 @@ export function applyPreset(id: string) {
   const p = S.settings.presets.find((x) => x.id === id);
   if (!p || running()) return;
   S.settings.tokens = plain(p.tokens);
-  saveSettings();
 }
 
 /** Switches to a preset's subfolders and works out the destinations again. */
@@ -45,12 +44,10 @@ export function saveCurrentAs(name: string) {
   const i = s.presets.findIndex((p) => p.name.toLowerCase() === name.toLowerCase());
   if (i >= 0) s.presets[i] = { ...preset, id: s.presets[i].id };
   else s.presets.push(preset);
-  saveSettings();
   closeOverlay();
   return true;
 }
 
 export function deletePreset(id: string) {
   S.settings.presets = S.settings.presets.filter((p) => p.id !== id);
-  saveSettings();
 }

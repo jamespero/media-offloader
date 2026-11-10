@@ -3,7 +3,7 @@
 import { open } from "@tauri-apps/plugin-dialog";
 import { api, historyApi, type OffloadArgs } from "./api";
 import { markEarlierRun } from "./history";
-import { S, filesFromPlan, running, saveSettings, sep, tokenContext } from "./state.svelte.ts";
+import { S, filesFromPlan, running, sep, tokenContext } from "./state.svelte.ts";
 import { resolveRoot } from "./tokens";
 
 function offloadArgs(): OffloadArgs {
@@ -62,7 +62,6 @@ export function setDest(w: "copy" | "bak", path: string) {
   else s.bakDest = path;
   const key = w === "copy" ? "recentCopy" : "recentBak";
   s[key] = [path, ...s[key].filter((p) => p !== path)].slice(0, 5);
-  saveSettings();
   S.dests = null;
   schedulePrepare();
 }
@@ -78,13 +77,11 @@ export async function browseDest(w: "copy" | "bak") {
 /** Drops the backup destination: the next offload makes only the copy. */
 export function removeBackup() {
   S.settings.bakDest = null;
-  saveSettings();
   S.dests = null;
   schedulePrepare();
 }
 
 export function tokensChanged() {
-  saveSettings();
   S.dests = null;
   schedulePrepare();
 }

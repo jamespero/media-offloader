@@ -51,7 +51,7 @@
     <p>Media Offloader {update.version} has been downloaded. You have {update.currentVersion}.</p>
     {#if error}<p id="updMsg" class="problem-text">{error}</p>{:else}<p id="updMsg">Installing takes a few seconds and restarts the app. Your settings and presets are kept.</p>{/if}
     <SettingRow title="Install updates automatically from now on" note="As the app starts, before you begin. Never during an offload." boxed>
-      <Toggle on={S.settings.autoUpdate} setting="autoUpdate" label="Install updates automatically from now on" disabled={installing} />
+      <Toggle bind:on={S.settings.autoUpdate} label="Install updates automatically from now on" disabled={installing} />
     </SettingRow>
   {/if}
   <div class="acts">

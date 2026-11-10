@@ -1,4 +1,5 @@
 import { mockIPC } from "@tauri-apps/api/mocks";
+import { flushSync } from "svelte";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { S } from "./state.svelte.ts";
 import { addToken, moveToken, removeToken, setReel, setTokenFormat, stepImportNo } from "./tokenEdits";
@@ -14,7 +15,11 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-const saved = () => JSON.parse(localStorage.getItem("media-offloader.settings.v1")!);
+/** What's saved, once Svelte has run the effect that saves settings. */
+const saved = () => {
+  flushSync();
+  return JSON.parse(localStorage.getItem("media-offloader.settings.v1")!);
+};
 
 test("each kind of subfolder starts with its usual value", () => {
   for (const t of ["now", "shot", "day", "text", "reel", "project", "source", "import"] as const) addToken(t);
