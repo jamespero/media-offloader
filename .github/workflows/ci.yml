@@ -53,6 +53,11 @@ jobs:
           npm ci
           npm run build
 
+      - name: Test the UI
+        if: steps.detect.outputs.app == 'true'
+        working-directory: app
+        run: npm test
+
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch; installs the current stable Rust
         if: steps.detect.outputs.rust == 'true'
         with:

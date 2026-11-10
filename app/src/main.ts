@@ -19,7 +19,8 @@ import { S } from "./state.svelte.ts";
 import { initThumbs } from "./thumbs";
 import { initUpdates } from "./updates";
 
-mount(App, { target: document.getElementById("app")! });
+/** The mounted app; tests unmount it between runs. */
+export const app = mount(App, { target: document.getElementById("app")! });
 guardWindowClose();
 api.onEngine(onEngine);
 api.onReport(onReport);
