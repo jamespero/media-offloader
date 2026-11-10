@@ -1,6 +1,5 @@
 <script lang="ts">
   import Icon from "../Icon/Icon.svelte";
-  import IconButton from "../IconButton/IconButton.svelte";
   import Button from "../Button/Button.svelte";
   import { closeOverlay } from "../Overlay/overlayState.svelte.ts";
   import { reveal } from "../../places";
@@ -19,11 +18,11 @@
   const lines = $derived(text.split(/\r?\n/).map((l) => [l, tone(l)] as const));
 </script>
 
-<LogBox>
-  <header>
-    <Icon name="file" /><b>Transfer log</b>
+<LogBox icon="file" title="Transfer log" onclose={closeOverlay}>
+  {#snippet extra()}
     <Button size="sm" onclick={() => reveal(path)}><Icon name="reveal" size={13} /> Show in {fileManager}</Button>
-    <IconButton onclick={closeOverlay} aria-label="Close"><Icon name="x" /></IconButton>
-  </header>
+  {/snippet}
   <pre>{#each lines as [line, cls], i}{#if i > 0}{"\n"}{/if}{#if cls}<span class={cls}>{line}</span>{:else}{line}{/if}{/each}</pre>
 </LogBox>
+
+<style src="./LogViewer.css"></style>

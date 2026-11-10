@@ -20,7 +20,7 @@ import { initThumbs } from "./thumbs";
 import { initUpdates } from "./updates";
 
 /** The mounted app; tests unmount it between runs. */
-export const app = mount(App, { target: document.getElementById("app")! });
+export const app = mount(App, { target: document.body });
 guardWindowClose();
 api.onEngine(onEngine);
 api.onReport(onReport);

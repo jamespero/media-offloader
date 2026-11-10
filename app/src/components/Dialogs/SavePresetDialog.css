@@ -1,0 +1,4 @@
+/* The name field sits a little further from the paragraph than the dialog's gap. */
+.field {
+  margin-top: var(--space-3);
+}

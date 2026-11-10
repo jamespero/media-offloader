@@ -31,13 +31,13 @@
   position: relative;
 }
 
-.pane :global(h5) {
+.pane h5 {
   font: var(--font-weight-semibold) var(--font-size-2xl) var(--font-heading);
   margin: 0 0 var(--space-2);
   text-transform: lowercase;
 }
 
-.pane :global(.intro) {
+.intro {
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
   margin: 0 0 var(--space-5);

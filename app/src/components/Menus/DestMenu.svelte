@@ -1,4 +1,6 @@
 <script lang="ts">
+  import MenuHeading from "../Menu/MenuHeading.svelte";
+  import MenuSeparator from "../Menu/MenuSeparator.svelte";
   import { browseDest, setDest } from "../../destinations";
   import { S } from "../../state.svelte.ts";
   import MenuItem from "../Menu/MenuItem.svelte";
@@ -9,10 +11,10 @@
 </script>
 
 {#if recent.length}
-  <div class="mh">Recent</div>
+  <MenuHeading text={"Recent"} />
   {#each recent as path (path)}
     <MenuItem icon="folder" label={path} mono onclick={() => setDest(which, path)} />
   {/each}
-  <div class="sep"></div>
+  <MenuSeparator />
 {/if}
 <MenuItem icon="reveal" label="Browse…" onclick={() => browseDest(which)} />

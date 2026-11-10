@@ -38,7 +38,7 @@
   color: var(--color-text-secondary);
 }
 
-.banner .tx :global(b) {
+.banner .tx b {
   color: var(--color-text);
   font-weight: var(--font-weight-semibold);
 }

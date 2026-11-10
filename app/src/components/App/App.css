@@ -1,3 +1,21 @@
+/* COLOR MEANS STATUS. Violet = working, mint = done & safe, red = problem.
+   Controls (buttons, chips, toggles, menus) stay neutral so nothing idle looks busy. */
+
+/* The whole window. The base text font is set here once, and everything inherits it. */
+.app {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 260px 46px 1fr 30px;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface-app);
+  color: var(--color-text);
+  font: var(--font-size-md)/var(--line-height-ui) var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+}
+
 .band {
   display: grid;
   grid-template-columns: 236px 1fr 1fr;

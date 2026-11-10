@@ -1,0 +1,18 @@
+.pct {
+  font: var(--font-weight-semibold) var(--font-size-7xl)/var(--line-height-tight) var(--font-heading);
+  letter-spacing: var(--tracking-tighter);
+  font-variant-numeric: tabular-nums;
+  margin-top: var(--space-3);
+}
+
+.result {
+  font-size: var(--font-size-6xl);
+}
+
+small {
+  display: block;
+  font: var(--font-weight-medium) var(--font-size-lg) var(--font-heading);
+  letter-spacing: 0;
+  margin-top: var(--space-2);
+  opacity: .85;
+}

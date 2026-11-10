@@ -25,9 +25,7 @@ export async function startApp(search = "") {
   vi.resetModules();
   localStorage.clear();
   history.replaceState(null, "", "/" + search);
-  const target = document.createElement("div");
-  target.id = "app";
-  document.body.replaceChildren(target);
+  document.body.replaceChildren();
 
   const main = await import("../main");
   const { S } = await import("../state.svelte.ts");

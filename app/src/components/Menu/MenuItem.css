@@ -27,9 +27,8 @@
   outline-offset: 2px;
 }
 
-.mi :global(svg) {
-  color: var(--color-text-secondary);
-  flex: none;
+.mi {
+  --icon-color: var(--color-text-secondary);
 }
 
 .mi > span:nth-child(2) {

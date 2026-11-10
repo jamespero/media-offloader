@@ -1,0 +1,17 @@
+.preview {
+  font: var(--font-size-sm) var(--font-mono);
+  color: var(--color-text-tertiary);
+  max-width: 92%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+b {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.warn {
+  color: var(--color-status-problem);
+}

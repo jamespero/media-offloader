@@ -22,8 +22,7 @@
   });
 </script>
 
-<Dialog>
-  <h3>Save preset</h3>
+<Dialog title="Save preset">
   <p>Saves the subfolder pattern, so the next card from this camera is one click. The destinations aren't saved: they stay as they are, set once per project.</p>
   <div class="field">
     <TextInput
@@ -37,8 +36,10 @@
       }}
     />
   </div>
-  <div class="acts">
+  {#snippet actions()}
     <Button onclick={closeOverlay}>Cancel</Button>
     <Button variant="primary" size="compact" onclick={save}>Save</Button>
-  </div>
+  {/snippet}
 </Dialog>
+
+<style src="./SavePresetDialog.css"></style>

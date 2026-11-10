@@ -23,24 +23,3 @@
     opacity: 0;
   }
 }
-
-.menu :global(.mh) {
-  font-size: var(--font-size-xs);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: var(--color-text-tertiary);
-  padding: var(--space-4) var(--space-5) var(--space-2);
-}
-
-.menu :global(.mnote) {
-  padding: var(--space-2) var(--space-5) var(--space-4);
-  color: var(--color-text-tertiary);
-  font-size: var(--font-size-sm);
-}
-
-.menu :global(.sep) {
-  height: 1px;
-  background: var(--color-border);
-  margin: var(--space-3) var(--space-2);
-}
-

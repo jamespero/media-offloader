@@ -127,6 +127,7 @@
   text-overflow: ellipsis;
 }
 
-.preset :global(svg) {
-  color: var(--color-text-tertiary);
+.preset {
+  --icon-color: var(--color-text-tertiary);
 }
+

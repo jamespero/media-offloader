@@ -1,4 +1,7 @@
 <script lang="ts">
+  import Heading from "./Heading.svelte";
+  import Note from "./Note.svelte";
+  import Preview from "./Preview.svelte";
   import { resuming } from "../../panelState";
   import { S } from "../../state.svelte.ts";
   import PathLine from "./PathLine.svelte";
@@ -10,7 +13,7 @@
   const item = $derived(resuming());
 </script>
 
-<h2>{name}</h2>
-<div class="sub">Continuing in the same folder:</div>
+<Heading text={name} />
+<Note>Continuing in the same folder:</Note>
 {#if target}<PathLine path={target.root} />{/if}
-<div class="preview"><b>{item?.verified[dest] ?? 0} of {item?.files ?? S.files.length}</b> files already verified</div>
+<Preview strong="{item?.verified[dest] ?? 0} of {item?.files ?? S.files.length}" suffix=" files already verified" />

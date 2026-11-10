@@ -1,0 +1,7 @@
+/* A parent can tint or fade its icons by setting --icon-color or --icon-opacity on its own element. */
+svg {
+  display: block;
+  flex: none;
+  color: var(--icon-color, currentColor);
+  opacity: var(--icon-opacity, 1);
+}

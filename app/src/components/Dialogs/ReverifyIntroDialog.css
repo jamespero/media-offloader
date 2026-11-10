@@ -1,0 +1,4 @@
+/* A quieter aside under the main text. */
+.note {
+  color: var(--color-text-tertiary);
+}

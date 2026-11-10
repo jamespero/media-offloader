@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Heading from "../Panel/Heading.svelte";
+  import Note from "../Panel/Note.svelte";
   import Icon from "../Icon/Icon.svelte";
   import StatusPill from "../StatusPill/StatusPill.svelte";
   import Button from "../Button/Button.svelte";
@@ -14,7 +16,6 @@
   import PreviewLine from "../Panel/PreviewLine.svelte";
   import ProblemStatus from "../Panel/ProblemStatus.svelte";
   import ResumeStatus from "../Panel/ResumeStatus.svelte";
-  import ProgressFill from "../ProgressFill/ProgressFill.svelte";
   import TokenChips from "../TokenChips/TokenChips.svelte";
 
   const panel = $derived(bakState());
@@ -24,49 +25,47 @@
   const chosen = $derived(!resume && !unset && panel === "idle");
   const dim = $derived(resume ? !hasBackup() : unset ? !S.src || running() : chosen && !S.src);
   const dest = $derived(S.settings.bakDest ?? "");
+  /** The backup is being written now (not merely queued or held). */
+  const writing = $derived(!resume && !unset && panel === "running");
 
   const chooseDest = (e: MouseEvent) => destMenu(e.currentTarget as Element, "bak");
 </script>
-
-{#snippet behind()}
-  {#if chosen && S.src}
-    <button class="corner" onclick={removeBackup} title="Remove backup destination"><Icon name="x" size={14} /></button>
-  {:else if !resume && !unset && panel === "running"}
-    <ProgressFill pct={S.bakP} />
-    <span class="tagline">Backup</span>
-    <button class="corner" onclick={confirmStop} title="Stop"><Icon name="x" /></button>
-  {/if}
-{/snippet}
 
 <Panel
   id="pBak"
   {dim}
   status={!resume && !unset && (panel === "running" || panel === "error" || panel === "done") ? panel : ""}
-  {behind}
+  progress={writing ? S.bakP : undefined}
+  tagline={writing ? "Backup" : undefined}
+  corner={chosen && S.src
+    ? { title: "Remove backup destination", onclick: removeBackup, iconSize: 14 }
+    : writing
+      ? { title: "Stop", onclick: confirmStop }
+      : undefined}
 >
   {#if resume}
     {#if hasBackup()}
       <ResumeStatus name="backup" dest={1} />
     {:else}
-      <h2>backup</h2>
-      <div class="sub">No backup in this offload.</div>
+      <Heading text="backup" />
+      <Note>No backup in this offload.</Note>
     {/if}
   {:else if unset}
-    <h2>backup</h2>
-    <div class="sub">Select a location to save a second copy of all media files.</div>
+    <Heading text="backup" />
+    <Note>Select a location to save a second copy of all media files.</Note>
     <Button size="sm" onclick={chooseDest}><Icon name="folder" size={14} /> Choose…</Button>
   {:else if panel === "idle"}
-    <h2>backup</h2>
-    <div class="sub">Media files will also be copied to:</div>
+    <Heading text="backup" />
+    <Note>Media files will also be copied to:</Note>
     <Button size="sm" onclick={chooseDest}><Icon name="folder" size={14} /> Choose…</Button>
     <PathLine path={dest + (dest.endsWith(sep) ? "" : sep)} />
     <TokenChips sameAsCopy />
     <PreviewLine which="bak" />
   {:else if panel === "queued"}
-    <h2>backup</h2>
+    <Heading text="backup" />
     <PathLine path={root} />
     <StatusPill tone="queued">Queued</StatusPill>
-    <div class="sub">Starts as soon as the copy is verified.</div>
+    <Note>Starts as soon as the copy is verified.</Note>
   {:else if panel === "running"}
     <LiveStatus
       heading="backing up to"
@@ -76,10 +75,10 @@
       rate={S.runFanOut ? "Reading the card once, writing every drive" : "Reading from the verified copy"}
     />
   {:else if panel === "hold"}
-    <h2>backup</h2>
+    <Heading text="backup" />
     <PathLine path={root} />
     <StatusPill tone="held">On hold</StatusPill>
-    <div class="sub">Resolve the copy errors first.</div>
+    <Note>Resolve the copy errors first.</Note>
   {:else if panel === "error"}
     <ProblemStatus heading="backup incomplete" {root} failed={S.failBak} fallback="stopped" fallbackNote={S.abortReason ?? ""} onlog={openRunLog} />
   {:else}

@@ -8,12 +8,11 @@
   const done = $derived(S.files.filter((f) => f.state === "copied" || f.state === "backed").length);
 </script>
 
-<Dialog>
-  <h3>Stop this offload?</h3>
+<Dialog title="Stop this offload?">
   <p>{done} of {S.files.length} files are already copied and verified. Those stay where they are.</p>
   <p>The file in progress will be removed so nothing half-written is left behind.</p>
-  <div class="acts">
+  {#snippet actions()}
     <Button onclick={closeOverlay}>Keep going</Button>
     <Button variant="danger" onclick={stopOffload}>Stop</Button>
-  </div>
+  {/snippet}
 </Dialog>

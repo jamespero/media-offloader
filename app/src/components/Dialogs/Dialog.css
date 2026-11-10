@@ -1,3 +1,4 @@
+/* Content is spaced by the gap; text inside inherits the secondary color. */
 .dialog {
   width: min(430px,92%);
   background: var(--color-surface-1);
@@ -5,34 +6,21 @@
   border-radius: var(--radius-dialog);
   padding: var(--space-12);
   box-shadow: var(--shadow-dialog);
-}
-
-.dialog :global(h3) {
-  font: var(--font-weight-semibold) var(--font-size-2xl) var(--font-heading);
-  margin: 0 0 var(--space-3);
-}
-
-.dialog :global(p) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   color: var(--color-text-secondary);
-  margin: 0 0 var(--space-3);
-  font-size: var(--font-size-md);
 }
 
-.dialog :global(.acts) {
+h3 {
+  font: var(--font-weight-semibold) var(--font-size-2xl) var(--font-heading);
+  color: var(--color-text);
+}
+
+/* Buttons sit further from the content than its paragraphs sit from each other. */
+.acts {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-4);
-  margin-top: var(--space-9);
-}
-
-.dialog :global(p.problem-text) {
-  color: var(--color-status-problem);
-}
-
-.dialog :global(p.note) {
-  color: var(--color-text-tertiary);
-}
-
-.dialog :global(.field) {
   margin-top: var(--space-6);
 }

@@ -65,6 +65,15 @@ Components read the app state from `S` in `state.svelte.ts` and update themselve
 
 Shared controls are components too: `Button`, `Icon`, `IconButton`, `MenuItem`, `Segmented`, `StatusPill`, `TextInput` and others. Use them rather than writing a new button or input. Icons are drawn with `<Icon name="check" size={13} />`; a new icon goes in `icons.ts` as the shapes it's made of, on the same 24×24 grid.
 
+### Readable code
+
+Write it for the next person, even if that person is an agent. Someone opening a file should know what it's for from its name and its first screen, and should never have to search for where a style lives.
+
+- **One job per file.** A component, a module or a stylesheet does one thing, and its name says what. When a file needs scrolling to understand, or starts doing a second thing, split it.
+- **Styles live with their markup.** A component's styles are in the `.css` file beside it, and they style only what that component renders, so the place to change how something looks is always the component that draws it.
+- **Repeated markup becomes a component.** If the same piece appears in two places, such as a panel's heading or a menu's separator, make it a small component and use it in both rather than copying the markup and its styles.
+- **Say why, not what.** A short comment explains a choice the code can't make obvious (a workaround, a constraint, a deliberate exception). Don't narrate what the code already says.
+
 ### Styling rules
 
 Keep it simple. Every rule here exists so that changing one component can't quietly change another.
@@ -75,8 +84,6 @@ Keep it simple. Every rule here exists so that changing one component can't quie
 4. **Pass layout values down through custom properties or props, not selectors.** When a child needs a size from a particular parent, the parent sets a custom property on its own element (`.panel { --path-max-width: 92%; }`) and the child uses it with a fallback (`max-width: var(--path-max-width, 100%)`), or the child takes a prop. A state that changes the look of what's inside, such as a panel turning violet while it runs, reaches the children the same way: the parent sets `color` or a custom property on its own element and the children inherit it, or the state is passed as a prop. Prefer setting a custom property on the parent's own element over passing one to a component (`<PathLine --max-width="92%" />`), which makes Svelte add a wrapper element.
 5. **Fonts.** The base text font (Inter, its size and line height) is set once, as high up as possible: on the root element of the `App` component. Everything inherits it. A component whose text is different, such as a heading in Outfit, a path in JetBrains Mono, or a different size or weight, sets those font properties in its own styles. A component never sets the font of text another component renders.
 6. **Minimal markup.** Don't add a `div` or `span` only to hang a style on. Add an element when the content needs one (a list, a label, a region), or when the layout can't be done on an element that's already there.
-
-Some existing components still use `:global()`, and the base font and page layout are still set in `global.css`. They're being moved over to these rules; new code follows them from the start.
 
 Name a state module differently from its component. `Toast.svelte` and `toast.svelte.ts` collide on the case-insensitive filesystems Windows and macOS use by default.
 

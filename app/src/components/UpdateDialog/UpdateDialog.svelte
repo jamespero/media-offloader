@@ -41,20 +41,18 @@
   });
 </script>
 
-<Dialog>
+<Dialog title={auto ? "Updating" : "Update ready"}>
   {#if auto}
-    <h3>Updating</h3>
     <p>Installing Media Offloader {update.version}. The app restarts in a moment.</p>
     {#if error}<p id="updMsg" class="problem-text">{error}</p>{:else}<p id="updMsg" class="note">Automatic updates can be turned off in Settings → General.</p>{/if}
   {:else}
-    <h3>Update ready</h3>
     <p>Media Offloader {update.version} has been downloaded. You have {update.currentVersion}.</p>
     {#if error}<p id="updMsg" class="problem-text">{error}</p>{:else}<p id="updMsg">Installing takes a few seconds and restarts the app. Your settings and presets are kept.</p>{/if}
     <SettingRow title="Install updates automatically from now on" note="As the app starts, before you begin. Never during an offload." boxed>
       <Toggle bind:on={S.settings.autoUpdate} label="Install updates automatically from now on" disabled={installing} />
     </SettingRow>
   {/if}
-  <div class="acts">
+  {#snippet actions()}
     {#if !auto}
       <Button id="updNotes" disabled={installing} onclick={() => api.openRelease(update.version).catch(() => {})}>What's new</Button>
     {/if}
@@ -62,5 +60,7 @@
     <Button variant="primary" id="updGo" disabled={installing || (auto && !error)} onclick={install}>
       {#if error}Try again{:else if installing || auto}Installing…{:else}Update and relaunch{/if}
     </Button>
-  </div>
+  {/snippet}
 </Dialog>
+
+<style src="./UpdateDialog.css"></style>

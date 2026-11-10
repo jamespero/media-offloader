@@ -1,4 +1,7 @@
 <script lang="ts">
+  import Heading from "../Panel/Heading.svelte";
+  import Note from "../Panel/Note.svelte";
+  import SourceHead from "../Panel/SourceHead.svelte";
   import Icon from "../Icon/Icon.svelte";
   import Row from "../Row/Row.svelte";
   import StatusPill from "../StatusPill/StatusPill.svelte";
@@ -24,24 +27,26 @@
 
 {#snippet head()}
   {@const src = S.src!}
-  <div class="srcicon"><Icon name={src.kind} /></div>
-  <h2>source</h2>
-  <Row gap="tighter">
-    <button class="vol" onclick={running() ? undefined : (e) => srcMenu(e.currentTarget)} title={src.path}>
-      <span>{src.label}</span>
-      {#if !running()}<Icon name="chev" />{/if}
-    </button>
-    {#if canEject}<IconButton small title="Eject" onclick={ejectSource}><Icon name="eject" size={14} /></IconButton>{/if}
-  </Row>
-  <div class="meta">{src.media}</div>
+  <SourceHead
+    icon={src.kind}
+    label={src.label}
+    meta={src.media}
+    path={src.path}
+    chevron={!running()}
+    onclick={running() ? undefined : (e) => srcMenu(e.currentTarget)}
+  >
+    {#snippet extra()}
+      {#if canEject}<IconButton small title="Eject" onclick={ejectSource}><Icon name="eject" size={14} /></IconButton>{/if}
+    {/snippet}
+  </SourceHead>
 {/snippet}
 
 <!-- After the copy verified: an Eject button, or confirmation that it was ejected. -->
 {#snippet ejectRow(rest: string)}
   {#if S.ejected}
-    <div class="sub">Ejected — safe to remove. {rest}</div>
+    <Note>Ejected — safe to remove. {rest}</Note>
   {:else}
-    <div class="sub">Safe to remove. {rest}</div>
+    <Note>Safe to remove. {rest}</Note>
     {#if canEject}<Button size="sm" onclick={ejectSource}><Icon name="eject" size={13} /> Eject</Button>{/if}
   {/if}
 {/snippet}
@@ -51,19 +56,19 @@
     <div class="waiting-icon">
       {#if S.scanning}<span class="spin"><Icon name="spinner" size={36} /></span>{:else}<Icon name="cardWaiting" />{/if}
     </div>
-    <h2>source</h2>
-    <div class="sub">{S.scanning ? "Reading the source…" : "Waiting for media"}</div>
+    <Heading text="source" small />
+    <Note>{S.scanning ? "Reading the source…" : "Waiting for media"}</Note>
     <Button size="sm" onclick={(e: MouseEvent) => srcMenu(e.currentTarget as Element)}>Select a source <Icon name="chev" /></Button>
   {:else if S.phase === "ready" || S.phase === "waiting"}
     {@render head()}
-    <div class="sub">
+    <Note>
       {#if S.scanning}Reading the source…{:else if res}Picks up where it stopped. Files already verified aren't copied again.{:else}Media files have not been copied from this source.{/if}
-    </div>
+    </Note>
     <Button variant="primary" start onclick={startOffload} disabled={!can} title={why}>{startLabel}</Button>
   {:else if cardBusy}
     {@render head()}
-    <Row above="sm"><span class="pulse"></span><span class="sub strong">Copying from this source</span></Row>
-    <div class="sub">Keep it connected until the copy is verified.</div>
+    <Row above="sm"><span class="pulse"></span><Note strong>Copying from this source</Note></Row>
+    <Note>Keep it connected until the copy is verified.</Note>
   {:else if S.phase === "backing"}
     {@render head()}
     <StatusPill tone="done"><Icon name="check" size={13} /> Copy verified</StatusPill>
@@ -72,7 +77,7 @@
     {@render head()}
     <StatusPill tone="done"><Icon name="check" size={13} /> Copied &amp; verified</StatusPill>
     {#if S.src.kind === "folder"}
-      <div class="sub">Media files have been copied and verified.</div>
+      <Note>Media files have been copied and verified.</Note>
     {:else}
       {@render ejectRow("Media files have been copied and verified.")}
     {/if}
@@ -83,6 +88,8 @@
   {:else}
     {@render head()}
     <StatusPill tone="problem"><Icon name="alert" size={13} /> {S.failCopy > 0 ? `${plural(S.failCopy, "file")} failed` : "Stopped"}</StatusPill>
-    <div class="sub">Keep this card. {S.failCopy > 0 ? "Some files didn't verify." : "The copy isn't complete."}</div>
+    <Note>Keep this card. {S.failCopy > 0 ? "Some files didn't verify." : "The copy isn't complete."}</Note>
   {/if}
 </Panel>
+
+<style src="./SourcePanel.css"></style>

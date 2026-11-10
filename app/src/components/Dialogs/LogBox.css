@@ -9,7 +9,7 @@
   overflow: hidden;
 }
 
-.logbox :global(header) {
+header {
   display: flex;
   align-items: center;
   gap: var(--space-5);
@@ -17,32 +17,9 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.logbox :global(header) :global(b) {
+b {
   font: var(--font-weight-semibold) var(--font-size-lg) var(--font-heading);
   flex: 1;
-}
-
-.logbox :global(pre) {
-  margin: 0;
-  padding: var(--space-7) var(--space-8);
-  overflow: auto;
-  font: var(--font-size-sm)/var(--line-height-code) var(--font-mono);
-  color: var(--color-text-secondary);
-  flex: 1;
-  user-select: text;
-  white-space: pre;
-}
-
-.logbox :global(pre) :global(.ok) {
-  color: var(--color-status-done);
-}
-
-.logbox :global(pre) :global(.er) {
-  color: var(--color-status-problem);
-}
-
-.logbox :global(pre) :global(.hd) {
-  color: var(--color-text);
 }
 
 .logbox.fit {
@@ -51,6 +28,6 @@
   width: min(720px, 94%);
 }
 
-.logbox.fit :global(header) :global(b) {
+.fit b {
   flex: none;
 }

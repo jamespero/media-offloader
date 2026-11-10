@@ -1,7 +1,7 @@
 @import "./tokens.css";
 
-/* COLOR MEANS STATUS. Violet = working, mint = done & safe, red = problem.
-   Controls (buttons, chips, toggles, menus) stay neutral so nothing idle looks busy. */
+/* Only what no component can own: fonts, design tokens, and a reset of browser defaults.
+   The app's own look starts at the App component. */
 
 /* Fonts are bundled (SIL OFL, see fonts/OFL.txt); no CDN. */
 @font-face {
@@ -40,38 +40,29 @@ html,
 body {
   margin: 0;
   height: 100%;
+  overflow: hidden;
 }
 
-body {
-  background: var(--color-surface-app);
-  color: var(--color-text);
-  font: var(--font-size-md)/var(--line-height-ui) var(--font-ui);
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden;
-  user-select: none;
-  cursor: default;
+/* Browsers give headings and paragraphs margins; components space their own content. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+/* Form controls don't inherit the page's font or color unless told to. */
+button,
+input {
+  font: inherit;
+  color: inherit;
 }
 
 button {
-  font: inherit;
-  color: inherit;
   cursor: pointer;
-}
-
-svg {
-  display: block;
-}
-
-input {
-  user-select: text;
-}
-
-#app {
-  height: 100vh;
-  display: grid;
-  grid-template-rows: 260px 46px 1fr 30px;
-  position: relative;
-  overflow: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

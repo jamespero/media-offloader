@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Preview from "./Preview.svelte";
   import { rootFor } from "../../panelState";
   import { S, sep } from "../../state.svelte.ts";
 
@@ -8,7 +9,7 @@
 </script>
 
 {#if S.prepError && which === "copy"}
-  <div class="preview"><span class="warn">{S.prepError}</span></div>
+  <Preview warn={S.prepError} />
 {:else if root && S.src}
-  <div class="preview" title={root}>→ <b>{root}{sep}</b></div>
+  <Preview title={root} prefix="→ " strong="{root}{sep}" />
 {/if}

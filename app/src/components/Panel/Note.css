@@ -1,0 +1,10 @@
+/* The panel sets --panel-note-color while it's colored by status. */
+.note {
+  color: var(--panel-note-color, var(--color-text-secondary));
+  font-size: var(--font-size-md);
+  max-width: 360px;
+}
+
+.strong {
+  color: var(--color-text);
+}

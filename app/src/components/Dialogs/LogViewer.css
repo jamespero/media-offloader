@@ -1,0 +1,23 @@
+/* The log fills the sheet under its header and scrolls; its lines are colored by what they say. */
+pre {
+  flex: 1;
+  padding: var(--space-7) var(--space-8);
+  overflow: auto;
+  font: var(--font-size-sm)/var(--line-height-code) var(--font-mono);
+  color: var(--color-text-secondary);
+  user-select: text;
+  white-space: pre;
+  margin: 0;
+}
+
+.ok {
+  color: var(--color-status-done);
+}
+
+.er {
+  color: var(--color-status-problem);
+}
+
+.hd {
+  color: var(--color-text);
+}

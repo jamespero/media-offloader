@@ -1,0 +1,16 @@
+/* rtl keeps the end of a long path visible; bdi keeps the path itself left to right. */
+.path {
+  font: var(--font-size-sm) var(--font-mono);
+  color: var(--panel-note-color, var(--color-text-secondary));
+  max-width: 92%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: center;
+}
+
+bdi {
+  direction: ltr;
+  unicode-bidi: isolate;
+}

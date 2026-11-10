@@ -16,8 +16,6 @@
   }
 </script>
 
-<h5>naming &amp; presets</h5>
-<p class="intro">A preset saves a subfolder pattern, e.g. one per camera. It goes under the copy and backup destinations, which you set once per project. Pick a preset from the ★ Preset button above the thumbnails.</p>
 {#each S.settings.presets as p (p.id)}
   <SettingRow title={p.name} note={folders(p.tokens)} mono>
     <Button size="sm" onclick={() => deletePreset(p.id)} title="Delete preset"><Icon name="trash" size={13} /></Button>
