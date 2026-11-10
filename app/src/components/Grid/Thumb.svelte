@@ -4,8 +4,16 @@
   import { revealFile } from "../../places";
   import type { FileView } from "../../state.svelte.ts";
   import { thumbUrl } from "../../thumbs";
+  import { clearHover, hoverFile } from "../Tooltip/tooltipState.svelte.ts";
 
-  let { file, index }: { file: FileView; index: number } = $props();
+  let { file }: { file: FileView } = $props();
+
+  /** Whether the pointer is over this tile, so the tooltip can be cleared if the tile goes away under it. */
+  let over = false;
+
+  $effect(() => () => {
+    if (over) clearHover();
+  });
 
   const CLASS = { pending: "pending", copying: "active", copied: "ok", backed: "ok", backing: "bk-active", failed: "fail" };
   /** The placeholder for each kind of file, until (or unless) there's a thumbnail. */
@@ -16,9 +24,22 @@
 
 {#snippet check()}<Icon name="check" size={10} stroke={3} />{/snippet}
 
-<!-- Double-click shows the file in Explorer or Finder; the tooltip says so. -->
+<!-- Hovering shows the file's details in the tooltip; double-click shows it in Explorer or Finder. -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class={["thumb", CLASS[file.state]]} data-i={index} style:--p="{file.p}%" ondblclick={() => revealFile(file)}>
+<div
+  class={["thumb", CLASS[file.state]]}
+  style:--p="{file.p}%"
+  ondblclick={() => revealFile(file)}
+  onmouseenter={(e) => {
+    over = true;
+    hoverFile(file, e);
+  }}
+  onmousemove={(e) => hoverFile(file, e)}
+  onmouseleave={() => {
+    over = false;
+    clearHover();
+  }}
+>
   <div class="img">
     {#if url}<img src={url} alt="" />{:else}{@const [art, size] = ART[kindOf(file.ext)]}<Icon name={art} {size} />{/if}
   </div>

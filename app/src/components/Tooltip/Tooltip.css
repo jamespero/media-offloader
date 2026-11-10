@@ -10,6 +10,8 @@
   color: var(--color-text-secondary);
   box-shadow: var(--shadow-tooltip);
   display: none;
+  /* Its own width wherever it is, so near the right edge it's moved in rather than squeezed. */
+  width: max-content;
   max-width: 320px;
   left: var(--x);
   top: var(--y);
