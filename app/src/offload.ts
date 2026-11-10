@@ -103,6 +103,12 @@ export function onReport(r: JobReport) {
   if (quitAfterStop) getCurrentWindow().destroy();
 }
 
+/** Stops the running offload, once the user has confirmed. */
+export function stopOffload() {
+  closeOverlay();
+  api.cancel();
+}
+
 export function newOffload() {
   if (running()) return;
   closeOverlay();

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { kindOf } from "../../fileKinds";
   import { ic } from "../../icons";
+  import { revealFile } from "../../places";
   import type { FileView } from "../../state.svelte.ts";
   import { thumbUrl } from "../../thumbs";
 
@@ -13,7 +14,9 @@
   const check = ic.check(10, 3);
 </script>
 
-<div class={["thumb", CLASS[file.state]]} data-i={index} style:--p="{file.p}%">
+<!-- Double-click shows the file in Explorer or Finder; the tooltip says so. -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class={["thumb", CLASS[file.state]]} data-i={index} style:--p="{file.p}%" ondblclick={() => revealFile(file)}>
   <div class="img">
     {#if url}<img src={url} alt="" />{:else}{@html ART[kindOf(file.ext)]()}{/if}
   </div>

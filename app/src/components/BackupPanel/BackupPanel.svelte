@@ -1,7 +1,10 @@
 <script lang="ts">
   import StatusPill from "../StatusPill/StatusPill.svelte";
   import Button from "../Button/Button.svelte";
+  import { removeBackup } from "../../destinations";
+  import { confirmStop, openRunLog } from "../../dialogs";
   import { ic } from "../../icons";
+  import { destMenu } from "../../menus";
   import { bakState, rootFor } from "../../panelState";
   import { S, hasBackup, running, sep, totalBytes } from "../../state.svelte.ts";
   import DoneStatus from "../Panel/DoneStatus.svelte";
@@ -21,15 +24,17 @@
   const chosen = $derived(!resume && !unset && panel === "idle");
   const dim = $derived(resume ? !hasBackup() : unset ? !S.src || running() : chosen && !S.src);
   const dest = $derived(S.settings.bakDest ?? "");
+
+  const chooseDest = (e: MouseEvent) => destMenu(e.currentTarget as Element, "bak");
 </script>
 
 {#snippet behind()}
   {#if chosen && S.src}
-    <button class="corner" data-act="rmbak" title="Remove backup destination">{@html ic.x(14)}</button>
+    <button class="corner" onclick={removeBackup} title="Remove backup destination">{@html ic.x(14)}</button>
   {:else if !resume && !unset && panel === "running"}
     <ProgressFill pct={S.bakP} />
     <span class="tagline">Backup</span>
-    <button class="corner" data-act="cancel" title="Stop">{@html ic.x()}</button>
+    <button class="corner" onclick={confirmStop} title="Stop">{@html ic.x()}</button>
   {/if}
 {/snippet}
 
@@ -49,11 +54,11 @@
   {:else if unset}
     <h2>backup</h2>
     <div class="sub">Select a location to save a second copy of all media files.</div>
-    <Button size="sm" data-act="dest" data-w="bak">{@html ic.folder(14)} Choose…</Button>
+    <Button size="sm" onclick={chooseDest}>{@html ic.folder(14)} Choose…</Button>
   {:else if panel === "idle"}
     <h2>backup</h2>
     <div class="sub">Media files will also be copied to:</div>
-    <Button size="sm" data-act="dest" data-w="bak">{@html ic.folder(14)} Choose…</Button>
+    <Button size="sm" onclick={chooseDest}>{@html ic.folder(14)} Choose…</Button>
     <PathLine path={dest + (dest.endsWith(sep) ? "" : sep)} />
     <TokenChips sameAsCopy />
     <PreviewLine which="bak" />
@@ -76,8 +81,8 @@
     <StatusPill tone="held">On hold</StatusPill>
     <div class="sub">Resolve the copy errors first.</div>
   {:else if panel === "error"}
-    <ProblemStatus heading="backup incomplete" {root} failed={S.failBak} fallback="stopped" fallbackNote={S.abortReason ?? ""} logAct="log" />
+    <ProblemStatus heading="backup incomplete" {root} failed={S.failBak} fallback="stopped" fallbackNote={S.abortReason ?? ""} onlog={openRunLog} />
   {:else}
-    <DoneStatus heading="backed up to" {root} bytes={totalBytes()} files={S.files.length} verb="backed up" logAct="log" />
+    <DoneStatus heading="backed up to" {root} bytes={totalBytes()} files={S.files.length} verb="backed up" onlog={openRunLog} />
   {/if}
 </Panel>

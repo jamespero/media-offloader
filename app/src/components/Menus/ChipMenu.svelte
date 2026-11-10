@@ -3,6 +3,7 @@
   import { onMount, untrack } from "svelte";
   import { closeMenus } from "../Menu/menuState.svelte.ts";
   import { S, tokenContext } from "../../state.svelte.ts";
+  import { moveToken, removeToken, setReel, setTokenFormat } from "../../tokenEdits";
   import { DATE_FMTS, DAY_FMTS, fmtDate, fmtDay, tokenInfo, tokenText } from "../../tokens";
   import MenuItem from "../Menu/MenuItem.svelte";
 
@@ -51,7 +52,7 @@
 {/snippet}
 
 {#snippet format(f: string, sample: string, chosen: boolean)}
-  <MenuItem marked={chosen} label={f} act="fmt" data-i={index} data-f={f} hint={sample} />
+  <MenuItem marked={chosen} label={f} onclick={() => setTokenFormat(index, f)} hint={sample} />
 {/snippet}
 
 {#if token.t === "now" || token.t === "shot"}
@@ -71,7 +72,7 @@
 {:else if token.t === "reel"}
   <div class="mh">Reel letter</div>
   {#each ["A", "B", "C", "D"] as l}
-    <MenuItem icon="tag" label="{l}{String(ctx.reelNo(l)).padStart(3, '0')}, {l}{String(ctx.reelNo(l) + 1).padStart(3, '0')}…" act="reel" data-i={index} data-v={l} checked={reel === l} />
+    <MenuItem icon="tag" label="{l}{String(ctx.reelNo(l)).padStart(3, '0')}, {l}{String(ctx.reelNo(l) + 1).padStart(3, '0')}…" onclick={() => setReel(index, l)} checked={reel === l} />
   {/each}
   <div class="sep"></div>
   {@render numberRow(`Next ${reel} roll`, "Counts up after each completed offload. Change it to match the card's label.")}
@@ -80,8 +81,8 @@
   <div class="mnote">Resolves to <span class="mono-value">{tokenText(token, ctx)}</span></div>
 {/if}
 <div class="sep"></div>
-{#if index > 0}<MenuItem icon="chevL" label="Move Left" act="mvl" data-i={index} />{/if}
-{#if index < count - 1}<MenuItem icon="chevR" label="Move Right" act="mvr" data-i={index} />{/if}
-<MenuItem icon="trash" label="Remove" act="rmtok" data-i={index} />
+{#if index > 0}<MenuItem icon="chevL" label="Move Left" onclick={() => moveToken(index, -1)} />{/if}
+{#if index < count - 1}<MenuItem icon="chevR" label="Move Right" onclick={() => moveToken(index, 1)} />{/if}
+<MenuItem icon="trash" label="Remove" onclick={() => removeToken(index)} />
 
 <style src="./ChipMenu.css"></style>

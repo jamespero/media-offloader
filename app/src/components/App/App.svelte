@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onShortcut } from "../../shortcuts";
   import { S } from "../../state.svelte.ts";
   import BackupPanel from "../BackupPanel/BackupPanel.svelte";
   import CopyPanel from "../CopyPanel/CopyPanel.svelte";
@@ -18,6 +19,8 @@
   /** The past offload being shown, once its journal has been read. */
   const past = $derived(S.view ? (S.detail?.item ?? null) : null);
 </script>
+
+<svelte:window onkeydown={onShortcut} />
 
 <div class="band">
   {#if past}

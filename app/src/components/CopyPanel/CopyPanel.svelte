@@ -1,6 +1,8 @@
 <script lang="ts">
   import Button from "../Button/Button.svelte";
+  import { confirmStop, openRunLog } from "../../dialogs";
   import { ic } from "../../icons";
+  import { destMenu } from "../../menus";
   import { copyState, rateText, rootFor } from "../../panelState";
   import { S, sep, totalBytes } from "../../state.svelte.ts";
   import DoneStatus from "../Panel/DoneStatus.svelte";
@@ -22,7 +24,7 @@
   {#if panel === "running"}
     <ProgressFill pct={S.copyP} />
     <span class="tagline">{S.runFanOut ? "Fan-out" : "Copy"}</span>
-    <button class="corner" data-act="cancel" title="Stop">{@html ic.x()}</button>
+    <button class="corner" onclick={confirmStop} title="Stop">{@html ic.x()}</button>
   {/if}
 {/snippet}
 
@@ -37,15 +39,15 @@
   {:else if panel === "idle"}
     <h2>copy</h2>
     <div class="sub">Media files will be copied to:</div>
-    <Button size="sm" data-act="dest" data-w="copy">{@html ic.folder(14)} Choose…</Button>
+    <Button size="sm" onclick={(e: MouseEvent) => destMenu(e.currentTarget as Element, "copy")}>{@html ic.folder(14)} Choose…</Button>
     {#if dest}<PathLine path={dest + (dest.endsWith(sep) ? "" : sep)} />{:else}<div class="path">No folder chosen</div>{/if}
     <TokenChips />
     <PreviewLine which="copy" />
   {:else if panel === "running"}
     <LiveStatus heading="copying to" {root} pct={S.copyP} cur={S.cur} rate={rateText()} />
   {:else if panel === "error"}
-    <ProblemStatus heading="copy incomplete" {root} failed={S.failCopy} fallback="stopped" fallbackNote={S.abortReason ?? ""} logAct="log" />
+    <ProblemStatus heading="copy incomplete" {root} failed={S.failCopy} fallback="stopped" fallbackNote={S.abortReason ?? ""} onlog={openRunLog} />
   {:else}
-    <DoneStatus heading="copied to" {root} bytes={totalBytes()} files={S.files.length} verb="copied" logAct="log" />
+    <DoneStatus heading="copied to" {root} bytes={totalBytes()} files={S.files.length} verb="copied" onlog={openRunLog} />
   {/if}
 </Panel>

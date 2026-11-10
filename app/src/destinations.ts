@@ -1,5 +1,6 @@
 // Destinations: choosing them, and planning against them (copy-conflicted, free space).
 
+import { open } from "@tauri-apps/plugin-dialog";
 import { api, historyApi, type OffloadArgs } from "./api";
 import { markEarlierRun } from "./history";
 import { S, filesFromPlan, running, saveSettings, sep, tokenContext } from "./state.svelte.ts";
@@ -61,6 +62,22 @@ export function setDest(w: "copy" | "bak", path: string) {
   else s.bakDest = path;
   const key = w === "copy" ? "recentCopy" : "recentBak";
   s[key] = [path, ...s[key].filter((p) => p !== path)].slice(0, 5);
+  saveSettings();
+  S.dests = null;
+  schedulePrepare();
+}
+
+/** Picks a destination folder with the system dialog, starting where the current one is. */
+export async function browseDest(w: "copy" | "bak") {
+  const s = S.settings;
+  const current = (w === "copy" ? s.copyDest : s.bakDest) ?? undefined;
+  const p = await open({ directory: true, title: w === "copy" ? "Copy media to…" : "Back up media to…", defaultPath: current });
+  if (typeof p === "string") setDest(w, p);
+}
+
+/** Drops the backup destination: the next offload makes only the copy. */
+export function removeBackup() {
+  S.settings.bakDest = null;
   saveSettings();
   S.dests = null;
   schedulePrepare();

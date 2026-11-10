@@ -5,6 +5,7 @@
 // saved again.
 
 import { closeOverlay } from "./components/Overlay/overlayState.svelte.ts";
+import { schedulePrepare } from "./destinations";
 import { S, plain, running, saveSettings } from "./state.svelte.ts";
 import type { Token } from "./tokens";
 
@@ -26,6 +27,13 @@ export function applyPreset(id: string) {
   if (!p || running()) return;
   S.settings.tokens = plain(p.tokens);
   saveSettings();
+}
+
+/** Switches to a preset's subfolders and works out the destinations again. */
+export function usePreset(id: string) {
+  applyPreset(id);
+  S.dests = null;
+  schedulePrepare();
 }
 
 /** Saves the current setup under `name`; an existing preset with that name is updated. */

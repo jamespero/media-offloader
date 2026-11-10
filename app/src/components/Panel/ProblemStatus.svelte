@@ -11,7 +11,7 @@
     failed,
     fallback,
     fallbackNote,
-    logAct,
+    onlog,
   }: {
     heading: string;
     root: string;
@@ -19,7 +19,7 @@
     /** Shown large when no files failed. */
     fallback: string;
     fallbackNote: string;
-    logAct: "log" | "histlog";
+    onlog: () => void;
   } = $props();
 </script>
 
@@ -29,5 +29,5 @@
   {#if failed > 0}{plural(failed, "file")}<small>failed verification</small>{:else}{fallback}<small>{fallbackNote}</small>{/if}
 </div>
 <Row above="md">
-  <Button variant="onStatus" size="sm" data-act={logAct}>{@html ic.file(13)} Show log</Button>
+  <Button variant="onStatus" size="sm" onclick={onlog}>{@html ic.file(13)} Show log</Button>
 </Row>

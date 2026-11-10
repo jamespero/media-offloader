@@ -5,6 +5,7 @@
   import { plural } from "../../format";
   import { clock, day, resumeLabel } from "../../history";
   import { ic } from "../../icons";
+  import { resumeFrom } from "../../source";
   import { running } from "../../state.svelte.ts";
   import Panel from "../Panel/Panel.svelte";
 
@@ -31,7 +32,7 @@
   {/if}
   {#if item.resumable}
     {#if item.sourcePresent}
-      <Button variant="primary" start data-act="resume" data-path={item.path} disabled={running()}>{resumeLabel(item)}</Button>
+      <Button variant="primary" start onclick={() => resumeFrom(item.path)} disabled={running()}>{resumeLabel(item)}</Button>
     {:else}
       <div class="sub">Connect {item.label} to {resumeLabel(item).toLowerCase()}.</div>
     {/if}

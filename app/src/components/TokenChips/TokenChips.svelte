@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { tokensChanged } from "../../destinations";
   import { ic } from "../../icons";
+  import { addTokenMenu, chipMenu } from "../../menus";
   import { S } from "../../state.svelte.ts";
   import { hasFormat, tokenInfo, type Token } from "../../tokens";
 
@@ -35,14 +37,14 @@
   <div class="chips">
     {#each S.settings.tokens as t, i}
       {@const [prefix, value] = parts(t)}
-      <button class={["chip", t.t === "text" && "text"]} data-act="chip" data-i={i}>
+      <button class={["chip", t.t === "text" && "text"]} onclick={(e) => chipMenu(e.currentTarget, i, tokensChanged)}>
         {#if t.t !== "text"}{@html ic[tokenInfo(t.t).icon]()}{/if}
         {#if prefix}<span class="k">{prefix}</span>{/if}
         {value}
         {#if hasFormat(t.t) || t.t === "reel"}{@html ic.chev(10)}{/if}
       </button>
     {/each}
-    <button class="addchip" data-act="addtoken" title="Add subfolder">{@html ic.plus()}</button>
+    <button class="addchip" onclick={(e) => addTokenMenu(e.currentTarget)} title="Add subfolder">{@html ic.plus()}</button>
   </div>
 {/if}
 

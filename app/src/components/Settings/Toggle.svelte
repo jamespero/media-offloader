@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Settings } from "../../state.svelte.ts";
+  import { toggleSetting, type BoolSetting } from "../../settingEdits";
 
   let {
     on,
@@ -9,16 +9,23 @@
     ...attrs
   }: {
     on: boolean;
-    /** The setting it flips, through the app's click handling. */
-    setting?: keyof Settings;
+    /** The setting it flips. */
+    setting?: BoolSetting;
     label: string;
     lock?: boolean;
     [attr: string]: unknown;
   } = $props();
 
-  const act = $derived(setting && !lock);
 </script>
 
-<button class={["tog", on && "on", lock && "lock"]} data-act={act ? "tog" : undefined} data-k={act ? setting : undefined} aria-pressed={on} aria-label={label} {...attrs}></button>
+<button
+  class={["tog", on && "on", lock && "lock"]}
+  onclick={() => {
+    if (setting && !lock) toggleSetting(setting);
+  }}
+  aria-pressed={on}
+  aria-label={label}
+  {...attrs}
+></button>
 
 <style src="./Toggle.css"></style>
