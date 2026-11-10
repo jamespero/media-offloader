@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ic } from "../../icons";
+  import Icon from "../Icon/Icon.svelte";
 
   let {
     title,
@@ -18,7 +18,7 @@
 
 <div class={["empty", inline && "inline"]}>
   <div>
-    {#if art}<div class="empty-art">{@html ic.cardInsert()}</div>{/if}
+    {#if art}<div class="empty-art"><Icon name="cardInsert" /></div>{/if}
     <h3>{title}</h3>
     <div>{note}</div>
   </div>

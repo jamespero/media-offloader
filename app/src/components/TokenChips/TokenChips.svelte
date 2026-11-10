@@ -1,6 +1,6 @@
 <script lang="ts">
+  import Icon from "../Icon/Icon.svelte";
   import { tokensChanged } from "../../destinations";
-  import { ic } from "../../icons";
   import { addTokenMenu, chipMenu } from "../../menus";
   import { S } from "../../state.svelte.ts";
   import { hasFormat, tokenInfo, type Token } from "../../tokens";
@@ -31,20 +31,20 @@
 
 {#if sameAsCopy}
   <div class="lbl">Subfolders</div>
-  <div class="chips"><span class="chip static">{@html ic.layers(13)} Same as copy</span></div>
+  <div class="chips"><span class="chip static"><Icon name="layers" size={13} /> Same as copy</span></div>
 {:else}
   <div class="lbl">Add subfolders</div>
   <div class="chips">
     {#each S.settings.tokens as t, i}
       {@const [prefix, value] = parts(t)}
       <button class={["chip", t.t === "text" && "text"]} onclick={(e) => chipMenu(e.currentTarget, i, tokensChanged)}>
-        {#if t.t !== "text"}{@html ic[tokenInfo(t.t).icon]()}{/if}
+        {#if t.t !== "text"}<Icon name={tokenInfo(t.t).icon} />{/if}
         {#if prefix}<span class="k">{prefix}</span>{/if}
         {value}
-        {#if hasFormat(t.t) || t.t === "reel"}{@html ic.chev(10)}{/if}
+        {#if hasFormat(t.t) || t.t === "reel"}<Icon name="chev" size={10} />{/if}
       </button>
     {/each}
-    <button class="addchip" onclick={(e) => addTokenMenu(e.currentTarget)} title="Add subfolder">{@html ic.plus()}</button>
+    <button class="addchip" onclick={(e) => addTokenMenu(e.currentTarget)} title="Add subfolder"><Icon name="plus" /></button>
   </div>
 {/if}
 

@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Icon from "../Icon/Icon.svelte";
   import Row from "../Row/Row.svelte";
   import Button from "../Button/Button.svelte";
-  import { ic } from "../../icons";
   import { deletePreset } from "../../presets";
   import { stepImportNo } from "../../tokenEdits";
   import { S, sep, tokenContext } from "../../state.svelte.ts";
@@ -20,7 +20,7 @@
 <p class="intro">A preset saves a subfolder pattern, e.g. one per camera. It goes under the copy and backup destinations, which you set once per project. Pick a preset from the ★ Preset button above the thumbnails.</p>
 {#each S.settings.presets as p (p.id)}
   <SettingRow title={p.name} note={folders(p.tokens)} mono>
-    <Button size="sm" onclick={() => deletePreset(p.id)} title="Delete preset">{@html ic.trash(13)}</Button>
+    <Button size="sm" onclick={() => deletePreset(p.id)} title="Delete preset"><Icon name="trash" size={13} /></Button>
   </SettingRow>
 {:else}
   <SettingRow note="No presets yet. Use ★ Preset → Save Current as Preset…." />
